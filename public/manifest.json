@@ -1,0 +1,18 @@
+{
+  "name": "Altinnendata",
+  "short_name": "Altinnendata",
+  "theme_color": "#00887a",
+  "background_color": "#131313",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/no",
+  "description": "Lokal bygging og installasjon av stasjonære PC-er.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

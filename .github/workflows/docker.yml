@@ -1,0 +1,70 @@
+name: 🔨 Build and Push Docker Image
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag for the Docker image"
+        type: string
+        required: true
+      environment:
+        description: "Deployment environment (dev or prod)"
+        type: string
+        required: true
+      api_url:
+        description: "NEXT_PUBLIC_API_URL baked into the build"
+        type: string
+        required: true
+      tag_latest:
+        description: "Also tag the image as latest"
+        type: boolean
+        default: false
+    secrets:
+      DOCKER_PASSWORD:
+        required: true
+
+permissions: {}
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '23'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://altinnendata-api-dev.prod.tumogroup.com/api
+
+  build-and-push:
+    if: inputs.tag != ''
+    permissions:
+      contents: read
+      packages: read
+    uses: equinor/ops-actions/.github/workflows/docker.yml@a98fb1dafcfb1acdeea610e70eb8c1a2be6b59cd # v9.39.2
+    secrets:
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    with:
+      build_args: '{"NEXT_PUBLIC_API_URL":"${{ inputs.api_url }}"}'
+      environment: ${{ inputs.environment }}
+      registry: registry.hub.docker.com
+      username: sondresjo
+      repository: sondresjo/altinnendata-app
+      tag: ${{ inputs.tag }}
+      tag_latest: ${{ inputs.tag_latest }}

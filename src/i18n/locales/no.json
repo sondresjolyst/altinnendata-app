@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "tagline": "Lokal bygging og installasjon av stasjonære PC-er",
+    "description": "Altinnendata bygger og installerer stasjonære PC-er. Se maskinene vi har bygget, be om pristilbud."
+  },
+  "nav": {
+    "builds": "Datamaskiner",
+    "contact": "Kontakt",
+    "admin": "Admin",
+    "signIn": "Logg inn",
+    "signOut": "Logg ut",
+    "openMenu": "Åpne meny",
+    "closeMenu": "Lukk meny",
+    "language": "Språk"
+  },
+  "common": {
+    "loading": "Laster…",
+    "save": "Lagre",
+    "saving": "Lagrer…",
+    "cancel": "Avbryt",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "add": "Legg til",
+    "close": "Lukk",
+    "viewAll": "Se alle",
+    "back": "Tilbake",
+    "yes": "Ja",
+    "no": "Nei",
+    "notFound": "Fant ikke siden",
+    "notFoundBody": "Siden finnes ikke, eller den er flyttet.",
+    "toFrontPage": "Til forsiden",
+    "somethingWentWrong": "Noe gikk galt. Prøv igjen."
+  },
+  "builds": {
+    "title": "Datamaskiner",
+    "intro": "Maskiner bygget for kunder. Hver maskin er satt sammen etter behov og budsjett.",
+    "empty": "Ingen datamaskiner er publisert ennå.",
+    "specs": "Spesifikasjoner",
+    "price": "Pris",
+    "priceFrom": "Pris",
+    "builtOn": "Bygget",
+    "availability": {
+      "label": "Status",
+      "available": "Tilgjengelig",
+      "reserved": "Reservert",
+      "sold": "Solgt"
+    },
+    "category": {
+      "label": "Kategori",
+      "gaming": "Gaming",
+      "office": "Kontor",
+      "streaming": "Streaming",
+      "workstation": "Arbeidsstasjon"
+    },
+    "askAbout": "Spør om denne maskinen",
+    "draft": "Utkast"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "intro": "Fortell hva maskinen skal brukes til, så får du et forslag med pris.",
+    "name": "Navn",
+    "email": "E-post",
+    "phone": "Telefon",
+    "useCase": "Hva skal maskinen brukes til?",
+    "useCasePlaceholder": "Gaming, kontor, video,…",
+    "budget": "Budsjett (kr)",
+    "build": "Gjelder maskin",
+    "message": "Melding",
+    "send": "Send",
+    "sending": "Sender…",
+    "sent": "Takk — du hører fra oss.",
+    "failed": "Meldingen ble ikke sendt. Prøv igjen, eller ring oss.",
+    "callUs": "Ring oss",
+    "emailUs": "Send e-post"
+  },
+  "validation": {
+    "required": "Feltet må fylles ut",
+    "email": "Skriv inn en gyldig e-postadresse",
+    "tooLong": "Teksten er for lang",
+    "password": "Minst 8 tegn, med stor bokstav, liten bokstav og tall"
+  },
+  "auth": {
+    "signInTitle": "Logg inn",
+    "email": "E-post",
+    "password": "Passord",
+    "signIn": "Logg inn",
+    "signingIn": "Logger inn…",
+    "forgotPassword": "Glemt passord?",
+    "invalidCredentials": "Feil e-post eller passord.",
+    "resetTitle": "Sett nytt passord",
+    "resetIntro": "Skriv inn e-postadressen din, så sender vi en kode.",
+    "resetCode": "Kode fra e-post",
+    "newPassword": "Nytt passord",
+    "requestCode": "Send kode",
+    "setPassword": "Lagre passord",
+    "resetDone": "Passordet er endret. Du kan logge inn."
+  },
+  "footer": {
+    "orgNumber": "Org.nr",
+    "vatRegistered": "Registrert i Merverdiavgiftsregisteret",
+    "terms": "Vilkår",
+    "privacy": "Personvern",
+    "cookies": "Informasjonskapsler",
+    "rights": "Alle rettigheter reservert."
+  },
+  "legal": {
+    "missing": "Dette innholdet er ikke lagt inn ennå.",
+    "updated": "Sist oppdatert"
+  },
+  "admin": {
+    "title": "Admin",
+    "dashboard": "Oversikt",
+    "builds": "Datamaskiner",
+    "components": "Komponenter",
+    "content": "Forside",
+    "legal": "Juridiske sider",
+    "users": "Brukere",
+    "settings": "Innstillinger",
+    "stats": "Statistikk",
+    "language": "Språk",
+    "newBuild": "Ny datamaskin",
+    "editBuild": "Rediger datamaskin",
+    "buildTitle": "Tittel",
+    "buildSummary": "Kort beskrivelse",
+    "buildBody": "Innhold på maskinsiden",
+    "published": "Publisert",
+    "sortOrder": "Sortering",
+    "coverImage": "Forsidebilde",
+    "partsList": "Deleliste",
+    "addPart": "Legg til del",
+    "freeText": "Fritekst",
+    "fromCatalog": "Fra katalog",
+    "categories": "Kategorier",
+    "manufacturers": "Produsenter",
+    "parts": "Deler",
+    "inviteUser": "Inviter bruker",
+    "inviteSent": "Invitasjon sendt.",
+    "role": "Rolle",
+    "firstName": "Fornavn",
+    "lastName": "Etternavn",
+    "confirmDelete": "Er du sikker?"
+  },
+  "stats": {
+    "builds": "Datamaskiner publisert",
+    "parts": "Deler i katalogen",
+    "users": "Brukere",
+    "images": "Bilder"
+  }
+}

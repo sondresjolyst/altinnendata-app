@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "tagline": "Custom desktop PCs, built and installed locally",
+    "description": "Altinnendata builds and installs desktop PCs. See the machines we have built and ask for a quote."
+  },
+  "nav": {
+    "builds": "Computers",
+    "contact": "Contact",
+    "admin": "Admin",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "language": "Language"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "viewAll": "View all",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No",
+    "notFound": "Page not found",
+    "notFoundBody": "This page does not exist, or it has moved.",
+    "toFrontPage": "Go to the front page",
+    "somethingWentWrong": "Something went wrong. Please try again."
+  },
+  "builds": {
+    "title": "Computers",
+    "intro": "Machines built for customers. Every machine is put together around a purpose and a budget.",
+    "empty": "No computers have been published yet.",
+    "specs": "Specifications",
+    "price": "Price",
+    "priceFrom": "Price",
+    "builtOn": "Built",
+    "availability": {
+      "label": "Status",
+      "available": "Available",
+      "reserved": "Reserved",
+      "sold": "Sold"
+    },
+    "category": {
+      "label": "Category",
+      "gaming": "Gaming",
+      "office": "Office",
+      "streaming": "Streaming",
+      "workstation": "Workstation"
+    },
+    "askAbout": "Ask about this machine",
+    "draft": "Draft"
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Tell us what the machine is for, and you will get a suggestion with a price.",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "useCase": "What will the machine be used for?",
+    "useCasePlaceholder": "Gaming, office, video,…",
+    "budget": "Budget (NOK)",
+    "build": "About computer",
+    "message": "Message",
+    "send": "Send",
+    "sending": "Sending…",
+    "sent": "Thanks — we'll be in touch.",
+    "failed": "The message was not sent. Try again, or give us a call.",
+    "callUs": "Call us",
+    "emailUs": "Email us"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email address",
+    "tooLong": "This text is too long",
+    "password": "At least 8 characters, with an upper-case letter, a lower-case letter and a number"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "forgotPassword": "Forgot your password?",
+    "invalidCredentials": "Wrong email or password.",
+    "resetTitle": "Set a new password",
+    "resetIntro": "Enter your email address and we'll send you a code.",
+    "resetCode": "Code from the email",
+    "newPassword": "New password",
+    "requestCode": "Send code",
+    "setPassword": "Save password",
+    "resetDone": "Your password has been changed. You can sign in now."
+  },
+  "footer": {
+    "orgNumber": "Org. no",
+    "vatRegistered": "Registered in the Norwegian VAT Register",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "rights": "All rights reserved."
+  },
+  "legal": {
+    "missing": "This content has not been written yet.",
+    "updated": "Last updated"
+  },
+  "admin": {
+    "title": "Admin",
+    "dashboard": "Overview",
+    "builds": "Computers",
+    "components": "Components",
+    "content": "Front page",
+    "legal": "Legal pages",
+    "users": "Users",
+    "settings": "Settings",
+    "stats": "Statistics",
+    "language": "Language",
+    "newBuild": "New computer",
+    "editBuild": "Edit computer",
+    "buildTitle": "Title",
+    "buildSummary": "Short description",
+    "buildBody": "Computer page content",
+    "published": "Published",
+    "sortOrder": "Sort order",
+    "coverImage": "Cover image",
+    "partsList": "Parts list",
+    "addPart": "Add part",
+    "freeText": "Free text",
+    "fromCatalog": "From catalog",
+    "categories": "Categories",
+    "manufacturers": "Manufacturers",
+    "parts": "Parts",
+    "inviteUser": "Invite user",
+    "inviteSent": "Invitation sent.",
+    "role": "Role",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "confirmDelete": "Are you sure?"
+  },
+  "stats": {
+    "builds": "Computers published",
+    "parts": "Parts in catalog",
+    "users": "Users",
+    "images": "Images"
+  }
+}

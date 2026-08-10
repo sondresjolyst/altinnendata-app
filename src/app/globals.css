@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/* Palette taken from the Altinnendata profile picture: teal panel, dark ink, lime accent. */
+@theme {
+    --color-background: #ffffff;
+    --color-foreground: #131313;
+    --color-primary: #00887a;
+    --color-primary-foreground: #ffffff;
+    --color-accent: #7ce04a;
+    --color-ink: #22292f;
+}
+
+:root {
+    --background: #ffffff;
+    --foreground: #131313;
+    --primary: #00887a;
+    --primary-foreground: #ffffff;
+    --accent: #7ce04a;
+    --ink: #22292f;
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
+/* horizontal scroll without a visible scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+html,
+body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    background: var(--background);
+    color: var(--foreground);
+}
+
+body {
+    font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,333 @@
+"use client";
+
+import { useState } from 'react';
+import { toast } from 'sonner';
+import {
+    ArrowUpIcon, ArrowDownIcon, TrashIcon, PlusIcon, EyeIcon, EyeSlashIcon, DocumentDuplicateIcon,
+} from '@heroicons/react/24/outline';
+import ImageService, { imageUrl } from '@/services/imageService';
+import { Section, SectionType, SECTION_LABELS, createSection, cloneSection, StatItem, ImageSection } from '@/types/content';
+import TextInput from '@/components/TextInput';
+
+const ALL_TYPES: SectionType[] = ['hero', 'feature', 'text', 'feed', 'contact', 'cta', 'stats', 'image'];
+
+export default function SectionsEditor({
+    sections,
+    onChange,
+    types = ALL_TYPES,
+}: {
+    sections: Section[];
+    onChange: (sections: Section[]) => void;
+    types?: SectionType[];
+}) {
+    const [addType, setAddType] = useState<SectionType>(types[0]);
+
+    const patch = (id: string, changes: Partial<Section>) =>
+        onChange(sections.map(s => (s.id === id ? { ...s, ...changes } as Section : s)));
+
+    const move = (index: number, dir: -1 | 1) => {
+        const target = index + dir;
+        if (target < 0 || target >= sections.length) return;
+        const next = [...sections];
+        [next[index], next[target]] = [next[target], next[index]];
+        onChange(next);
+    };
+
+    const duplicate = (index: number) => {
+        const next = [...sections];
+        next.splice(index + 1, 0, cloneSection(sections[index]));
+        onChange(next);
+    };
+
+    return (
+        <div className="space-y-4">
+            {sections.map((section, index) => (
+                <div key={section.id} className="rounded-2xl border border-gray-200 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                            {SECTION_LABELS[section.type]}
+                        </span>
+                        <div className="flex items-center gap-1">
+                            <button type="button" onClick={() => patch(section.id, { visible: !section.visible })} title={section.visible ? 'Skjul' : 'Vis'} className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100">
+                                {section.visible ? <EyeIcon className="h-4 w-4" /> : <EyeSlashIcon className="h-4 w-4" />}
+                            </button>
+                            <button type="button" onClick={() => move(index, -1)} disabled={index === 0} title="Flytt opp" className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30">
+                                <ArrowUpIcon className="h-4 w-4" />
+                            </button>
+                            <button type="button" onClick={() => move(index, 1)} disabled={index === sections.length - 1} title="Flytt ned" className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30">
+                                <ArrowDownIcon className="h-4 w-4" />
+                            </button>
+                            <button type="button" onClick={() => duplicate(index)} title="Dupliser" className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100">
+                                <DocumentDuplicateIcon className="h-4 w-4" />
+                            </button>
+                            <button type="button" onClick={() => onChange(sections.filter(s => s.id !== section.id))} title="Slett" className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50">
+                                <TrashIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <SectionEditor section={section} patch={changes => patch(section.id, changes)} />
+                </div>
+            ))}
+
+            <div className="flex items-center gap-2 pt-2">
+                <select
+                    value={addType}
+                    onChange={e => setAddType(e.target.value as SectionType)}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                    {types.map(t => <option key={t} value={t}>{SECTION_LABELS[t]}</option>)}
+                </select>
+                <button
+                    type="button"
+                    onClick={() => onChange([...sections, createSection(addType)])}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 text-gray-700 font-medium px-4 py-2 text-sm hover:bg-gray-200 transition"
+                >
+                    <PlusIcon className="h-4 w-4" /> Legg til seksjon
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function Field({ label, value, onChange, textarea }: { label: string; value: string; onChange: (v: string) => void; textarea?: boolean }) {
+    if (textarea) {
+        return (
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                <textarea
+                    rows={3}
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+            </div>
+        );
+    }
+    return <TextInput label={label} value={value} onChange={e => onChange(e.target.value)} />;
+}
+
+function SectionEditor({ section, patch }: { section: Section; patch: (changes: Partial<Section>) => void }) {
+    switch (section.type) {
+        case 'hero':
+            return (
+                <div className="space-y-4">
+                    <Field label="Overskrift" value={section.heading} onChange={v => patch({ heading: v })} />
+                    <Field label="Undertekst" value={section.subheading} onChange={v => patch({ subheading: v })} textarea />
+                    <div>
+                        <ImagePicker
+                            imageId={section.backgroundImageId}
+                            onChange={backgroundImageId => patch({ backgroundImageId })}
+                            label="Bakgrunnsbilde"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">Uten bilde brukes standardbildet.</p>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <Field label="Knapp 1 – tekst" value={section.primaryLabel} onChange={v => patch({ primaryLabel: v })} />
+                        <Field label="Knapp 1 – lenke" value={section.primaryHref} onChange={v => patch({ primaryHref: v })} />
+                        <Field label="Knapp 2 – tekst" value={section.secondaryLabel} onChange={v => patch({ secondaryLabel: v })} />
+                        <Field label="Knapp 2 – lenke" value={section.secondaryHref} onChange={v => patch({ secondaryHref: v })} />
+                    </div>
+                </div>
+            );
+
+        case 'feature':
+            return (
+                <div className="space-y-4">
+                    <Field label="Overskrift" value={section.heading} onChange={v => patch({ heading: v })} />
+                    <Field label="Tekst" value={section.text} onChange={v => patch({ text: v })} textarea />
+                    <BulletEditor bullets={section.bullets} onChange={bullets => patch({ bullets })} />
+                </div>
+            );
+
+        case 'text':
+            return (
+                <div className="space-y-4">
+                    <Field label="Overskrift" value={section.heading} onChange={v => patch({ heading: v })} />
+                    <Field label="Brødtekst (markdown)" value={section.body} onChange={v => patch({ body: v })} textarea />
+                </div>
+            );
+
+        case 'feed':
+            return (
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <Field label="Overskrift" value={section.heading} onChange={v => patch({ heading: v })} />
+                    <TextInput
+                        label="Antall som vises"
+                        type="number"
+                        value={section.limit.toString()}
+                        onChange={e => patch({ limit: Math.max(1, Number(e.target.value) || 1) })}
+                    />
+                </div>
+            );
+
+        case 'contact':
+            return (
+                <div className="space-y-4">
+                    <Field label="Overskrift" value={section.heading} onChange={v => patch({ heading: v })} />
+                    <Field label="Tekst" value={section.text} onChange={v => patch({ text: v })} textarea />
+                </div>
+            );
+
+        case 'cta':
+            return (
+                <div className="space-y-4">
+                    <Field label="Overskrift" value={section.heading} onChange={v => patch({ heading: v })} />
+                    <Field label="Tekst" value={section.text} onChange={v => patch({ text: v })} textarea />
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <Field label="Knapp – tekst" value={section.primaryLabel} onChange={v => patch({ primaryLabel: v })} />
+                        <Field label="Knapp – lenke" value={section.primaryHref} onChange={v => patch({ primaryHref: v })} />
+                    </div>
+                </div>
+            );
+
+        case 'stats':
+            return (
+                <div className="space-y-4">
+                    <Field label="Overskrift (valgfri)" value={section.heading} onChange={v => patch({ heading: v })} />
+                    <StatsEditor items={section.items} onChange={items => patch({ items })} />
+                </div>
+            );
+
+        case 'image': {
+            const layout = section.layout ?? 'standard';
+            const usesText = layout === 'left' || layout === 'right' || layout === 'overlay' || layout === 'overlayFull';
+            return (
+                <div className="space-y-4">
+                    <ImagePicker imageId={section.imageId} onChange={imageId => patch({ imageId })} />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Oppsett</label>
+                        <select
+                            value={layout}
+                            onChange={e => patch({ layout: e.target.value as ImageSection['layout'] })}
+                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        >
+                            <option value="standard">Standard (midtstilt)</option>
+                            <option value="full">Full bredde</option>
+                            <option value="left">Bilde venstre, tekst høyre</option>
+                            <option value="right">Bilde høyre, tekst venstre</option>
+                            <option value="overlay">Tekst over bilde</option>
+                            <option value="overlayFull">Tekst over bilde (full bredde)</option>
+                        </select>
+                    </div>
+                    <Field label="Alt-tekst" value={section.alt} onChange={v => patch({ alt: v })} />
+                    {usesText && <Field label="Tekst" value={section.text} onChange={v => patch({ text: v })} textarea />}
+                    {!usesText && <Field label="Bildetekst (valgfri)" value={section.caption} onChange={v => patch({ caption: v })} />}
+                </div>
+            );
+        }
+    }
+}
+
+function StatsEditor({ items, onChange }: { items: StatItem[]; onChange: (items: StatItem[]) => void }) {
+    const update = (i: number, changes: Partial<StatItem>) =>
+        onChange(items.map((it, j) => (j === i ? { ...it, ...changes } : it)));
+
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tall</label>
+            <div className="space-y-3">
+                {items.map((item, i) => (
+                    <div key={i} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 p-3">
+                        <label className="text-xs text-gray-600">
+                            Kilde
+                            <select
+                                value={item.source}
+                                onChange={e => {
+                                    const source = e.target.value as StatItem['source'];
+                                    const defaults: Record<StatItem['source'], string> = {
+                                        static: '',
+                                        builds: 'Datamaskiner publisert',
+                                        parts: 'Deler i katalogen',
+                                    };
+                                    update(i, { source, ...(item.label ? {} : { label: defaults[source] }) });
+                                }}
+                                className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            >
+                                <option value="static">Fast tall</option>
+                                <option value="builds">Publiserte datamaskiner (live)</option>
+                                <option value="parts">Deler i katalogen (live)</option>
+                            </select>
+                        </label>
+                        {item.source === 'static' && (
+                            <div className="w-28">
+                                <TextInput label="Verdi" value={item.value} onChange={e => update(i, { value: e.target.value })} />
+                            </div>
+                        )}
+                        <div className="flex-1 min-w-[10rem]">
+                            <TextInput label="Tekst" value={item.label} onChange={e => update(i, { label: e.target.value })} />
+                        </div>
+                        <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="p-2 rounded-lg text-red-500 hover:bg-red-50">
+                            <TrashIcon className="h-4 w-4" />
+                        </button>
+                    </div>
+                ))}
+                <button type="button" onClick={() => onChange([...items, { source: 'static', value: '', label: '' }])} className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900">
+                    <PlusIcon className="h-4 w-4" /> Legg til tall
+                </button>
+            </div>
+        </div>
+    );
+}
+
+export function ImagePicker({ imageId, onChange, label = 'Bilde' }: { imageId: string | null; onChange: (id: string | null) => void; label?: string }) {
+    const [uploading, setUploading] = useState(false);
+
+    const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        setUploading(true);
+        try {
+            const { id } = await ImageService.upload(file);
+            onChange(id);
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Kunne ikke laste opp bildet');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            {imageId != null && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={imageUrl(imageId)} alt="" className="mb-2 h-32 w-auto rounded-lg border border-gray-200 object-cover" />
+            )}
+            <div className="flex items-center gap-3">
+                <label className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 text-gray-700 font-medium px-4 py-2 text-sm hover:bg-gray-200 transition cursor-pointer">
+                    {uploading ? 'Laster opp…' : imageId != null ? 'Bytt bilde' : 'Last opp bilde'}
+                    <input type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="hidden" />
+                </label>
+                {imageId != null && (
+                    <button type="button" onClick={() => onChange(null)} className="text-sm text-red-500 hover:text-red-700">Fjern</button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function BulletEditor({ bullets, onChange }: { bullets: string[]; onChange: (bullets: string[]) => void }) {
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Punkter</label>
+            <div className="space-y-2">
+                {bullets.map((bullet, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                        <input
+                            value={bullet}
+                            onChange={e => onChange(bullets.map((b, j) => (j === i ? e.target.value : b)))}
+                            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        <button type="button" onClick={() => onChange(bullets.filter((_, j) => j !== i))} className="p-2 rounded-lg text-red-500 hover:bg-red-50">
+                            <TrashIcon className="h-4 w-4" />
+                        </button>
+                    </div>
+                ))}
+                <button type="button" onClick={() => onChange([...bullets, ''])} className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900">
+                    <PlusIcon className="h-4 w-4" /> Legg til punkt
+                </button>
+            </div>
+        </div>
+    );
+}
