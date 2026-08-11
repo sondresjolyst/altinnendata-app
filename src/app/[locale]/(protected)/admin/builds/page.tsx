@@ -28,7 +28,7 @@ export default function AdminBuildsPage() {
             setEditing(await BuildService.getForEdit(id));
             setCreating(false);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke laste datamaskineret');
+            toast.error(err instanceof Error ? err.message : 'Kunne ikke laste datamaskinen');
         }
     };
 
@@ -36,10 +36,10 @@ export default function AdminBuildsPage() {
         if (!confirm(`Slette «${build.title}»?`)) return;
         try {
             await BuildService.remove(build.id);
-            toast.success('Maskinen er slettet');
+            toast.success('Datamaskinen er slettet');
             load();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke slette maskinen');
+            toast.error(err instanceof Error ? err.message : 'Kunne ikke slette datamaskinen');
         }
     };
 

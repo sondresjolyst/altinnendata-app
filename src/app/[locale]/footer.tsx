@@ -37,7 +37,8 @@ export default function Footer() {
                 </nav>
 
                 <p className="text-xs text-gray-400">
-                    © {year} {COMPANY.name} · {dict.footer.rights}
+                    © {year} {COMPANY.name} · {dict.footer.createdBy}{' '}
+                    <span className="text-gray-500">Sjølyst Innovations</span>
                 </p>
             </div>
         </footer>

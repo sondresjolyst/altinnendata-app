@@ -65,6 +65,9 @@ const AdminService = {
     removeRole: (userId: string, role: string) =>
         request(() => axiosInstance.delete(`/users/${userId}/roles/${role}`), 'Failed to remove role'),
 
+    deleteUser: (userId: string) =>
+        request(() => axiosInstance.delete(`/users/${userId}/account`), 'Failed to delete user'),
+
     invite: (email: string, firstName: string, lastName: string, role: string) =>
         request(() => axiosInstance.post('/users/invite', { email, firstName, lastName, role }), 'Failed to send invitation'),
 };

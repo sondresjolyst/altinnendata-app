@@ -2,19 +2,32 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import TextInput from '@/components/TextInput';
 import PasswordInput from '@/components/PasswordInput';
 import Alert from '@/components/Alert';
 import UserService from '@/services/userService';
+import { useDictionary } from '@/i18n/DictionaryProvider';
+import { localeHref } from '@/i18n/config';
 
 export default function ResetPasswordPage() {
-    const [step, setStep] = useState<1 | 2>(1);
-    const [email, setEmail] = useState('');
-    const [code, setCode] = useState('');
+    const params = useSearchParams();
+    const { locale, dict } = useDictionary();
+
+    // An invite or reset email links here with the address and code filled in,
+    // so the visitor lands straight on the "choose a password" step.
+    const invitedEmail = params.get('email') ?? '';
+    const invitedCode = params.get('code') ?? '';
+
+    const [step, setStep] = useState<1 | 2>(invitedCode ? 2 : 1);
+    const [email, setEmail] = useState(invitedEmail);
+    const [code, setCode] = useState(invitedCode);
     const [newPassword, setNewPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const loginHref = localeHref(locale, '/login');
 
     const sendCode = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,7 +37,7 @@ export default function ResetPasswordPage() {
             await UserService.requestPasswordReset({ email });
             setStep(2);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Something went wrong');
+            setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
         } finally {
             setLoading(false);
         }
@@ -35,10 +48,10 @@ export default function ResetPasswordPage() {
         setError(null);
         setLoading(true);
         try {
-            const res = await UserService.resetPassword({ email, code, newPassword });
-            setSuccess(res.message);
+            await UserService.resetPassword({ email, code, newPassword });
+            setSuccess(dict.auth.resetDone);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Something went wrong');
+            setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
         } finally {
             setLoading(false);
         }
@@ -46,41 +59,42 @@ export default function ResetPasswordPage() {
 
     return (
         <div className="max-w-md mx-auto px-4 py-16">
-            <h1 className="text-2xl font-black text-gray-900 mb-1">Reset password</h1>
+            <h1 className="text-2xl font-black text-gray-900 mb-1">{dict.auth.resetTitle}</h1>
             <p className="text-sm text-gray-600 mb-6">
-                Remembered it? <Link href="/login" className="font-semibold text-gray-900">Sign in</Link>
+                <Link href={loginHref} className="font-semibold text-gray-900">{dict.auth.signIn}</Link>
             </p>
 
             {success ? (
                 <Alert variant="success">
                     {success}
-                    <Link href="/login" className="block mt-3 font-semibold text-gray-900">Back to sign in →</Link>
+                    <Link href={loginHref} className="block mt-3 font-semibold text-gray-900">{dict.auth.signIn} →</Link>
                 </Alert>
             ) : step === 1 ? (
                 <form onSubmit={sendCode} className="space-y-4">
                     {error && <Alert variant="error">{error}</Alert>}
-                    <TextInput label="Email" name="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                    <p className="text-sm text-gray-600">{dict.auth.resetIntro}</p>
+                    <TextInput label={dict.auth.email} name="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
                     <button
                         type="submit"
                         disabled={loading}
                         className="w-full rounded-lg bg-primary text-primary-foreground font-semibold py-2.5 hover:brightness-95 disabled:opacity-60 transition"
                     >
-                        {loading ? 'Sending…' : 'Send reset code'}
+                        {loading ? dict.common.saving : dict.auth.requestCode}
                     </button>
                 </form>
             ) : (
                 <form onSubmit={reset} className="space-y-4">
-                    <p className="text-sm text-gray-600">Check your email for the reset code.</p>
                     {error && <Alert variant="error">{error}</Alert>}
-                    <TextInput label="Email" name="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-                    <TextInput label="Reset code" name="code" value={code} onChange={e => setCode(e.target.value)} required />
-                    <PasswordInput label="New password" name="newPassword" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+                    <TextInput label={dict.auth.email} name="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                    <TextInput label={dict.auth.resetCode} name="code" value={code} onChange={e => setCode(e.target.value)} required />
+                    <PasswordInput label={dict.auth.newPassword} name="newPassword" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+                    <p className="text-xs text-gray-500">{dict.validation.password}</p>
                     <button
                         type="submit"
                         disabled={loading}
                         className="w-full rounded-lg bg-primary text-primary-foreground font-semibold py-2.5 hover:brightness-95 disabled:opacity-60 transition"
                     >
-                        {loading ? 'Resetting…' : 'Reset password'}
+                        {loading ? dict.common.saving : dict.auth.setPassword}
                     </button>
                 </form>
             )}

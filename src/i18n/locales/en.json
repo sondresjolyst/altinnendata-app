@@ -33,7 +33,7 @@
   },
   "builds": {
     "title": "Computers",
-    "intro": "Machines built for customers. Every machine is put together around a purpose and a budget.",
+    "intro": "Computers we build and sell. Every machine is assembled, tested and set up by us, ready to use from day one.",
     "empty": "No computers have been published yet.",
     "specs": "Specifications",
     "price": "Price",
@@ -52,6 +52,11 @@
       "streaming": "Streaming",
       "workstation": "Workstation"
     },
+    "groups": {
+      "available": "Available computers",
+      "reserved": "Reserved computers",
+      "sold": "Sold computers"
+    },
     "askAbout": "Ask about this machine",
     "draft": "Draft"
   },
@@ -62,7 +67,7 @@
     "email": "Email",
     "phone": "Phone",
     "useCase": "What will the machine be used for?",
-    "useCasePlaceholder": "Gaming, office, video,…",
+    "useCasePlaceholder": "Gaming, office, video …",
     "budget": "Budget (NOK)",
     "build": "About computer",
     "message": "Message",
@@ -101,7 +106,8 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "cookies": "Cookies",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "createdBy": "Created by"
   },
   "legal": {
     "missing": "This content has not been written yet.",

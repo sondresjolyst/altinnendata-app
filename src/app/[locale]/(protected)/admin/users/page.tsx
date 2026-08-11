@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import AdminService, { AdminUser } from '@/services/adminService';
 import Toggle from '@/components/Toggle';
 import TextInput from '@/components/TextInput';
@@ -56,6 +56,18 @@ export default function AdminUsersPage() {
             toast.success(`${role} er fjernet fra ${user.firstName}`);
         } catch (err) {
             toast.error(err instanceof Error ? err.message : 'Kunne ikke fjerne rollen');
+        }
+    };
+
+    const deleteUser = async (user: AdminUser) => {
+        const label = `${user.firstName} ${user.lastName}`.trim() || user.email;
+        if (!confirm(`Slette ${label}? Navn, e-post og passord blir fjernet, og brukeren kan ikke logge inn igjen.`)) return;
+        try {
+            await AdminService.deleteUser(user.id);
+            toast.success('Brukeren er slettet');
+            load(includeDeleted);
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Kunne ikke slette brukeren');
         }
     };
 
@@ -128,9 +140,21 @@ export default function AdminUsersPage() {
                         const available = allRoles.filter(r => !user.roles.includes(r));
                         return (
                             <li key={user.id} className="p-4 space-y-2">
-                                <div className={user.isDeleted ? 'text-gray-400' : 'text-gray-800'}>
-                                    <span className="font-medium">{user.firstName} {user.lastName}</span>
-                                    <span className="ml-2 text-xs text-gray-500">{user.email}</span>
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className={user.isDeleted ? 'text-gray-400' : 'text-gray-800'}>
+                                        <span className="font-medium">{user.firstName} {user.lastName}</span>
+                                        <span className="ml-2 text-xs text-gray-500">{user.email}</span>
+                                        {user.isDeleted && <span className="ml-2 text-xs text-gray-400">(slettet)</span>}
+                                    </div>
+                                    {!user.isDeleted && (
+                                        <button
+                                            onClick={() => deleteUser(user)}
+                                            title="Slett bruker"
+                                            className="shrink-0 p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                    )}
                                 </div>
 
                                 <div className="flex flex-wrap items-center gap-1.5">
