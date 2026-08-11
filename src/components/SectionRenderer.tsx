@@ -35,7 +35,9 @@ export default function SectionRenderer({ section, locale }: { section: Section;
         case 'hero': {
             const background = section.backgroundImageId ? imageUrl(section.backgroundImageId) : '/hero.jpg';
             return (
-                <section className="relative isolate overflow-hidden bg-gray-900 min-h-[420px] sm:min-h-[520px] flex items-center">
+                // Aspect ratio rather than a fixed height: with a fluid width, a fixed
+                // height makes object-cover show a different slice at every screen size.
+                <section className="relative isolate overflow-hidden bg-gray-900 flex items-center min-h-[420px] aspect-[4/5] sm:aspect-[3/2] lg:aspect-[12/5] xl:aspect-[16/5]">
                     <Img
                         src={background}
                         alt=""
