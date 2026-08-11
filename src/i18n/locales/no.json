@@ -1,7 +1,7 @@
 {
   "meta": {
     "tagline": "Lokal bygging og installasjon av stasjonære PC-er",
-    "description": "Altinnendata bygger og installerer stasjonære PC-er. Se maskinene vi har bygget, be om pristilbud."
+    "description": "Altinnendata bygger og installerer stasjonære PC-er. Se datamaskinene vi har bygget, be om pristilbud."
   },
   "nav": {
     "builds": "Datamaskiner",
@@ -33,12 +33,12 @@
   },
   "builds": {
     "title": "Datamaskiner",
-    "intro": "Maskiner bygget for kunder. Hver maskin er satt sammen etter behov og budsjett.",
+    "intro": "Datamaskiner vi bygger og selger. Hver maskin er montert, testet og satt opp av oss, klar til bruk med en gang.",
     "empty": "Ingen datamaskiner er publisert ennå.",
     "specs": "Spesifikasjoner",
     "price": "Pris",
     "priceFrom": "Pris",
-    "builtOn": "Bygget",
+    "builtOn": "Byggedato",
     "availability": {
       "label": "Status",
       "available": "Tilgjengelig",
@@ -52,7 +52,12 @@
       "streaming": "Streaming",
       "workstation": "Arbeidsstasjon"
     },
-    "askAbout": "Spør om denne maskinen",
+    "groups": {
+      "available": "Tilgjengelige datamaskiner",
+      "reserved": "Reserverte datamaskiner",
+      "sold": "Solgte datamaskiner"
+    },
+    "askAbout": "Spør om denne datamaskinen",
     "draft": "Utkast"
   },
   "contact": {
@@ -62,9 +67,9 @@
     "email": "E-post",
     "phone": "Telefon",
     "useCase": "Hva skal maskinen brukes til?",
-    "useCasePlaceholder": "Gaming, kontor, video,…",
+    "useCasePlaceholder": "Gaming, kontor, video …",
     "budget": "Budsjett (kr)",
-    "build": "Gjelder maskin",
+    "build": "Gjelder datamaskin",
     "message": "Melding",
     "send": "Send",
     "sending": "Sender…",
@@ -101,7 +106,8 @@
     "terms": "Vilkår",
     "privacy": "Personvern",
     "cookies": "Informasjonskapsler",
-    "rights": "Alle rettigheter reservert."
+    "rights": "Alle rettigheter reservert.",
+    "createdBy": "Laget av"
   },
   "legal": {
     "missing": "Dette innholdet er ikke lagt inn ennå.",
@@ -122,7 +128,7 @@
     "editBuild": "Rediger datamaskin",
     "buildTitle": "Tittel",
     "buildSummary": "Kort beskrivelse",
-    "buildBody": "Innhold på maskinsiden",
+    "buildBody": "Innhold på siden til datamaskinen",
     "published": "Publisert",
     "sortOrder": "Sortering",
     "coverImage": "Forsidebilde",

@@ -114,10 +114,10 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         try {
             if (build) await BuildService.update(build.id, input);
             else await BuildService.create(input);
-            toast.success(build ? 'Maskinen er oppdatert' : 'Maskinen er opprettet');
+            toast.success(build ? 'Datamaskinen er oppdatert' : 'Datamaskinen er opprettet');
             onSaved();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke lagre maskinen');
+            toast.error(err instanceof Error ? err.message : 'Kunne ikke lagre datamaskinen');
         } finally {
             setSaving(false);
         }
@@ -153,7 +153,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 </div>
 
                 <TextInput label="Pris (kr)" type="number" value={priceNok} onChange={e => setPriceNok(e.target.value)} />
-                <TextInput label="Bygget" type="date" value={builtOn} onChange={e => setBuiltOn(e.target.value)} />
+                <TextInput label="Byggedato" type="date" value={builtOn} onChange={e => setBuiltOn(e.target.value)} />
                 <TextInput label="Sortering" type="number" value={sortOrder.toString()} onChange={e => setSortOrder(Number(e.target.value) || 0)} />
 
                 <div className="flex items-end">
@@ -185,7 +185,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Innhold på maskinsiden</h3>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Innhold på siden til datamaskinen</h3>
                     <SectionsEditor
                         sections={translation.sections as Section[]}
                         onChange={sections => patchTranslation(activeLocale, { sections })}

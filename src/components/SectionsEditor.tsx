@@ -6,7 +6,7 @@ import {
     ArrowUpIcon, ArrowDownIcon, TrashIcon, PlusIcon, EyeIcon, EyeSlashIcon, DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
 import ImageService, { imageUrl } from '@/services/imageService';
-import { Section, SectionType, SECTION_LABELS, createSection, cloneSection, StatItem, ImageSection } from '@/types/content';
+import { Section, SectionType, SECTION_LABELS, createSection, cloneSection, StatItem, ImageSection, FeedAvailability } from '@/types/content';
 import TextInput from '@/components/TextInput';
 
 const ALL_TYPES: SectionType[] = ['hero', 'feature', 'text', 'feed', 'contact', 'cta', 'stats', 'image'];
@@ -149,7 +149,7 @@ function SectionEditor({ section, patch }: { section: Section; patch: (changes: 
 
         case 'feed':
             return (
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-3 gap-4">
                     <Field label="Overskrift" value={section.heading} onChange={v => patch({ heading: v })} />
                     <TextInput
                         label="Antall som vises"
@@ -157,6 +157,19 @@ function SectionEditor({ section, patch }: { section: Section; patch: (changes: 
                         value={section.limit.toString()}
                         onChange={e => patch({ limit: Math.max(1, Number(e.target.value) || 1) })}
                     />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Viser</label>
+                        <select
+                            value={section.availability ?? 'all'}
+                            onChange={e => patch({ availability: e.target.value as FeedAvailability })}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        >
+                            <option value="all">Alle datamaskiner</option>
+                            <option value="available">Kun tilgjengelige</option>
+                            <option value="reserved">Kun reserverte</option>
+                            <option value="sold">Kun solgte</option>
+                        </select>
+                    </div>
                 </div>
             );
 

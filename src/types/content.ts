@@ -31,10 +31,14 @@ export interface TextSection extends BaseSection {
     body: string;
 }
 
+export type FeedAvailability = 'all' | 'available' | 'reserved' | 'sold';
+
 export interface FeedSection extends BaseSection {
     type: 'feed';
     heading: string;
     limit: number;
+    /** Which machines to pull in; 'all' leaves the filter off. */
+    availability: FeedAvailability;
 }
 
 export interface ContactSection extends BaseSection {
@@ -108,7 +112,7 @@ export function createSection(type: SectionType): Section {
         case 'text':
             return { ...base, type, heading: 'Overskrift', body: '' };
         case 'feed':
-            return { ...base, type, heading: 'Nyeste datamaskiner', limit: 3 };
+            return { ...base, type, heading: 'Nyeste datamaskiner', limit: 6, availability: 'all' };
         case 'contact':
             return { ...base, type, heading: 'Ta kontakt', text: '' };
         case 'cta':

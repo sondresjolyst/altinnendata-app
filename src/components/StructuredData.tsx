@@ -9,7 +9,7 @@ export default async function StructuredData() {
         name: company.name,
         ...(company.legalName ? { legalName: company.legalName } : {}),
         url: COMPANY.url,
-        image: `${COMPANY.url}/icon.svg`,
+        image: `${COMPANY.url}/icon.png`,
         telephone: company.phone ?? COMPANY.phone,
         email: company.email ?? COMPANY.email,
         address: {

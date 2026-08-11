@@ -1,8 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize from 'rehype-sanitize';
+import Markdown from '@/components/Markdown';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { Section } from '@/types/content';
 import { imageUrl } from '@/services/imageService';
@@ -37,17 +35,19 @@ export default function SectionRenderer({ section, locale }: { section: Section;
         case 'hero': {
             const background = section.backgroundImageId ? imageUrl(section.backgroundImageId) : '/hero.jpg';
             return (
-                <section className="relative isolate overflow-hidden bg-gray-900">
+                <section className="relative isolate overflow-hidden bg-gray-900 min-h-[420px] sm:min-h-[520px] flex items-center">
                     <Img
                         src={background}
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
+                        // Wide screens crop the photo hard vertically; bias upwards so the
+                        // machine stays in frame instead of the desk legs.
+                        className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_12%]"
                     />
                     {/* Keeps the headline readable whatever the photo looks like. */}
                     <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
-                        <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white max-w-3xl whitespace-pre-line drop-shadow">
+                    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+                        <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white max-w-3xl whitespace-pre-line drop-shadow">
                             {section.heading}
                         </h1>
                         {section.subheading && (
@@ -92,21 +92,20 @@ export default function SectionRenderer({ section, locale }: { section: Section;
             return (
                 <section className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
                     {section.heading && <h2 className="text-2xl font-bold text-gray-900 mb-4">{section.heading}</h2>}
-                    <div className="prose prose-sm max-w-none text-gray-700">
-                        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>{section.body}</Markdown>
+                    <div className="space-y-4 text-sm text-gray-700">
+                        <Markdown>{section.body}</Markdown>
                     </div>
                 </section>
             );
 
         case 'feed':
             return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-                    <div className="flex items-end justify-between mb-6">
-                        {section.heading && <h2 className="text-2xl font-bold text-gray-900">{section.heading}</h2>}
-                        <Link href={href('/builds')} className="text-sm font-semibold text-gray-700 hover:text-gray-900">{dict.common.viewAll} →</Link>
-                    </div>
-                    <FeaturedBuilds locale={locale} limit={section.limit} />
-                </section>
+                <FeaturedBuilds
+                    locale={locale}
+                    heading={section.heading}
+                    limit={section.limit}
+                    availability={section.availability ?? 'all'}
+                />
             );
 
         case 'contact':
