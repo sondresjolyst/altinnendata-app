@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import TextInput from '@/components/TextInput';
@@ -11,6 +11,15 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
 export default function ResetPasswordPage() {
+    // useSearchParams opts the tree out of prerendering unless it sits under Suspense.
+    return (
+        <Suspense fallback={null}>
+            <ResetPasswordForm />
+        </Suspense>
+    );
+}
+
+function ResetPasswordForm() {
     const params = useSearchParams();
     const { locale, dict } = useDictionary();
 
