@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.0.1...v1.1.0) (2026-08-11)
+
+
+### Features
+
+* put the computers first on the front page ([#12](https://github.com/sondresjolyst/altinnendata-app/issues/12)) ([ec6aa7e](https://github.com/sondresjolyst/altinnendata-app/commit/ec6aa7e59398d8edfd6c062ca364596aa5633826))
+
 ## [1.0.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.0.0...v1.0.1) (2026-08-10)
 
 
