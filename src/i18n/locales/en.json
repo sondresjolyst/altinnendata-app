@@ -70,6 +70,7 @@
   "contact": {
     "title": "Contact",
     "intro": "Tell us what the machine is for, and you will get a suggestion with a price.",
+    "introBuild": "Ask about this computer and we will reply as soon as we can.",
     "name": "Name",
     "email": "Email",
     "phone": "Phone",

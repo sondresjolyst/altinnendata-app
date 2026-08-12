@@ -5,15 +5,17 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     error?: string;
 }
 
-export default function TextInput({ label, error, id, ...props }: TextInputProps) {
+export default function TextInput({ label, error, id, required, ...props }: TextInputProps) {
     const inputId = id ?? props.name;
     return (
         <div>
             <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
                 {label}
+                {required && <span className="text-red-600"> *</span>}
             </label>
             <input
                 id={inputId}
+                aria-required={required || undefined}
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary ${
                     error ? 'border-red-400' : 'border-gray-300'
                 }`}
