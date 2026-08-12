@@ -70,6 +70,7 @@
   "contact": {
     "title": "Kontakt",
     "intro": "Fortell hva maskinen skal brukes til, så får du et forslag med pris.",
+    "introBuild": "Spør om denne datamaskinen, så svarer vi så snart vi kan.",
     "name": "Navn",
     "email": "E-post",
     "phone": "Telefon",

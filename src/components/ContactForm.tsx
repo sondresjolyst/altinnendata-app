@@ -1,19 +1,24 @@
 "use client";
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import TextInput from './TextInput';
 import ContactService from '@/services/contactService';
 import { contactSchema, fieldErrors, ContactInput } from '@/lib/validation';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
-export default function ContactForm() {
+export default function ContactForm({ build }: { build?: { slug: string; title: string } | null }) {
     const { dict } = useDictionary();
-    const searchParams = useSearchParams();
-    const buildSlug = searchParams.get('build') ?? '';
 
-    const empty: ContactInput = { name: '', email: '', phone: '', useCase: '', budgetNok: null, buildSlug, message: '' };
+    const empty: ContactInput = {
+        name: '',
+        email: '',
+        phone: '',
+        useCase: '',
+        budgetNok: null,
+        buildSlug: build?.slug ?? '',
+        message: '',
+    };
 
     const [form, setForm] = useState<ContactInput>(empty);
     const [errors, setErrors] = useState<Partial<Record<keyof ContactInput, string>>>({});
@@ -47,36 +52,47 @@ export default function ContactForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            {build && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                    <span className="block text-sm font-medium text-gray-700">{dict.contact.build}</span>
+                    <span className="text-sm text-gray-900">{build.title}</span>
+                </div>
+            )}
             <div className="grid sm:grid-cols-2 gap-4">
-                <TextInput label={dict.contact.name} name="name" value={form.name} onChange={update('name')} error={errors.name} />
-                <TextInput label={dict.contact.email} name="email" type="email" value={form.email} onChange={update('email')} error={errors.email} />
+                <TextInput label={dict.contact.name} name="name" value={form.name} onChange={update('name')} error={errors.name} required />
+                <TextInput label={dict.contact.email} name="email" type="email" value={form.email} onChange={update('email')} error={errors.email} required />
                 <TextInput label={dict.contact.phone} name="phone" value={form.phone ?? ''} onChange={update('phone')} error={errors.phone} />
-                <TextInput
-                    label={dict.contact.useCase}
-                    name="useCase"
-                    value={form.useCase ?? ''}
-                    onChange={update('useCase')}
-                    error={errors.useCase}
-                    placeholder={dict.contact.useCasePlaceholder}
-                />
-                <TextInput
-                    label={dict.contact.budget}
-                    name="budgetNok"
-                    type="number"
-                    value={form.budgetNok?.toString() ?? ''}
-                    onChange={updateBudget}
-                    error={errors.budgetNok}
-                />
-                {buildSlug && (
-                    <TextInput label={dict.contact.build} name="buildSlug" value={form.buildSlug ?? ''} onChange={update('buildSlug')} readOnly />
+                {!build && (
+                    <>
+                        <TextInput
+                            label={dict.contact.useCase}
+                            name="useCase"
+                            value={form.useCase ?? ''}
+                            onChange={update('useCase')}
+                            error={errors.useCase}
+                            placeholder={dict.contact.useCasePlaceholder}
+                        />
+                        <TextInput
+                            label={dict.contact.budget}
+                            name="budgetNok"
+                            type="number"
+                            value={form.budgetNok?.toString() ?? ''}
+                            onChange={updateBudget}
+                            error={errors.budgetNok}
+                        />
+                    </>
                 )}
             </div>
             <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">{dict.contact.message}</label>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                    {dict.contact.message}
+                    <span className="text-red-600"> *</span>
+                </label>
                 <textarea
                     id="message"
                     name="message"
                     rows={5}
+                    aria-required
                     value={form.message}
                     onChange={update('message')}
                     className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.message ? 'border-red-400' : 'border-gray-300'}`}
