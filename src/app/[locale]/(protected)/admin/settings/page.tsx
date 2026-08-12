@@ -6,6 +6,7 @@ import TextInput from '@/components/TextInput';
 import Toggle from '@/components/Toggle';
 import SettingsService, { Settings } from '@/services/settingsService';
 import BrandingManager from '@/components/BrandingManager';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 const EMPTY: Settings = {
     contactRecipientEmail: '',
@@ -19,6 +20,7 @@ const EMPTY: Settings = {
 };
 
 export default function AdminSettingsPage() {
+    const { dict } = useDictionary();
     const [settings, setSettings] = useState<Settings>(EMPTY);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -26,7 +28,7 @@ export default function AdminSettingsPage() {
     useEffect(() => {
         SettingsService.get()
             .then(setSettings)
-            .catch(() => toast.error('Kunne ikke laste innstillingene'))
+            .catch(() => toast.error(dict.admin.settingsLoadFailed))
             .finally(() => setLoading(false));
     }, []);
 
@@ -37,62 +39,62 @@ export default function AdminSettingsPage() {
         setSaving(true);
         try {
             setSettings(await SettingsService.update(settings));
-            toast.success('Innstillingene er lagret');
+            toast.success(dict.admin.settingsSaved);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke lagre');
+            toast.error(err instanceof Error ? err.message : dict.admin.settingsSaveFailed);
         } finally {
             setSaving(false);
         }
     };
 
-    if (loading) return <p className="text-gray-500">Laster…</p>;
+    if (loading) return <p className="text-gray-500">{dict.common.loading}</p>;
 
     return (
         <div className="space-y-8">
             <form onSubmit={handleSubmit} className="max-w-md space-y-4">
                 <TextInput
-                    label="Mottaker for henvendelser"
+                    label={dict.admin.contactRecipient}
                     name="contactRecipientEmail"
                     type="email"
                     value={settings.contactRecipientEmail}
                     onChange={e => patch({ contactRecipientEmail: e.target.value })}
                     required
                 />
-                <p className="text-xs text-gray-500">Meldinger fra kontaktskjemaet sendes hit.</p>
+                <p className="text-xs text-gray-500">{dict.admin.contactRecipientHint}</p>
 
                 <TextInput
-                    label="Firmanavn"
+                    label={dict.admin.companyName}
                     name="companyName"
                     value={settings.companyName}
                     onChange={e => patch({ companyName: e.target.value })}
                     required
                 />
                 <TextInput
-                    label="Registrert navn"
+                    label={dict.admin.legalName}
                     name="companyLegalName"
                     value={settings.companyLegalName}
                     onChange={e => patch({ companyLegalName: e.target.value })}
                 />
-                <p className="text-xs text-gray-500">Navnet i Enhetsregisteret. La stå tomt til firmaet er registrert.</p>
+                <p className="text-xs text-gray-500">{dict.admin.legalNameHint}</p>
 
                 <TextInput
-                    label="Organisasjonsnummer"
+                    label={dict.admin.orgNumber}
                     name="orgNumber"
                     value={settings.orgNumber}
                     onChange={e => patch({ orgNumber: e.target.value })}
                 />
-                <Toggle label="Registrert i Merverdiavgiftsregisteret" checked={settings.vatRegistered} onChange={v => patch({ vatRegistered: v })} />
-                <p className="text-xs text-gray-500">Krever organisasjonsnummer. Slått på vises nummeret med «MVA».</p>
+                <Toggle label={dict.admin.vatRegistered} checked={settings.vatRegistered} onChange={v => patch({ vatRegistered: v })} />
+                <p className="text-xs text-gray-500">{dict.admin.vatHint}</p>
 
                 <TextInput
-                    label="Adresse"
+                    label={dict.admin.address}
                     name="address"
                     value={settings.address}
                     onChange={e => patch({ address: e.target.value })}
                     required
                 />
                 <TextInput
-                    label="E-post som vises på nettsiden"
+                    label={dict.admin.publicEmail}
                     name="publicEmail"
                     type="email"
                     value={settings.publicEmail}
@@ -100,7 +102,7 @@ export default function AdminSettingsPage() {
                     required
                 />
                 <TextInput
-                    label="Telefon som vises på nettsiden"
+                    label={dict.admin.publicPhone}
                     name="publicPhone"
                     value={settings.publicPhone}
                     onChange={e => patch({ publicPhone: e.target.value })}
@@ -112,7 +114,7 @@ export default function AdminSettingsPage() {
                     disabled={saving}
                     className="rounded-lg bg-primary text-primary-foreground font-semibold px-5 py-2.5 hover:brightness-95 disabled:opacity-60 transition"
                 >
-                    {saving ? 'Lagrer…' : 'Lagre'}
+                    {saving ? dict.common.saving : dict.common.save}
                 </button>
             </form>
 

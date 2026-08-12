@@ -20,7 +20,6 @@ export const passwordSchema = z
     .regex(/[A-Z]/)
     .regex(/[0-9]/);
 
-/** Maps a Zod issue to a message in the visitor's language; Zod's own text is always English. */
 export function issueMessage(issue: z.core.$ZodIssue, dict: Dictionary): string {
     if (issue.code === 'invalid_format' && issue.format === 'email') return dict.validation.email;
     if (issue.code === 'too_big') return dict.validation.tooLong;

@@ -8,10 +8,12 @@ import LocaleTabs from '@/components/LocaleTabs';
 import { Section } from '@/types/content';
 import { defaultSections } from '@/lib/defaultSections';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 type SectionsByLocale = Record<Locale, Section[]>;
 
 export default function AdminContentPage() {
+    const { dict } = useDictionary();
     const [byLocale, setByLocale] = useState<SectionsByLocale | null>(null);
     const [active, setActive] = useState<Locale>(DEFAULT_LOCALE);
     const [saving, setSaving] = useState(false);
@@ -34,40 +36,40 @@ export default function AdminContentPage() {
         setSaving(true);
         try {
             await ContentService.updateHome(active, byLocale[active]);
-            toast.success('Forsiden er lagret');
+            toast.success(dict.admin.frontPageSaved);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke lagre');
+            toast.error(err instanceof Error ? err.message : dict.admin.frontPageSaveFailed);
         } finally {
             setSaving(false);
         }
     };
 
-    if (!byLocale) return <p className="text-gray-500">Laster…</p>;
+    if (!byLocale) return <p className="text-gray-500">{dict.common.loading}</p>;
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">Forside</h2>
+                <h2 className="font-bold text-gray-900">{dict.admin.content}</h2>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setByLocale({ ...byLocale, [active]: defaultSections(active) })}
                         className="text-sm text-gray-500 hover:text-gray-900"
                     >
-                        Tilbakestill
+                        {dict.admin.reset}
                     </button>
                     <button
                         onClick={save}
                         disabled={saving}
                         className="rounded-lg bg-primary text-primary-foreground font-semibold px-5 py-2 text-sm hover:brightness-95 disabled:opacity-60 transition"
                     >
-                        {saving ? 'Lagrer…' : 'Lagre'}
+                        {saving ? dict.common.saving : dict.common.save}
                     </button>
                 </div>
             </div>
 
             <LocaleTabs active={active} onChange={setActive} />
 
-            <p className="text-xs text-gray-500">Hvert språk lagres for seg. Lagre etter at du har endret en fane.</p>
+            <p className="text-xs text-gray-500">{dict.admin.perLanguageHint}</p>
 
             <SectionsEditor
                 sections={byLocale[active]}
@@ -80,7 +82,7 @@ export default function AdminContentPage() {
                     disabled={saving}
                     className="rounded-lg bg-primary text-primary-foreground font-semibold px-5 py-2 text-sm hover:brightness-95 disabled:opacity-60 transition"
                 >
-                    {saving ? 'Lagrer…' : 'Lagre'}
+                    {saving ? dict.common.saving : dict.common.save}
                 </button>
             </div>
         </div>

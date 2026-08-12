@@ -7,10 +7,6 @@ import { localeHref, type Locale } from '@/i18n/config';
 import type { FeedAvailability } from '@/types/content';
 import BuildCard from './BuildCard';
 
-/**
- * A whole feed section, heading included: an availability row with nothing in it
- * renders nothing at all, rather than a heading over an empty-state line.
- */
 export default async function FeaturedBuilds({
     locale,
     heading,

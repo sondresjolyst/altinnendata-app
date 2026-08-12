@@ -6,8 +6,10 @@ import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import AdminService, { AdminUser } from '@/services/adminService';
 import Toggle from '@/components/Toggle';
 import TextInput from '@/components/TextInput';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function AdminUsersPage() {
+    const { dict } = useDictionary();
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [allRoles, setAllRoles] = useState<string[]>([]);
     const [includeDeleted, setIncludeDeleted] = useState(false);
@@ -23,12 +25,12 @@ export default function AdminUsersPage() {
         setLoading(true);
         AdminService.getUsers(deleted)
             .then(setUsers)
-            .catch(err => toast.error(err instanceof Error ? err.message : 'Kunne ikke laste brukere'))
+            .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.usersLoadFailed))
             .finally(() => setLoading(false));
     };
 
     useEffect(() => { load(includeDeleted); }, [includeDeleted]);
-    useEffect(() => { AdminService.getRoles().then(setAllRoles).catch(() => toast.error('Kunne ikke laste roller')); }, []);
+    useEffect(() => { AdminService.getRoles().then(setAllRoles).catch(() => toast.error(dict.admin.rolesLoadFailed)); }, []);
 
     const setRoles = (id: string, roles: string[]) =>
         setUsers(prev => prev.map(u => (u.id === id ? { ...u, roles } : u)));
@@ -39,11 +41,11 @@ export default function AdminUsersPage() {
         try {
             await AdminService.addRole(user.id, selectedRole);
             setRoles(user.id, [...user.roles, selectedRole]);
-            toast.success(`${user.firstName} har fått rollen ${selectedRole}`);
+            toast.success(dict.admin.roleAssigned.replace("{name}", user.firstName).replace("{role}", selectedRole));
             setAddRoleFor(null);
             setSelectedRole('');
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke tildele rollen');
+            toast.error(err instanceof Error ? err.message : dict.admin.roleAssignFailed);
         } finally {
             setRoleLoading(false);
         }
@@ -53,37 +55,37 @@ export default function AdminUsersPage() {
         try {
             await AdminService.removeRole(user.id, role);
             setRoles(user.id, user.roles.filter(r => r !== role));
-            toast.success(`${role} er fjernet fra ${user.firstName}`);
+            toast.success(dict.admin.roleRemoved.replace("{role}", role).replace("{name}", user.firstName));
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke fjerne rollen');
+            toast.error(err instanceof Error ? err.message : dict.admin.roleRemoveFailed);
         }
     };
 
     const deleteUser = async (user: AdminUser) => {
         const label = `${user.firstName} ${user.lastName}`.trim() || user.email;
-        if (!confirm(`Slette ${label}? Navn, e-post og passord blir fjernet, og brukeren kan ikke logge inn igjen.`)) return;
+        if (!confirm(dict.admin.confirmDeleteUser.replace('{name}', label))) return;
         try {
             await AdminService.deleteUser(user.id);
-            toast.success('Brukeren er slettet');
+            toast.success(dict.admin.userDeleted);
             load(includeDeleted);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke slette brukeren');
+            toast.error(err instanceof Error ? err.message : dict.admin.userDeleteFailed);
         }
     };
 
     const sendInvite = async () => {
         if (!invite.email.trim() || !invite.firstName.trim() || !invite.lastName.trim()) {
-            toast.error('Fyll ut navn og e-post');
+            toast.error(dict.admin.inviteIncomplete);
             return;
         }
         setInviting(true);
         try {
             await AdminService.invite(invite.email.trim(), invite.firstName.trim(), invite.lastName.trim(), invite.role);
-            toast.success('Invitasjon sendt. Brukeren får en kode for å sette passord.');
+            toast.success(dict.admin.inviteSentLong);
             setInvite({ email: '', firstName: '', lastName: '', role: invite.role });
             load(includeDeleted);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke sende invitasjonen');
+            toast.error(err instanceof Error ? err.message : dict.admin.inviteFailed);
         } finally {
             setInviting(false);
         }
@@ -92,24 +94,24 @@ export default function AdminUsersPage() {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">Brukere</h2>
-                <Toggle label="Vis slettede" checked={includeDeleted} onChange={setIncludeDeleted} />
+                <h2 className="font-bold text-gray-900">{dict.admin.users}</h2>
+                <Toggle label={dict.admin.showDeleted} checked={includeDeleted} onChange={setIncludeDeleted} />
             </div>
 
             <div className="rounded-2xl border border-gray-200 p-4 space-y-3">
-                <h3 className="text-sm font-semibold text-gray-900">Inviter bruker</h3>
+                <h3 className="text-sm font-semibold text-gray-900">{dict.admin.inviteUser}</h3>
                 <div className="flex flex-wrap items-end gap-2">
                     <div className="w-40">
-                        <TextInput label="Fornavn" value={invite.firstName} onChange={e => setInvite({ ...invite, firstName: e.target.value })} />
+                        <TextInput label={dict.admin.firstName} value={invite.firstName} onChange={e => setInvite({ ...invite, firstName: e.target.value })} />
                     </div>
                     <div className="w-40">
-                        <TextInput label="Etternavn" value={invite.lastName} onChange={e => setInvite({ ...invite, lastName: e.target.value })} />
+                        <TextInput label={dict.admin.lastName} value={invite.lastName} onChange={e => setInvite({ ...invite, lastName: e.target.value })} />
                     </div>
                     <div className="flex-1 min-w-[14rem]">
-                        <TextInput label="E-post" type="email" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} />
+                        <TextInput label={dict.auth.email} type="email" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} />
                     </div>
                     <label className="text-xs text-gray-600">
-                        Rolle
+                        {dict.admin.role}
                         <select
                             value={invite.role}
                             onChange={e => setInvite({ ...invite, role: e.target.value })}
@@ -123,16 +125,16 @@ export default function AdminUsersPage() {
                         disabled={inviting}
                         className="rounded-lg bg-primary text-primary-foreground font-semibold px-4 py-2 text-sm hover:brightness-95 disabled:opacity-60 transition"
                     >
-                        {inviting ? 'Sender…' : 'Send invitasjon'}
+                        {inviting ? dict.admin.sending : dict.admin.sendInvite}
                     </button>
                 </div>
                 <p className="text-xs text-gray-500">
-                    Brukeren får en e-post med en kode og setter passordet selv på siden for glemt passord.
+                    {dict.admin.inviteHint}
                 </p>
             </div>
 
             {loading ? (
-                <p className="text-gray-500">Laster…</p>
+                <p className="text-gray-500">{dict.common.loading}</p>
             ) : (
                 <ul className="divide-y divide-gray-100 rounded-2xl border border-gray-200">
                     {users.map(user => {
@@ -144,12 +146,12 @@ export default function AdminUsersPage() {
                                     <div className={user.isDeleted ? 'text-gray-400' : 'text-gray-800'}>
                                         <span className="font-medium">{user.firstName} {user.lastName}</span>
                                         <span className="ml-2 text-xs text-gray-500">{user.email}</span>
-                                        {user.isDeleted && <span className="ml-2 text-xs text-gray-400">(slettet)</span>}
+                                        {user.isDeleted && <span className="ml-2 text-xs text-gray-400">({dict.admin.deletedTag})</span>}
                                     </div>
                                     {!user.isDeleted && (
                                         <button
                                             onClick={() => deleteUser(user)}
-                                            title="Slett bruker"
+                                            title={dict.common.delete}
                                             className="shrink-0 p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
                                         >
                                             <TrashIcon className="h-4 w-4" />
@@ -161,18 +163,18 @@ export default function AdminUsersPage() {
                                     {user.roles.map(role => (
                                         <span key={role} className="flex items-center gap-1 pl-2 pr-1 py-0.5 bg-gray-100 border border-gray-200 rounded-lg text-xs text-gray-700">
                                             {role}
-                                            <button onClick={() => removeRole(user, role)} className="hover:text-red-600 transition-colors" title={`Fjern ${role}`}>
+                                            <button onClick={() => removeRole(user, role)} className="hover:text-red-600 transition-colors" title={`${dict.common.remove} ${role}`}>
                                                 <XMarkIcon className="h-3 w-3" />
                                             </button>
                                         </span>
                                     ))}
-                                    {user.roles.length === 0 && <span className="text-xs text-gray-400">Ingen roller</span>}
+                                    {user.roles.length === 0 && <span className="text-xs text-gray-400">{dict.admin.noRoles}</span>}
                                     {!isAddingRole && !user.isDeleted && available.length > 0 && (
                                         <button
                                             onClick={() => { setAddRoleFor(user.id); setSelectedRole(available[0]); }}
                                             className="flex items-center gap-1 px-2 py-0.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-xs text-gray-500 hover:text-gray-800 transition"
                                         >
-                                            <PlusIcon className="h-3 w-3" /> Legg til rolle
+                                            <PlusIcon className="h-3 w-3" /> {dict.admin.addRole}
                                         </button>
                                     )}
                                 </div>
@@ -187,7 +189,7 @@ export default function AdminUsersPage() {
                                             {available.map(r => <option key={r} value={r}>{r}</option>)}
                                         </select>
                                         <button onClick={() => assignRole(user)} disabled={roleLoading} className="rounded-lg bg-gray-900 text-white text-xs px-3 py-1.5 hover:bg-gray-800 disabled:opacity-50 transition">
-                                            {roleLoading ? '…' : 'Legg til'}
+                                            {roleLoading ? '…' : dict.common.add}
                                         </button>
                                         <button onClick={() => setAddRoleFor(null)} className="rounded-lg border border-gray-300 text-gray-700 text-xs px-3 py-1.5 hover:bg-gray-50 transition">
                                             Cancel

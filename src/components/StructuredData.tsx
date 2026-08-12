@@ -18,7 +18,6 @@ export default async function StructuredData() {
             addressCountry: 'NO',
         },
         areaServed: 'NO',
-        // Only a VAT-registered business may publish a VAT id.
         ...(company.vatRegistered && company.orgNumber ? { vatID: `NO${company.orgNumber.replace(/\s/g, '')}MVA` } : {}),
         ...(company.orgNumber ? { taxID: company.orgNumber } : {}),
     };

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AdminService, { AdminStats, DailyStat, EmailStats } from '@/services/adminService';
 import StatHistoryChart from '@/components/StatHistoryChart';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 function formatBytes(n: number): string {
     if (n <= 0) return '0 B';
@@ -13,22 +14,23 @@ function formatBytes(n: number): string {
 }
 
 export default function AdminStatsPage() {
+    const { dict } = useDictionary();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [history, setHistory] = useState<DailyStat[]>([]);
     const [email, setEmail] = useState<EmailStats | null>(null);
 
     useEffect(() => {
-        AdminService.getStats().then(setStats).catch(err => toast.error(err instanceof Error ? err.message : 'Failed to load stats'));
+        AdminService.getStats().then(setStats).catch(err => toast.error(err instanceof Error ? err.message : dict.admin.statsLoadFailed));
         AdminService.getStatsHistory().then(setHistory).catch(() => { });
         AdminService.getEmailStats().then(setEmail).catch(() => { });
     }, []);
 
     const tiles = stats ? [
-        { label: 'Brukere', value: stats.totalUsers },
-        { label: 'Publiserte datamaskiner', value: stats.publishedBuilds },
-        { label: 'Utkast', value: stats.draftBuilds },
-        { label: 'Deler i katalogen', value: stats.catalogParts },
-        { label: 'Bilder', value: stats.contentImages },
+        { label: dict.stats.users, value: stats.totalUsers },
+        { label: dict.stats.builds, value: stats.publishedBuilds },
+        { label: dict.admin.drafts, value: stats.draftBuilds },
+        { label: dict.stats.parts, value: stats.catalogParts },
+        { label: dict.stats.images, value: stats.contentImages },
     ] : [];
 
     return (
@@ -43,37 +45,37 @@ export default function AdminStatsPage() {
             </div>
 
             <div className="rounded-2xl border border-gray-200 p-5">
-                <h2 className="font-bold text-gray-900 mb-4">Over time</h2>
+                <h2 className="font-bold text-gray-900 mb-4">{dict.admin.overTime}</h2>
                 <StatHistoryChart data={history} />
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-gray-200 p-5">
-                    <h2 className="font-bold text-gray-900 mb-3">Storage</h2>
+                    <h2 className="font-bold text-gray-900 mb-3">{dict.admin.storage}</h2>
                     {stats ? (
                         <div className="space-y-1.5 text-sm text-gray-700">
-                            <div className="flex justify-between"><span className="text-gray-500">Uploads</span><span className="tabular-nums">{formatBytes(stats.storageUsedBytes)}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">Disk free</span><span className="tabular-nums">{formatBytes(stats.diskFreeBytes)}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">Disk total</span><span className="tabular-nums">{formatBytes(stats.diskTotalBytes)}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.uploads}</span><span className="tabular-nums">{formatBytes(stats.storageUsedBytes)}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.diskFree}</span><span className="tabular-nums">{formatBytes(stats.diskFreeBytes)}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.diskTotal}</span><span className="tabular-nums">{formatBytes(stats.diskTotalBytes)}</span></div>
                             {stats.diskTotalBytes > 0 && (
                                 <div className="mt-2 h-2 rounded-full bg-gray-100 overflow-hidden">
                                     <div className="h-full bg-gray-900" style={{ width: `${Math.min(100, ((stats.diskTotalBytes - stats.diskFreeBytes) / stats.diskTotalBytes) * 100)}%` }} />
                                 </div>
                             )}
                         </div>
-                    ) : <p className="text-sm text-gray-500">Loading…</p>}
+                    ) : <p className="text-sm text-gray-500">{dict.common.loading}</p>}
                 </div>
 
                 <div className="rounded-2xl border border-gray-200 p-5">
-                    <h2 className="font-bold text-gray-900 mb-3">Email (last {email?.days ?? 30} days)</h2>
+                    <h2 className="font-bold text-gray-900 mb-3">{dict.admin.emailLast.replace('{days}', String(email?.days ?? 30))}</h2>
                     {email ? (
                         <div className="space-y-1.5 text-sm text-gray-700">
-                            <div className="flex justify-between"><span className="text-gray-500">Sent</span><span className="tabular-nums">{email.requests}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">Delivered</span><span className="tabular-nums">{email.delivered}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">Bounces</span><span className="tabular-nums">{email.hardBounces + email.softBounces}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">Blocked / spam</span><span className="tabular-nums">{email.blocked + email.spamReports}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailSent}</span><span className="tabular-nums">{email.requests}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailDelivered}</span><span className="tabular-nums">{email.delivered}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailBounces}</span><span className="tabular-nums">{email.hardBounces + email.softBounces}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailBlocked}</span><span className="tabular-nums">{email.blocked + email.spamReports}</span></div>
                         </div>
-                    ) : <p className="text-sm text-gray-500">Unavailable.</p>}
+                    ) : <p className="text-sm text-gray-500">{dict.admin.unavailable}</p>}
                 </div>
             </div>
         </div>

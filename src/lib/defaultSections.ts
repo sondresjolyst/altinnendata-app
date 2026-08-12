@@ -2,9 +2,6 @@ import { Section } from '@/types/content';
 import { COMPANY } from '@/lib/company';
 import type { Locale } from '@/i18n/config';
 
-// Shown until an admin saves a front page for the locale. Deliberately sparse —
-// stat bands, bullet lists and the like are added from the admin console when
-// there is something real to put in them.
 const NO: Section[] = [
     {
         id: 'default-hero',

@@ -35,16 +35,13 @@ export default function SectionRenderer({ section, locale }: { section: Section;
         case 'hero': {
             const background = section.backgroundImageId ? imageUrl(section.backgroundImageId) : '/hero.jpg';
             return (
-                <section className="relative isolate overflow-hidden bg-gray-900 min-h-[420px] sm:min-h-[520px] flex items-center">
+                <section className="relative isolate overflow-hidden bg-gray-900 flex items-center min-h-[420px] aspect-[4/5] sm:aspect-[3/2] lg:aspect-[12/5] xl:aspect-[16/5]">
                     <Img
                         src={background}
                         alt=""
                         aria-hidden="true"
-                        // Wide screens crop the photo hard vertically; bias upwards so the
-                        // machine stays in frame instead of the desk legs.
                         className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_12%]"
                     />
-                    {/* Keeps the headline readable whatever the photo looks like. */}
                     <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
                     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
                         <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white max-w-3xl whitespace-pre-line drop-shadow">

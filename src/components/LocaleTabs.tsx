@@ -1,6 +1,7 @@
 "use client";
 
 import { LOCALES, LOCALE_LABELS, type Locale } from '@/i18n/config';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function LocaleTabs({
     active,
@@ -11,6 +12,7 @@ export default function LocaleTabs({
     onChange: (locale: Locale) => void;
     filled?: Partial<Record<Locale, boolean>>;
 }) {
+    const { dict } = useDictionary();
     return (
         <div className="flex items-center gap-1 border-b border-gray-200">
             {LOCALES.map(locale => (
@@ -26,7 +28,7 @@ export default function LocaleTabs({
                 >
                     {LOCALE_LABELS[locale]}
                     {filled && filled[locale] === false && (
-                        <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-400 align-middle" title="Ikke fylt ut" />
+                        <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-400 align-middle" title={dict.admin.notFilled} />
                     )}
                 </button>
             ))}

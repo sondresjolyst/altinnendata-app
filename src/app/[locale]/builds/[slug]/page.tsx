@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import SectionRenderer from '@/components/SectionRenderer';
-import { BuildDetail, coverImageSrc, coverImageSrcSet } from '@/services/buildService';
+import BuildGallery from '@/components/BuildGallery';
+import Markdown from '@/components/Markdown';
+import { BuildDetail, coverImageSrc } from '@/services/buildService';
 import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { formatDate, formatPrice } from '@/lib/format';
@@ -44,73 +45,107 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
     if (!build) notFound();
 
     const dict = getDictionary(locale);
-    const cover = coverImageSrc(build);
-    const availability = dict.builds.availability[build.availability.toLowerCase() as 'available' | 'reserved' | 'sold'];
+    const status = build.availability.toLowerCase() as 'available' | 'reserved' | 'sold';
+    const statusTone = {
+        available: 'bg-emerald-100 text-emerald-800',
+        reserved: 'bg-amber-100 text-amber-800',
+        sold: 'bg-gray-200 text-gray-700',
+    }[status];
+
+    const gallery = build.imageIds;
 
     return (
-        <article>
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10">
-                <Link href={localeHref(locale, '/builds')} className="text-sm font-semibold text-gray-500 hover:text-gray-900">
-                    ← {dict.builds.title}
-                </Link>
+        <article className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+            <Link href={localeHref(locale, '/builds')} className="text-sm font-semibold text-gray-500 hover:text-gray-900">
+                ← {dict.builds.title}
+            </Link>
 
-                <header className="mt-4 flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-900">{build.title}</h1>
-                        {build.summary && <p className="mt-2 text-gray-600 max-w-2xl">{build.summary}</p>}
-                    </div>
-                    <div className="text-right">
-                        {build.priceNok != null && (
-                            <p className="text-2xl font-extrabold text-gray-900">{formatPrice(build.priceNok, locale)}</p>
-                        )}
-                        <p className="mt-1 text-sm text-gray-500">{dict.builds.availability.label}: {availability}</p>
+            <div className="mt-6 grid gap-10 lg:grid-cols-2">
+                <BuildGallery imageIds={gallery} alt={build.title} />
+
+                <div>
+                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusTone}`}>
+                        {dict.builds.availability[status]}
+                    </span>
+
+                    <h1 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight text-gray-900">{build.title}</h1>
+
+                    {build.summary && <p className="mt-3 text-gray-600">{build.summary}</p>}
+
+                    {build.priceNok != null && (
+                        <p className="mt-6 text-3xl font-extrabold text-gray-900">{formatPrice(build.priceNok, locale)}</p>
+                    )}
+
+                    <dl className="mt-6 space-y-1 text-sm text-gray-500">
                         {build.builtOn && (
-                            <p className="text-sm text-gray-500">{dict.builds.builtOn}: {formatDate(build.builtOn, locale)}</p>
+                            <div className="flex gap-2">
+                                <dt>{dict.builds.builtOn}:</dt>
+                                <dd className="text-gray-900">{formatDate(build.builtOn, locale)}</dd>
+                            </div>
+                        )}
+                        {build.category && (
+                            <div className="flex gap-2">
+                                <dt>{dict.builds.category.label}:</dt>
+                                <dd className="text-gray-900">
+                                    {dict.builds.category[build.category as keyof typeof dict.builds.category] ?? build.category}
+                                </dd>
+                            </div>
+                        )}
+                    </dl>
+
+                    <div className="mt-8 flex flex-wrap gap-3">
+                        <Link
+                            href={localeHref(locale, `/contact?build=${build.slug}`)}
+                            className="rounded-lg bg-primary text-primary-foreground font-semibold px-6 py-3 hover:brightness-95 transition"
+                        >
+                            {status === 'sold' ? dict.builds.askSimilar : dict.builds.askAbout}
+                        </Link>
+                        {build.finnUrl && (
+                            <a
+                                href={build.finnUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded-lg border border-gray-300 text-gray-900 font-semibold px-6 py-3 hover:bg-gray-50 transition"
+                            >
+                                {dict.builds.seeOnFinn}
+                            </a>
                         )}
                     </div>
-                </header>
 
-                {cover && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={cover}
-                        srcSet={coverImageSrcSet(build)}
-                        sizes="(max-width: 1024px) 100vw, 960px"
-                        alt={build.title}
-                        className="mt-8 w-full rounded-2xl object-cover"
-                    />
-                )}
+                </div>
+            </div>
 
-                {build.components.length > 0 && (
-                    <section className="mt-10">
-                        <h2 className="text-xl font-bold text-gray-900">{dict.builds.specs}</h2>
-                        <dl className="mt-4 divide-y divide-gray-200 rounded-2xl border border-gray-200">
+            {build.components.length > 0 && (
+                <details open className="mt-12 max-w-3xl rounded-2xl border border-gray-200 bg-white">
+                    <summary className="cursor-pointer list-none px-5 py-4 text-lg font-bold text-gray-900 marker:content-none">
+                        {dict.builds.specs}
+                    </summary>
+                    <table className="w-full border-t border-gray-200 text-sm">
+                        <tbody className="divide-y divide-gray-200">
                             {build.components.map(component => (
-                                <div key={component.id} className="flex flex-wrap gap-x-4 gap-y-1 px-4 py-3">
-                                    <dt className="w-40 shrink-0 text-sm font-semibold text-gray-500">
+                                <tr key={component.id}>
+                                    <th scope="row" className="w-48 px-5 py-2.5 text-left align-top font-medium text-gray-500">
                                         {component.categoryName ?? component.categoryKey ?? ''}
-                                    </dt>
-                                    <dd className="text-sm text-gray-900">
+                                    </th>
+                                    <td className="px-5 py-2.5 text-gray-900">
                                         {component.name}
                                         {component.details && <span className="text-gray-500"> — {component.details}</span>}
-                                    </dd>
-                                </div>
+                                    </td>
+                                </tr>
                             ))}
-                        </dl>
-                    </section>
-                )}
-            </div>
+                        </tbody>
+                    </table>
+                </details>
+            )}
 
-            {build.sections.map(section => <SectionRenderer key={section.id} section={section} locale={locale} />)}
-
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-                <Link
-                    href={localeHref(locale, `/contact?build=${build.slug}`)}
-                    className="inline-block rounded-lg bg-primary text-primary-foreground font-semibold px-6 py-3 hover:brightness-95 transition"
-                >
-                    {dict.builds.askAbout}
-                </Link>
-            </div>
+            {build.description && build.description !== build.summary && (
+                <section className="mt-12 max-w-3xl">
+                    <h2 className="text-lg font-bold text-gray-900">{dict.builds.description}</h2>
+                    <div className="mt-3 space-y-4 text-sm text-gray-700">
+                        <Markdown>{build.description}</Markdown>
+                    </div>
+                </section>
+            )}
         </article>
     );
 }

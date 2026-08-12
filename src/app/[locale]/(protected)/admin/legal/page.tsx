@@ -6,6 +6,7 @@ import LegalService, { LEGAL_KEYS, LegalKey, LegalPage } from '@/services/legalS
 import LocaleTabs from '@/components/LocaleTabs';
 import TextInput from '@/components/TextInput';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 const KEY_LABELS: Record<LegalKey, string> = {
     terms: 'Vilkår',
@@ -18,6 +19,7 @@ type Draft = { title: string; bodyMarkdown: string };
 const emptyDraft: Draft = { title: '', bodyMarkdown: '' };
 
 export default function AdminLegalPage() {
+    const { dict } = useDictionary();
     const [drafts, setDrafts] = useState<Record<string, Draft>>({});
     const [activeKey, setActiveKey] = useState<LegalKey>('terms');
     const [activeLocale, setActiveLocale] = useState<Locale>(DEFAULT_LOCALE);
@@ -29,7 +31,7 @@ export default function AdminLegalPage() {
             .then((pages: LegalPage[]) => {
                 setDrafts(Object.fromEntries(pages.map(p => [`${p.key}:${p.locale}`, { title: p.title, bodyMarkdown: p.bodyMarkdown }])));
             })
-            .catch(err => toast.error(err instanceof Error ? err.message : 'Kunne ikke laste sidene'))
+            .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.legalLoadFailed))
             .finally(() => setLoading(false));
     }, []);
 
@@ -41,32 +43,32 @@ export default function AdminLegalPage() {
 
     const save = async () => {
         if (draft.title.trim() === '' || draft.bodyMarkdown.trim() === '') {
-            toast.error('Tittel og innhold må fylles ut');
+            toast.error(dict.admin.legalRequired);
             return;
         }
         setSaving(true);
         try {
             await LegalService.save(activeKey, activeLocale, draft.title.trim(), draft.bodyMarkdown);
-            toast.success('Siden er lagret');
+            toast.success(dict.admin.legalSaved);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke lagre siden');
+            toast.error(err instanceof Error ? err.message : dict.admin.legalSaveFailed);
         } finally {
             setSaving(false);
         }
     };
 
-    if (loading) return <p className="text-gray-500">Laster…</p>;
+    if (loading) return <p className="text-gray-500">{dict.common.loading}</p>;
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">Juridiske sider</h2>
+                <h2 className="font-bold text-gray-900">{dict.admin.legal}</h2>
                 <button
                     onClick={save}
                     disabled={saving}
                     className="rounded-lg bg-primary text-primary-foreground font-semibold px-5 py-2 text-sm hover:brightness-95 disabled:opacity-60 transition"
                 >
-                    {saving ? 'Lagrer…' : 'Lagre'}
+                    {saving ? dict.common.saving : dict.common.save}
                 </button>
             </div>
 
@@ -79,7 +81,7 @@ export default function AdminLegalPage() {
                             key === activeKey ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
                         }`}
                     >
-                        {KEY_LABELS[key]}
+                        {dict.footer[key]}
                     </button>
                 ))}
             </div>
@@ -90,10 +92,10 @@ export default function AdminLegalPage() {
                 filled={Object.fromEntries(LOCALES.map(l => [l, (drafts[`${activeKey}:${l}`]?.bodyMarkdown ?? '') !== ''])) as Record<Locale, boolean>}
             />
 
-            <TextInput label="Tittel" value={draft.title} onChange={e => patch({ title: e.target.value })} />
+            <TextInput label={dict.admin.buildTitle} value={draft.title} onChange={e => patch({ title: e.target.value })} />
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Innhold (markdown)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{dict.admin.bodyMarkdown}</label>
                 <textarea
                     rows={24}
                     value={draft.bodyMarkdown}

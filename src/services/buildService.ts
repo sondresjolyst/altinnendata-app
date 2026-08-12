@@ -39,7 +39,9 @@ export interface BuildSummary {
 }
 
 export interface BuildDetail extends BuildSummary {
-    sections: Section[];
+    finnUrl: string | null;
+    description: string | null;
+    imageIds: string[];
     components: BuildComponent[];
     availableLocales: string[];
 }
@@ -48,7 +50,7 @@ export interface BuildTranslation {
     locale: string;
     title: string;
     summary: string | null;
-    sections: Section[];
+    description: string | null;
 }
 
 export interface BuildAdmin {
@@ -59,10 +61,12 @@ export interface BuildAdmin {
     priceNok: number | null;
     builtOn: string | null;
     coverImageId: string | null;
+    finnUrl: string | null;
     published: boolean;
     sortOrder: number;
     translations: BuildTranslation[];
     components: BuildComponent[];
+    imageIds: string[];
     createdAt: string;
     updatedAt: string;
 }
@@ -72,9 +76,10 @@ export interface BuildInput {
     availability: Availability;
     priceNok: number | null;
     builtOn: string | null;
-    coverImageId: string | null;
+    finnUrl: string | null;
     published: boolean;
     sortOrder: number;
+    imageIds: string[];
     translations: BuildTranslation[];
     components: Array<{
         componentPartId: number | null;

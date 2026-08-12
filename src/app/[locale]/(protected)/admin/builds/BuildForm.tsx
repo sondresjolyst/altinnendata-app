@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import ComponentService, { CategoryTree } from '@/services/componentService';
-import SectionsEditor, { ImagePicker } from '@/components/SectionsEditor';
+import FinnService from '@/services/finnService';
+import ImageService, { imageUrl } from '@/services/imageService';
+import { ImagePicker } from '@/components/SectionsEditor';
 import LocaleTabs from '@/components/LocaleTabs';
 import TextInput from '@/components/TextInput';
 import Toggle from '@/components/Toggle';
-import { Section } from '@/types/content';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 const AVAILABILITIES: Availability[] = ['Available', 'Reserved', 'Sold'];
 
@@ -36,13 +38,14 @@ interface PartLine {
     details: string;
 }
 
-const emptyTranslation = (locale: Locale): BuildTranslation => ({ locale, title: '', summary: '', sections: [] });
+const emptyTranslation = (locale: Locale): BuildTranslation => ({ locale, title: '', summary: '', description: '' });
 
 export default function BuildForm({ build, onSaved, onCancel }: {
     build: BuildAdmin | null;
     onSaved: () => void;
     onCancel: () => void;
 }) {
+    const { dict } = useDictionary();
     const [activeLocale, setActiveLocale] = useState<Locale>(DEFAULT_LOCALE);
     const [translations, setTranslations] = useState<Record<Locale, BuildTranslation>>(() =>
         Object.fromEntries(
@@ -69,8 +72,63 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         })) ?? [],
     );
 
+    const [finnUrl, setFinnUrl] = useState(build?.finnUrl ?? '');
+    const [imageIds, setImageIds] = useState<string[]>(build?.imageIds ?? []);
+    const [importing, setImporting] = useState(false);
+    const [uploading, setUploading] = useState(false);
+
     const [tree, setTree] = useState<CategoryTree[]>([]);
     const [saving, setSaving] = useState(false);
+
+    const moveImage = (index: number, delta: number) => {
+        const target = index + delta;
+        if (target < 0 || target >= imageIds.length) return;
+        const next = [...imageIds];
+        [next[index], next[target]] = [next[target], next[index]];
+        setImageIds(next);
+    };
+
+    const addImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files ?? []);
+        e.target.value = '';
+        if (files.length === 0) return;
+
+        setUploading(true);
+        try {
+            const uploaded = await Promise.all(files.map(file => ImageService.upload(file)));
+            setImageIds(current => [...current, ...uploaded.map(u => u.id)]);
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : dict.admin.uploadFailed);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const importFromFinn = async () => {
+        setImporting(true);
+        try {
+            const ad = await FinnService.import(finnUrl.trim());
+
+            if (ad.title) patchTranslation(activeLocale, { title: ad.title });
+            if (ad.summary) patchTranslation(activeLocale, { summary: ad.summary });
+            if (ad.description) patchTranslation(activeLocale, { description: ad.description });
+            if (ad.priceNok != null) setPriceNok(ad.priceNok.toString());
+            if (ad.imageIds.length > 0) {
+                setImageIds(current => [...current, ...ad.imageIds.filter(id => !current.includes(id))]);
+                if (!coverImageId && ad.coverImageId) setCoverImageId(ad.coverImageId);
+            }
+
+            toast.success(
+                ad.skippedImages > 0
+                    ? dict.admin.importedSkipped.replace('{count}', String(ad.skippedImages))
+                    : dict.admin.imported,
+            );
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : dict.admin.importFailed);
+        } finally {
+            setImporting(false);
+        }
+    };
 
     useEffect(() => {
         ComponentService.getTree(DEFAULT_LOCALE).then(setTree).catch(() => setTree([]));
@@ -88,7 +146,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             .filter(t => t.title.trim() !== '');
 
         if (!filled.some(t => t.locale === DEFAULT_LOCALE)) {
-            toast.error('Tittel på norsk må fylles ut');
+            toast.error(dict.admin.titleRequired);
             return;
         }
 
@@ -97,10 +155,15 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             availability,
             priceNok: priceNok === '' ? null : Number(priceNok),
             builtOn: builtOn || null,
-            coverImageId,
+            finnUrl: finnUrl.trim() || null,
             published,
             sortOrder,
-            translations: filled.map(t => ({ ...t, summary: t.summary?.trim() || null })),
+            imageIds,
+            translations: filled.map(t => ({
+                ...t,
+                summary: t.summary?.trim() || null,
+                description: t.description?.trim() || null,
+            })),
             components: parts.map((p, i) => ({
                 componentPartId: p.componentPartId,
                 componentCategoryId: p.componentCategoryId,
@@ -114,10 +177,10 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         try {
             if (build) await BuildService.update(build.id, input);
             else await BuildService.create(input);
-            toast.success(build ? 'Datamaskinen er oppdatert' : 'Datamaskinen er opprettet');
+            toast.success(build ? dict.admin.buildSaved : dict.admin.buildCreated);
             onSaved();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke lagre datamaskinen');
+            toast.error(err instanceof Error ? err.message : dict.admin.buildSaveFailed);
         } finally {
             setSaving(false);
         }
@@ -130,7 +193,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         <div className="space-y-6 rounded-2xl border border-gray-200 p-5">
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.category.label}</label>
                     <select
                         value={category}
                         onChange={e => setCategory(e.target.value)}
@@ -142,7 +205,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.availability.label}</label>
                     <select
                         value={availability}
                         onChange={e => setAvailability(e.target.value as Availability)}
@@ -152,16 +215,71 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                     </select>
                 </div>
 
-                <TextInput label="Pris (kr)" type="number" value={priceNok} onChange={e => setPriceNok(e.target.value)} />
-                <TextInput label="Byggedato" type="date" value={builtOn} onChange={e => setBuiltOn(e.target.value)} />
-                <TextInput label="Sortering" type="number" value={sortOrder.toString()} onChange={e => setSortOrder(Number(e.target.value) || 0)} />
+                <TextInput label={dict.admin.price} type="number" value={priceNok} onChange={e => setPriceNok(e.target.value)} />
+                <TextInput label={dict.builds.builtOn} type="date" value={builtOn} onChange={e => setBuiltOn(e.target.value)} />
+                <TextInput label={dict.admin.sortOrder} type="number" value={sortOrder.toString()} onChange={e => setSortOrder(Number(e.target.value) || 0)} />
 
                 <div className="flex items-end">
-                    <Toggle checked={published} onChange={setPublished} label="Publisert" />
+                    <Toggle checked={published} onChange={setPublished} label={dict.admin.published} />
                 </div>
             </div>
 
-            <ImagePicker imageId={coverImageId} onChange={setCoverImageId} label="Forsidebilde" />
+            <div className="rounded-2xl border border-gray-200 p-4 space-y-3">
+                <div className="flex flex-wrap items-end gap-2">
+                    <div className="flex-1 min-w-[18rem]">
+                        <TextInput
+                            label={dict.admin.finnUrl}
+                            value={finnUrl}
+                            onChange={e => setFinnUrl(e.target.value)}
+                            placeholder="https://www.finn.no/recommerce/forsale/item/..."
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={importFromFinn}
+                        disabled={importing || finnUrl.trim() === ''}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 text-gray-700 font-medium px-4 py-2 text-sm hover:bg-gray-200 disabled:opacity-50"
+                    >
+                        <ArrowDownTrayIcon className="h-4 w-4" /> {importing ? dict.admin.importing : dict.admin.importFromFinn}
+                    </button>
+                </div>
+                <p className="text-xs text-gray-500">
+                    {dict.admin.finnHelp}
+                </p>
+            </div>
+
+            <ImagePicker imageId={coverImageId} onChange={setCoverImageId} label={dict.admin.coverImage} />
+
+            <div>
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-700">{dict.admin.gallery}</h3>
+                    <label className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 text-gray-700 font-medium px-3 py-1.5 text-xs hover:bg-gray-200 cursor-pointer">
+                        {uploading ? dict.admin.uploading : dict.admin.addImage}
+                        <input type="file" accept="image/*" multiple onChange={addImages} disabled={uploading} className="hidden" />
+                    </label>
+                </div>
+                {imageIds.length === 0 ? (
+                    <p className="text-sm text-gray-500">{dict.admin.noImages}</p>
+                ) : (
+                    <ul className="flex flex-wrap gap-3">
+                        {imageIds.map((id, index) => (
+                            <li key={id} className="relative">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={`${imageUrl(id)}?w=384`} alt="" className="h-24 w-32 rounded-lg border border-gray-200 object-cover" />
+                                <div className="mt-1 flex items-center justify-between gap-1">
+                                    <div className="flex gap-1">
+                                        <button type="button" onClick={() => moveImage(index, -1)} disabled={index === 0} className="rounded px-1.5 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-30">←</button>
+                                        <button type="button" onClick={() => moveImage(index, 1)} disabled={index === imageIds.length - 1} className="rounded px-1.5 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-30">→</button>
+                                    </div>
+                                    <button type="button" onClick={() => setImageIds(imageIds.filter(x => x !== id))} className="rounded p-1 text-red-500 hover:bg-red-50">
+                                        <TrashIcon className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
 
             <div className="space-y-4">
                 <LocaleTabs
@@ -170,12 +288,12 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                     filled={Object.fromEntries(LOCALES.map(l => [l, translations[l].title.trim() !== ''])) as Record<Locale, boolean>}
                 />
                 <TextInput
-                    label="Tittel"
+                    label={dict.admin.buildTitle}
                     value={translation.title}
                     onChange={e => patchTranslation(activeLocale, { title: e.target.value })}
                 />
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Kort beskrivelse</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{dict.admin.buildSummary}</label>
                     <textarea
                         rows={2}
                         value={translation.summary ?? ''}
@@ -185,12 +303,14 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Innhold på siden til datamaskinen</h3>
-                    <SectionsEditor
-                        sections={translation.sections as Section[]}
-                        onChange={sections => patchTranslation(activeLocale, { sections })}
-                        types={['text', 'image', 'feature', 'cta']}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{dict.admin.buildBody}</label>
+                    <textarea
+                        rows={8}
+                        value={translation.description ?? ''}
+                        onChange={e => patchTranslation(activeLocale, { description: e.target.value })}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
+                    <p className="mt-1 text-xs text-gray-500">{dict.admin.markdownHint}</p>
                 </div>
             </div>
 

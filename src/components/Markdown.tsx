@@ -2,8 +2,6 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 
-// Explicit classes rather than `prose`: the Tailwind typography plugin is not
-// installed, so without these the CSS reset renders headings as body text.
 const COMPONENTS: Components = {
     h1: props => <h2 className="text-lg font-semibold text-gray-900" {...props} />,
     h2: props => <h2 className="text-base font-semibold text-gray-900 pt-2" {...props} />,
