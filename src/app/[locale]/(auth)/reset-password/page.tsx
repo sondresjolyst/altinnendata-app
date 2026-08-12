@@ -11,7 +11,6 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
 export default function ResetPasswordPage() {
-    // useSearchParams opts the tree out of prerendering unless it sits under Suspense.
     return (
         <Suspense fallback={null}>
             <ResetPasswordForm />
@@ -23,8 +22,6 @@ function ResetPasswordForm() {
     const params = useSearchParams();
     const { locale, dict } = useDictionary();
 
-    // An invite or reset email links here with the address and code filled in,
-    // so the visitor lands straight on the "choose a password" step.
     const invitedEmail = params.get('email') ?? '';
     const invitedCode = params.get('code') ?? '';
 

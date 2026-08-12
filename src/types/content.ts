@@ -14,7 +14,6 @@ export interface HeroSection extends BaseSection {
     primaryHref: string;
     secondaryLabel: string;
     secondaryHref: string;
-    /** Uploaded image behind the hero. Null falls back to the bundled photo. */
     backgroundImageId: string | null;
 }
 
@@ -37,7 +36,6 @@ export interface FeedSection extends BaseSection {
     type: 'feed';
     heading: string;
     limit: number;
-    /** Which machines to pull in; 'all' leaves the filter off. */
     availability: FeedAvailability;
 }
 

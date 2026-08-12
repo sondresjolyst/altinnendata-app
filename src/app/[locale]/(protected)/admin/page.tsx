@@ -9,13 +9,13 @@ export default function AdminOverview() {
     const { locale, dict } = useDictionary();
 
     const cards = [
-        { href: '/admin/content', icon: Squares2X2Icon, title: dict.admin.content, text: 'Sett sammen forsiden av seksjoner, per språk.' },
-        { href: '/admin/builds', icon: CpuChipIcon, title: dict.admin.builds, text: 'Opprett, rediger og publiser datamaskiner.' },
-        { href: '/admin/components', icon: WrenchScrewdriverIcon, title: dict.admin.components, text: 'Kategorier, produsenter og deler.' },
-        { href: '/admin/legal', icon: ScaleIcon, title: dict.admin.legal, text: 'Vilkår, personvern og informasjonskapsler.' },
-        { href: '/admin/stats', icon: PresentationChartLineIcon, title: dict.admin.stats, text: 'Totaler, trender, lagring og e-post.' },
-        { href: '/admin/users', icon: UsersIcon, title: dict.admin.users, text: 'Inviter brukere og styr roller.' },
-        { href: '/admin/settings', icon: Cog6ToothIcon, title: dict.admin.settings, text: 'Firmaopplysninger og kontaktmottaker.' },
+        { href: '/admin/content', icon: Squares2X2Icon, title: dict.admin.content, text: dict.admin.cardContent },
+        { href: '/admin/builds', icon: CpuChipIcon, title: dict.admin.builds, text: dict.admin.cardBuilds },
+        { href: '/admin/components', icon: WrenchScrewdriverIcon, title: dict.admin.components, text: dict.admin.cardComponents },
+        { href: '/admin/legal', icon: ScaleIcon, title: dict.admin.legal, text: dict.admin.cardLegal },
+        { href: '/admin/stats', icon: PresentationChartLineIcon, title: dict.admin.stats, text: dict.admin.cardStats },
+        { href: '/admin/users', icon: UsersIcon, title: dict.admin.users, text: dict.admin.cardUsers },
+        { href: '/admin/settings', icon: Cog6ToothIcon, title: dict.admin.settings, text: dict.admin.cardSettings },
     ];
 
     return (

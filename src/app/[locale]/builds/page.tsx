@@ -9,7 +9,6 @@ import { getDictionary } from '@/i18n/dictionaries';
 
 export const revalidate = 60;
 
-// Same order as the front page: what you can buy first, sold ones as reference.
 const GROUPS: { key: Availability; dictKey: 'available' | 'reserved' | 'sold' }[] = [
     { key: 'Available', dictKey: 'available' },
     { key: 'Reserved', dictKey: 'reserved' },

@@ -6,8 +6,10 @@ import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import BuildService, { BuildAdmin, BuildSummary } from '@/services/buildService';
 import BuildForm from './BuildForm';
 import { DEFAULT_LOCALE } from '@/i18n/config';
+import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function AdminBuildsPage() {
+    const { dict } = useDictionary();
     const [builds, setBuilds] = useState<BuildSummary[]>([]);
     const [editing, setEditing] = useState<BuildAdmin | null>(null);
     const [creating, setCreating] = useState(false);
@@ -17,7 +19,7 @@ export default function AdminBuildsPage() {
         setLoading(true);
         BuildService.list(DEFAULT_LOCALE, true)
             .then(setBuilds)
-            .catch(err => toast.error(err instanceof Error ? err.message : 'Kunne ikke laste datamaskiner'))
+            .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.buildsLoadFailed))
             .finally(() => setLoading(false));
     }, []);
 
@@ -28,18 +30,18 @@ export default function AdminBuildsPage() {
             setEditing(await BuildService.getForEdit(id));
             setCreating(false);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke laste datamaskinen');
+            toast.error(err instanceof Error ? err.message : dict.admin.buildLoadFailed);
         }
     };
 
     const remove = async (build: BuildSummary) => {
-        if (!confirm(`Slette «${build.title}»?`)) return;
+        if (!confirm(dict.admin.confirmDeleteBuild.replace('{title}', build.title))) return;
         try {
             await BuildService.remove(build.id);
-            toast.success('Datamaskinen er slettet');
+            toast.success(dict.admin.buildDeleted);
             load();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Kunne ikke slette datamaskinen');
+            toast.error(err instanceof Error ? err.message : dict.admin.buildDeleteFailed);
         }
     };
 
@@ -60,19 +62,19 @@ export default function AdminBuildsPage() {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">Datamaskiner</h2>
+                <h2 className="font-bold text-gray-900">{dict.admin.builds}</h2>
                 <button
                     onClick={() => { setCreating(true); setEditing(null); }}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground font-semibold px-4 py-2 text-sm hover:brightness-95 transition"
                 >
-                    <PlusIcon className="h-4 w-4" /> Ny datamaskin
+                    <PlusIcon className="h-4 w-4" /> {dict.admin.newBuild}
                 </button>
             </div>
 
             {loading ? (
-                <p className="text-gray-500">Laster…</p>
+                <p className="text-gray-500">{dict.common.loading}</p>
             ) : builds.length === 0 ? (
-                <p className="text-gray-500">Ingen datamaskiner ennå.</p>
+                <p className="text-gray-500">{dict.admin.noBuilds}</p>
             ) : (
                 <ul className="divide-y divide-gray-200 rounded-2xl border border-gray-200">
                     {builds.map(build => (
@@ -82,13 +84,13 @@ export default function AdminBuildsPage() {
                                 <p className="text-xs text-gray-500">
                                     /{build.slug} · {build.availability}
                                     {build.priceNok != null && ` · ${build.priceNok} kr`}
-                                    {!build.published && ' · utkast'}
+                                    {!build.published && ` · ${dict.admin.draftTag}`}
                                 </p>
                             </div>
-                            <button onClick={() => edit(build.id)} title="Rediger" className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100">
+                            <button onClick={() => edit(build.id)} title={dict.common.edit} className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100">
                                 <PencilIcon className="h-4 w-4" />
                             </button>
-                            <button onClick={() => remove(build)} title="Slett" className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50">
+                            <button onClick={() => remove(build)} title={dict.common.delete} className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50">
                                 <TrashIcon className="h-4 w-4" />
                             </button>
                         </li>
