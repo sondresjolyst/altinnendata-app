@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.2.0...v1.3.0) (2026-08-12)
+
+
+### Features
+
+* tailor the contact form to a specific machine ([#16](https://github.com/sondresjolyst/altinnendata-app/issues/16)) ([9c975a6](https://github.com/sondresjolyst/altinnendata-app/commit/9c975a6043cd34243893d3495c9da7b140c3f1cf))
+
+
+### Bug Fixes
+
+* keep build pages inside the screen on phones ([#17](https://github.com/sondresjolyst/altinnendata-app/issues/17)) ([9755d0c](https://github.com/sondresjolyst/altinnendata-app/commit/9755d0c47b5046e333545c3251af8f299838fde5))
+
 ## [1.2.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.1.0...v1.2.0) (2026-08-12)
 
 
