@@ -16,7 +16,7 @@ export default function BuildGallery({ imageIds, alt }: { imageIds: string[]; al
     const step = (delta: number) => setActive(current => (current + delta + imageIds.length) % imageIds.length);
 
     return (
-        <div className="space-y-3">
+        <div className="min-w-0 space-y-3">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-gray-200 bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -53,7 +53,7 @@ export default function BuildGallery({ imageIds, alt }: { imageIds: string[]; al
             </div>
 
             {imageIds.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                <div className="flex w-full min-w-0 gap-2 overflow-x-auto no-scrollbar">
                     {imageIds.map((id, index) => (
                         <button
                             key={id}

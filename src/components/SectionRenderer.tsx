@@ -35,22 +35,22 @@ export default function SectionRenderer({ section, locale }: { section: Section;
         case 'hero': {
             const background = section.backgroundImageId ? imageUrl(section.backgroundImageId) : '/hero.jpg';
             return (
-                <section className="relative isolate overflow-hidden bg-gray-900 flex items-center min-h-[420px] aspect-[4/5] sm:aspect-[3/2] lg:aspect-[12/5] xl:aspect-[16/5]">
+                <section className="relative isolate overflow-hidden bg-gray-900 flex items-center aspect-square sm:aspect-[3/2] sm:min-h-[420px] lg:aspect-[12/5] xl:aspect-[16/5]">
                     <Img
                         src={background}
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_12%]"
+                        className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_20%] sm:object-[50%_12%]"
                     />
-                    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
-                    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-                        <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white max-w-3xl whitespace-pre-line drop-shadow">
+                    <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/65 to-black/45 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/60 sm:to-black/30" />
+                    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-20">
+                        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white max-w-3xl whitespace-pre-line drop-shadow">
                             {section.heading}
                         </h1>
                         {section.subheading && (
-                            <p className="mt-5 text-lg text-white/85 max-w-xl whitespace-pre-line">{section.subheading}</p>
+                            <p className="mt-4 sm:mt-5 text-base sm:text-lg text-white/85 max-w-xl whitespace-pre-line">{section.subheading}</p>
                         )}
-                        <div className="mt-8 flex flex-wrap gap-3">
+                        <div className="mt-6 sm:mt-8 flex flex-wrap gap-3">
                             {section.primaryLabel && (
                                 <SmartLink href={href(section.primaryHref || '#')} className="rounded-lg bg-primary text-primary-foreground font-semibold px-6 py-3 hover:brightness-95 transition">
                                     {section.primaryLabel}

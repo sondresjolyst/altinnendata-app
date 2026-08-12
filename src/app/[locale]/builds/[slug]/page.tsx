@@ -63,12 +63,12 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
             <div className="mt-6 grid gap-10 lg:grid-cols-2">
                 <BuildGallery imageIds={gallery} alt={build.title} />
 
-                <div>
+                <div className="min-w-0">
                     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusTone}`}>
                         {dict.builds.availability[status]}
                     </span>
 
-                    <h1 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight text-gray-900">{build.title}</h1>
+                    <h1 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight text-gray-900 break-words">{build.title}</h1>
 
                     {build.summary && <p className="mt-3 text-gray-600">{build.summary}</p>}
 
@@ -120,21 +120,23 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                     <summary className="cursor-pointer list-none px-5 py-4 text-lg font-bold text-gray-900 marker:content-none">
                         {dict.builds.specs}
                     </summary>
-                    <table className="w-full border-t border-gray-200 text-sm">
-                        <tbody className="divide-y divide-gray-200">
-                            {build.components.map(component => (
-                                <tr key={component.id}>
-                                    <th scope="row" className="w-48 px-5 py-2.5 text-left align-top font-medium text-gray-500">
-                                        {component.categoryName ?? component.categoryKey ?? ''}
-                                    </th>
-                                    <td className="px-5 py-2.5 text-gray-900">
-                                        {component.name}
-                                        {component.details && <span className="text-gray-500"> — {component.details}</span>}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-t border-gray-200 text-sm">
+                            <tbody className="divide-y divide-gray-200">
+                                {build.components.map(component => (
+                                    <tr key={component.id}>
+                                        <th scope="row" className="w-32 px-4 py-2.5 text-left align-top font-medium text-gray-500 sm:w-48 sm:px-5">
+                                            {component.categoryName ?? component.categoryKey ?? ''}
+                                        </th>
+                                        <td className="px-4 py-2.5 text-gray-900 sm:px-5">
+                                            {component.name}
+                                            {component.details && <span className="text-gray-500"> — {component.details}</span>}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </details>
             )}
 
