@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.1.0...v1.2.0) (2026-08-12)
+
+
+### Features
+
+* show every machine on the same product page ([#14](https://github.com/sondresjolyst/altinnendata-app/issues/14)) ([6becec7](https://github.com/sondresjolyst/altinnendata-app/commit/6becec7488f002a2d4a474f95b9915ae95119c1d))
+
 ## [1.1.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.0.1...v1.1.0) (2026-08-11)
 
 
