@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.3.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.3.0...v1.3.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* sync react-dom with react, group dependabot updates ([#27](https://github.com/sondresjolyst/altinnendata-app/issues/27)) ([5cac39d](https://github.com/sondresjolyst/altinnendata-app/commit/5cac39d1e782ac2bf4c3f2a1ef5582e8f8fed64e))
+
+
+### Dependencies
+
+* **github-actions:** bump `equinor/ops-actions/.github/workflows/docker.yml` from 9.39.5 to 9.39.6 ([#19](https://github.com/sondresjolyst/altinnendata-app/issues/19)) ([200e910](https://github.com/sondresjolyst/altinnendata-app/commit/200e9104b2a59a67d87192a2f456f5a6d539c736))
+* **github-actions:** bump `equinor/ops-actions/.github/workflows/release-please-manifest.yml` from 9.39.5 to 9.39.6 ([#21](https://github.com/sondresjolyst/altinnendata-app/issues/21)) ([3157239](https://github.com/sondresjolyst/altinnendata-app/commit/315723994ca15bc2a442124ce637af3119c61bf2))
+* **npm:** bump `@types/node` from 26.1.2 to 26.2.0 ([#24](https://github.com/sondresjolyst/altinnendata-app/issues/24)) ([a51d42a](https://github.com/sondresjolyst/altinnendata-app/commit/a51d42af3060f9cf037917e3083d1d801cfa74c3))
+* **npm:** bump `axios` from 1.18.1 to 1.19.0 ([#20](https://github.com/sondresjolyst/altinnendata-app/issues/20)) ([7c56819](https://github.com/sondresjolyst/altinnendata-app/commit/7c5681965a9d4eedb8cd647f5db41cb612fee1e8))
+* **npm:** bump `eslint` from 10.8.0 to 10.8.1 ([#25](https://github.com/sondresjolyst/altinnendata-app/issues/25)) ([a7420d2](https://github.com/sondresjolyst/altinnendata-app/commit/a7420d29e9d82148b2f5357df540966ec5f81dd1))
+* **npm:** bump `postcss` from 8.5.25 to 8.5.26 ([#22](https://github.com/sondresjolyst/altinnendata-app/issues/22)) ([f79c871](https://github.com/sondresjolyst/altinnendata-app/commit/f79c87132b6f0b8727ce63ee5c73ff1c2d07a36a))
+* **npm:** bump react and @types/react ([#23](https://github.com/sondresjolyst/altinnendata-app/issues/23)) ([a8ae676](https://github.com/sondresjolyst/altinnendata-app/commit/a8ae6768a754c911cd7900c290db804dbdbe63e5))
+
 ## [1.3.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.2.0...v1.3.0) (2026-08-12)
 
 
