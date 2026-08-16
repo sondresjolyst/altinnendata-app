@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.3.1...v1.3.2) (2026-08-16)
+
+
+### Dependencies
+
+* **npm:** bump @types/react-dom from 19.2.3 to 19.2.4 in the react group ([#28](https://github.com/sondresjolyst/altinnendata-app/issues/28)) ([0db28b4](https://github.com/sondresjolyst/altinnendata-app/commit/0db28b4d6af3195ca878d26f3fda8aa8fb391264))
+* **npm:** bump `sonner` from 2.0.7 to 2.0.8 ([#30](https://github.com/sondresjolyst/altinnendata-app/issues/30)) ([94ea750](https://github.com/sondresjolyst/altinnendata-app/commit/94ea750e4961c6eaa196f5b7e2a587b4c9d4cf4e))
+* **npm:** bump `typescript` from 6.0.3 to 7.0.2 ([#31](https://github.com/sondresjolyst/altinnendata-app/issues/31)) ([36ae3cd](https://github.com/sondresjolyst/altinnendata-app/commit/36ae3cd98b705828588f15c54606c9891c1dd5c9))
+* **npm:** bump the testing group with 4 updates ([#29](https://github.com/sondresjolyst/altinnendata-app/issues/29)) ([4dd30c3](https://github.com/sondresjolyst/altinnendata-app/commit/4dd30c32e8547e388a43cb29c5f904ed1381c0a4))
+
 ## [1.3.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.3.0...v1.3.1) (2026-08-16)
 
 
