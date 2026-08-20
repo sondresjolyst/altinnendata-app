@@ -4,6 +4,9 @@ import { DEFAULT_LOCALE, LOCALES, LOCALE_TAGS, type Locale } from '@/i18n/config
 import { getDictionary } from '@/i18n/dictionaries';
 import { localePath } from './urls';
 
+/** Dimensions of the generated share image, shared with the route that renders it. */
+export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 } as const;
+
 /** Robots directive for pages that exist for signed-in users only. */
 export const NOINDEX: Metadata['robots'] = { index: false, follow: false };
 
@@ -14,7 +17,7 @@ export interface PageMetadataInput {
     /** Page title, without the site-name suffix — the root layout's template appends that. */
     title?: string;
     description?: string;
-    /** Absolute image URLs for the share preview. Falls back to the site default. */
+    /** Image URLs for the share preview. Falls back to the generated default for the locale. */
     images?: string[];
 }
 
@@ -32,6 +35,20 @@ function languageAlternates(path: string): Record<string, string> {
 }
 
 /** Canonical, hreflang set and Open Graph for one public page, from its locale and path. */
+/**
+ * The default share preview for a locale. Explicit rather than Next's `opengraph-image` file
+ * convention, which a page's own `openGraph` block replaces — leaving that page with no image.
+ */
+function defaultShareImage(locale: Locale) {
+    const dict = getDictionary(locale);
+    return {
+        url: localePath(locale, '/og'),
+        ...SHARE_IMAGE_SIZE,
+        type: 'image/png',
+        alt: `${COMPANY.name} — ${dict.meta.tagline}`,
+    };
+}
+
 export function pageMetadata({ locale, path = '', title, description, images }: PageMetadataInput): Metadata {
     const canonical = localePath(locale, path);
 
@@ -49,7 +66,7 @@ export function pageMetadata({ locale, path = '', title, description, images }: 
             url: canonical,
             ...(title ? { title } : {}),
             ...(description ? { description } : {}),
-            ...(images ? { images } : {}),
+            images: images ?? [defaultShareImage(locale)],
         },
     };
 }
