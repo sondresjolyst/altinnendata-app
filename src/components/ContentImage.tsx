@@ -14,6 +14,12 @@ export interface ContentImageProps {
     fallbackSrc?: string;
     className?: string;
     /**
+     * Intrinsic dimensions, so the browser can reserve the image's space before it loads.
+     * Only worth passing where the layout does not already fix the aspect ratio.
+     */
+    width?: number;
+    height?: number;
+    /**
      * Set on the one image visible without scrolling, usually the hero: loaded eagerly and at
      * high priority. Everything else waits until it nears the viewport.
      */
@@ -31,6 +37,8 @@ export default function ContentImage({
     sizes,
     fallbackSrc,
     className,
+    width,
+    height,
     priority = false,
     'aria-hidden': ariaHidden,
 }: ContentImageProps) {
@@ -45,6 +53,8 @@ export default function ContentImage({
             sizes={imageId != null ? sizes : undefined}
             alt={alt}
             className={className}
+            width={width}
+            height={height}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : undefined}
             decoding={priority ? 'sync' : 'async'}

@@ -7,7 +7,10 @@ export interface Settings {
     companyLegalName: string;
     orgNumber: string;
     vatRegistered: boolean;
-    address: string;
+    streetAddress: string;
+    postalCode: string;
+    addressLocality: string;
+    addressRegion: string;
     publicEmail: string;
     publicPhone: string;
 }

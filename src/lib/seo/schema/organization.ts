@@ -5,6 +5,22 @@ import { absoluteUrl } from '../urls';
 import { ref, SCHEMA_IDS, type SchemaNode } from './graph';
 
 /**
+ * The address as separate fields. A search engine matches a local listing on a postcode and
+ * place name it can read; parts the admin has not filled in are left out, and the street
+ * falls back to the one-line form so the address is never empty.
+ */
+function postalAddress(company: CompanyInfo) {
+    return {
+        '@type': 'PostalAddress',
+        streetAddress: company.streetAddress || company.address,
+        ...(company.postalCode ? { postalCode: company.postalCode } : {}),
+        ...(company.addressLocality ? { addressLocality: company.addressLocality } : {}),
+        ...(company.addressRegion ? { addressRegion: company.addressRegion } : {}),
+        addressCountry: 'NO',
+    };
+}
+
+/**
  * The business itself, under a stable `@id` that page-scoped nodes point at.
  *
  * Fields the admin has not filled in are omitted: in structured data an empty or invented
@@ -21,11 +37,7 @@ export function organizationNode(company: CompanyInfo): SchemaNode {
         logo: absoluteUrl('/logo.png'),
         telephone: company.phone,
         email: company.email,
-        address: {
-            '@type': 'PostalAddress',
-            streetAddress: company.address,
-            addressCountry: 'NO',
-        },
+        address: postalAddress(company),
         areaServed: 'NO',
         ...(company.vatRegistered && company.orgNumber
             ? { vatID: `NO${company.orgNumber.replace(/\s/g, '')}MVA` }

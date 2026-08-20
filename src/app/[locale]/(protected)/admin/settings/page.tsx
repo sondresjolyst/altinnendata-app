@@ -14,7 +14,10 @@ const EMPTY: Settings = {
     companyLegalName: '',
     orgNumber: '',
     vatRegistered: false,
-    address: '',
+    streetAddress: '',
+    postalCode: '',
+    addressLocality: '',
+    addressRegion: '',
     publicEmail: '',
     publicPhone: '',
 };
@@ -87,12 +90,34 @@ export default function AdminSettingsPage() {
                 <p className="text-xs text-gray-500">{dict.admin.vatHint}</p>
 
                 <TextInput
-                    label={dict.admin.address}
-                    name="address"
-                    value={settings.address}
-                    onChange={e => patch({ address: e.target.value })}
+                    label={dict.admin.streetAddress}
+                    name="streetAddress"
+                    value={settings.streetAddress}
+                    onChange={e => patch({ streetAddress: e.target.value })}
                     required
                 />
+                <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
+                    <TextInput
+                        label={dict.admin.postalCode}
+                        name="postalCode"
+                        inputMode="numeric"
+                        value={settings.postalCode}
+                        onChange={e => patch({ postalCode: e.target.value })}
+                    />
+                    <TextInput
+                        label={dict.admin.addressLocality}
+                        name="addressLocality"
+                        value={settings.addressLocality}
+                        onChange={e => patch({ addressLocality: e.target.value })}
+                    />
+                </div>
+                <TextInput
+                    label={dict.admin.addressRegion}
+                    name="addressRegion"
+                    value={settings.addressRegion}
+                    onChange={e => patch({ addressRegion: e.target.value })}
+                />
+                <p className="text-xs text-gray-500">{dict.admin.addressHint}</p>
                 <TextInput
                     label={dict.admin.publicEmail}
                     name="publicEmail"
