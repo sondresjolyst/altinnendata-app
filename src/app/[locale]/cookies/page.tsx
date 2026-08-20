@@ -4,8 +4,9 @@ import LegalPageView from '@/components/LegalPageView';
 import { LegalPage } from '@/services/legalService';
 import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
-import { isLocale, LOCALES, LOCALE_TAGS } from '@/i18n/config';
+import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
+import { pageMetadata } from '@/lib/seo/metadata';
 
 export const revalidate = 3600;
 
@@ -13,13 +14,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const { locale } = await params;
     if (!isLocale(locale)) return {};
 
-    return {
+    return pageMetadata({
+        locale,
+        path: '/cookies',
         title: getDictionary(locale).footer.cookies,
-        alternates: {
-            canonical: `/${locale}/cookies`,
-            languages: Object.fromEntries(LOCALES.map(l => [LOCALE_TAGS[l], `/${l}/cookies`])),
-        },
-    };
+    });
 }
 
 export default async function CookiesPage({ params }: { params: Promise<{ locale: string }> }) {

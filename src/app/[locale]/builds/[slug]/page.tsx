@@ -7,8 +7,9 @@ import { BuildDetail, coverImageSrc } from '@/services/buildService';
 import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { formatDate, formatPrice } from '@/lib/format';
-import { isLocale, localeHref, LOCALES, LOCALE_TAGS, type Locale } from '@/i18n/config';
+import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
+import { pageMetadata } from '@/lib/seo/metadata';
 
 export const revalidate = 60;
 
@@ -22,19 +23,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const build = await fetchBuild(slug, locale);
     if (!build) return {};
 
-    return {
+    return pageMetadata({
+        locale,
+        path: `/builds/${slug}`,
         title: build.title,
         description: build.summary ?? undefined,
-        alternates: {
-            canonical: `/${locale}/builds/${slug}`,
-            languages: Object.fromEntries(LOCALES.map(l => [LOCALE_TAGS[l], `/${l}/builds/${slug}`])),
-        },
-        openGraph: {
-            title: build.title,
-            description: build.summary ?? undefined,
-            images: build.coverImageId ? [coverImageSrc(build)!] : undefined,
-        },
-    };
+        images: build.coverImageId ? [coverImageSrc(build)!] : undefined,
+    });
 }
 
 export default async function BuildPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {

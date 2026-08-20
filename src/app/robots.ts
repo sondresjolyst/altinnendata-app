@@ -1,14 +1,21 @@
 import { MetadataRoute } from 'next';
 import { COMPANY } from '@/lib/company';
+import { LOCALES } from '@/i18n/config';
+import { PRIVATE_PATHS, PRIVATE_ROOT_PATHS } from '@/lib/seo/routes';
+import { absoluteUrl, localePath } from '@/lib/seo/urls';
 
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/admin', '/profile', '/login', '/register', '/reset-password', '/api/'],
+            // Every route is under a locale segment, so a bare `/admin` would match nothing.
+            disallow: [
+                ...LOCALES.flatMap(locale => PRIVATE_PATHS.map(path => localePath(locale, path))),
+                ...PRIVATE_ROOT_PATHS,
+            ],
         },
-        sitemap: `${COMPANY.url}/sitemap.xml`,
+        sitemap: absoluteUrl('/sitemap.xml'),
         host: COMPANY.url,
     };
 }

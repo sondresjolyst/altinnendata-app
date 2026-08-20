@@ -8,7 +8,9 @@ export default function proxy(req: NextRequest) {
 
     const url = req.nextUrl.clone();
     url.pathname = `/${DEFAULT_LOCALE}${pathname === '/' ? '' : pathname}`;
-    return NextResponse.redirect(url);
+    // 308 rather than the default 307: the target never varies, so search engines should
+    // treat the locale-prefixed URL as canonical and pass ranking signals to it.
+    return NextResponse.redirect(url, 308);
 }
 
 // Keep in sync with LOCALES in src/i18n/config.ts — Turbopack requires a static matcher.

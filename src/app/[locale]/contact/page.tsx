@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ContactForm from '@/components/ContactForm';
 import { COMPANY } from '@/lib/company';
-import { isLocale, LOCALES, LOCALE_TAGS, Locale } from '@/i18n/config';
+import { isLocale, Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
+import { pageMetadata } from '@/lib/seo/metadata';
 import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { BuildDetail } from '@/services/buildService';
@@ -13,14 +14,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     if (!isLocale(locale)) return {};
     const dict = getDictionary(locale);
 
-    return {
+    return pageMetadata({
+        locale,
+        path: '/contact',
         title: dict.contact.title,
         description: dict.contact.intro,
-        alternates: {
-            canonical: `/${locale}/contact`,
-            languages: Object.fromEntries(LOCALES.map(l => [LOCALE_TAGS[l], `/${l}/contact`])),
-        },
-    };
+    });
 }
 
 async function findBuild(slug: string | string[] | undefined, locale: Locale) {
