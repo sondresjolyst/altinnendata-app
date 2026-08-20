@@ -10,6 +10,10 @@ import { formatDate, formatPrice } from '@/lib/format';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata } from '@/lib/seo/metadata';
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbNode } from '@/lib/seo/schema/navigation';
+import { productNode } from '@/lib/seo/schema/product';
+import { absoluteLocaleUrl, localePath } from '@/lib/seo/urls';
 
 export const revalidate = 60;
 
@@ -48,9 +52,18 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
     }[status];
 
     const gallery = build.imageIds;
+    const pageUrl = absoluteLocaleUrl(locale, `/builds/${slug}`);
 
     return (
         <article className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+            <JsonLd nodes={[
+                productNode(build, locale, pageUrl),
+                breadcrumbNode([
+                    { name: dict.nav.home, path: localePath(locale) },
+                    { name: dict.builds.title, path: localePath(locale, '/builds') },
+                    { name: build.title },
+                ], pageUrl),
+            ]} />
             <Link href={localeHref(locale, '/builds')} className="text-sm font-semibold text-gray-500 hover:text-gray-900">
                 ← {dict.builds.title}
             </Link>

@@ -9,6 +9,9 @@ import { publicGet } from "@/lib/publicApi";
 import { Branding } from "@/services/brandingService";
 import { LOCALES, LOCALE_TAGS, isLocale, type Locale } from "@/i18n/config";
 import { siteMetadata } from "@/lib/seo/metadata";
+import JsonLd from "@/components/JsonLd";
+import { organizationNode, webSiteNode } from "@/lib/seo/schema/organization";
+import { getCompanyInfo } from "@/lib/companyInfo";
 import { DictionaryProvider } from "@/i18n/DictionaryProvider";
 
 export function generateStaticParams() {
@@ -31,11 +34,16 @@ export default async function LocaleLayout({
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
 
-    const branding = await publicGet<Branding>("/branding") ?? {};
+    const [branding, company] = await Promise.all([
+        publicGet<Branding>("/branding").then(value => value ?? {}),
+        getCompanyInfo(),
+    ]);
 
     return (
         <html lang={LOCALE_TAGS[locale as Locale]}>
             <Script src="/register-sw.js" />
+            {/* Business and site identity, on every page so page-scoped nodes can reference them. */}
+            <JsonLd nodes={[organizationNode(company), webSiteNode(locale)]} />
             <body className="min-h-screen flex flex-col bg-background text-foreground">
                 <DictionaryProvider locale={locale}>
                     <Providers initialBranding={branding}>

@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import SectionRenderer from '@/components/SectionRenderer';
-import StructuredData from '@/components/StructuredData';
 import { Section } from '@/types/content';
 import { defaultSections } from '@/lib/defaultSections';
 import { publicGet } from '@/lib/publicApi';
@@ -18,7 +17,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
     return (
         <div>
-            <StructuredData />
             {sections.map(section => <SectionRenderer key={section.id} section={section} locale={locale} />)}
         </div>
     );
