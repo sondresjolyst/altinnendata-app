@@ -33,7 +33,14 @@ describe('pageMetadata', () => {
         const meta = pageMetadata({ locale: 'no' });
         expect(meta.title).toBeUndefined();
         expect(meta.description).toBeUndefined();
-        expect(meta.openGraph).not.toHaveProperty('images');
+    });
+
+    it('gives every page a share image, localised, unless it supplies its own', () => {
+        const images = pageMetadata({ locale: 'en', path: '/contact' }).openGraph?.images as Array<{ url: string }>;
+        expect(images[0].url).toBe('/en/og');
+
+        const own = pageMetadata({ locale: 'no', path: '/builds/x', images: ['https://img.example/cover'] });
+        expect(own.openGraph?.images).toEqual(['https://img.example/cover']);
     });
 });
 
