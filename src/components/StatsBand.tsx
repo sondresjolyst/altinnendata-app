@@ -1,4 +1,4 @@
-import { publicGet } from '@/lib/publicApi';
+import { publicGetOptional } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { BuildSummary } from '@/services/buildService';
 import { CategoryTree } from '@/services/componentService';
@@ -10,10 +10,10 @@ export default async function StatsBand({ section, locale }: { section: StatsSec
     const needsParts = section.items.some(i => i.source === 'parts');
 
     const builds = needsBuilds
-        ? await publicGet<BuildSummary[]>(`/builds?locale=${locale}`, { tags: [REVALIDATE_TARGETS.builds] })
+        ? await publicGetOptional<BuildSummary[]>(`/builds?locale=${locale}`, { tags: [REVALIDATE_TARGETS.builds] })
         : null;
     const tree = needsParts
-        ? await publicGet<CategoryTree[]>(`/components/tree?locale=${locale}`)
+        ? await publicGetOptional<CategoryTree[]>(`/components/tree?locale=${locale}`)
         : null;
 
     const partCount = tree?.reduce((total, category) => total + category.parts.length, 0) ?? null;

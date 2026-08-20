@@ -1,6 +1,6 @@
 import axiosInstance from './axiosInstance';
 import { request } from '@/lib/apiRequest';
-import { publicGet } from '@/lib/publicApi';
+import { publicGetOptional } from '@/lib/publicApi';
 
 export interface UploadedImage {
     id: string;
@@ -35,7 +35,7 @@ export async function fetchImageDimensions(ids: readonly (string | null)[], tags
     const wanted = [...new Set(ids.filter((id): id is string => id != null))];
     if (wanted.length === 0) return {};
 
-    const measured = await publicGet<ImageDimensionsResponse[]>(
+    const measured = await publicGetOptional<ImageDimensionsResponse[]>(
         `/content-images/dimensions?ids=${wanted.map(encodeURIComponent).join(',')}`,
         { tags },
     );

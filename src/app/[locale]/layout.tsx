@@ -5,7 +5,7 @@ import "../globals.css";
 import Providers from "../providers";
 import Navbar from "./navbar";
 import Footer from "./footer";
-import { publicGet } from "@/lib/publicApi";
+import { publicGetOptional } from "@/lib/publicApi";
 import { Branding } from "@/services/brandingService";
 import { LOCALES, LOCALE_TAGS, isLocale, type Locale } from "@/i18n/config";
 import { siteMetadata } from "@/lib/seo/metadata";
@@ -35,7 +35,7 @@ export default async function LocaleLayout({
     if (!isLocale(locale)) notFound();
 
     const [branding, company] = await Promise.all([
-        publicGet<Branding>("/branding").then(value => value ?? {}),
+        publicGetOptional<Branding>("/branding").then(value => value ?? {}),
         getCompanyInfo(),
     ]);
 
