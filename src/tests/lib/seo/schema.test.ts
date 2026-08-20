@@ -12,6 +12,10 @@ const company: CompanyInfo = {
     orgNumber: '',
     vatRegistered: false,
     address: 'Mårvegen 21a, 4347 Lye',
+    streetAddress: 'Mårvegen 21a',
+    postalCode: '4347',
+    addressLocality: 'Lye',
+    addressRegion: 'Rogaland',
     email: 'post@example.com',
     phone: '+47 473 88 759',
 };
@@ -58,6 +62,36 @@ describe('organization node', () => {
     it('emits a VAT id only once registered', () => {
         const node = organizationNode({ ...company, orgNumber: '123 456 789', vatRegistered: true });
         expect(node.vatID).toBe('NO123456789MVA');
+    });
+
+    it('emits the address as separate fields, which is what a listing is matched on', () => {
+        expect(organizationNode(company).address).toEqual({
+            '@type': 'PostalAddress',
+            streetAddress: 'Mårvegen 21a',
+            postalCode: '4347',
+            addressLocality: 'Lye',
+            addressRegion: 'Rogaland',
+            addressCountry: 'NO',
+        });
+    });
+
+    it('omits address parts an admin has not filled in, rather than guessing them', () => {
+        const partial = { ...company, postalCode: '', addressLocality: '', addressRegion: '' };
+        expect(organizationNode(partial).address).toEqual({
+            '@type': 'PostalAddress',
+            streetAddress: 'Mårvegen 21a',
+            addressCountry: 'NO',
+        });
+    });
+
+    it('falls back to the one-line address when the API has no parts to give', () => {
+        // The API that predates the structured fields answers with the one line only.
+        const oneLine = { ...company, streetAddress: '', postalCode: '', addressLocality: '', addressRegion: '' };
+        expect(organizationNode(oneLine).address).toEqual({
+            '@type': 'PostalAddress',
+            streetAddress: 'Mårvegen 21a, 4347 Lye',
+            addressCountry: 'NO',
+        });
     });
 
     it('is referenced by the site node rather than repeated inside it', () => {

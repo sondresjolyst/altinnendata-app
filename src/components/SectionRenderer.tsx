@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import Markdown from '@/components/Markdown';
 import ContentImage from '@/components/ContentImage';
+import type { ImageDimensionsMap } from '@/services/imageService';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { Section } from '@/types/content';
 import FeaturedBuilds from './FeaturedBuilds';
@@ -20,7 +21,19 @@ function ScrimText({ text, big }: { text: string; big?: boolean }) {
     );
 }
 
-export default function SectionRenderer({ section, locale }: { section: Section; locale: Locale }) {
+export default function SectionRenderer({
+    section,
+    locale,
+    imageDimensions = {},
+}: {
+    section: Section;
+    locale: Locale;
+    /**
+     * Intrinsic dimensions by image id. Only the layouts that let an image keep its own aspect
+     * ratio need them; the rest sit in a fixed-ratio box and cannot shift.
+     */
+    imageDimensions?: ImageDimensionsMap;
+}) {
     if (!section.visible) return null;
 
     const dict = getDictionary(locale);
@@ -138,6 +151,7 @@ export default function SectionRenderer({ section, locale }: { section: Section;
         case 'image': {
             if (section.imageId == null) return null;
             const layout = section.layout ?? 'standard';
+            const intrinsic = imageDimensions[section.imageId];
 
             if (layout === 'full') {
                 return (
@@ -175,7 +189,9 @@ export default function SectionRenderer({ section, locale }: { section: Section;
                                 imageId={section.imageId}
                                 alt={section.alt}
                                 sizes="(max-width: 640px) 100vw, 640px"
-                                className={`w-full rounded-2xl ${layout === 'right' ? 'sm:order-2' : ''}`}
+                                width={intrinsic?.width}
+                                height={intrinsic?.height}
+                                className={`w-full h-auto rounded-2xl ${layout === 'right' ? 'sm:order-2' : ''}`}
                             />
                             {section.text && (
                                 <p className="text-gray-700 leading-relaxed whitespace-pre-line">{section.text}</p>
@@ -188,7 +204,14 @@ export default function SectionRenderer({ section, locale }: { section: Section;
             return (
                 <section className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
                     <figure>
-                        <ContentImage imageId={section.imageId} alt={section.alt} sizes="(max-width: 1024px) 100vw, 1024px" className="w-full rounded-2xl" />
+                        <ContentImage
+                            imageId={section.imageId}
+                            alt={section.alt}
+                            sizes="(max-width: 1024px) 100vw, 1024px"
+                            width={intrinsic?.width}
+                            height={intrinsic?.height}
+                            className="w-full h-auto rounded-2xl"
+                        />
                         {section.caption && <figcaption className="mt-2 text-center text-sm text-gray-500">{section.caption}</figcaption>}
                     </figure>
                 </section>

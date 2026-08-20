@@ -36,3 +36,19 @@ describe('ContentImage', () => {
         expect(container).toBeEmptyDOMElement();
     });
 });
+
+describe('ContentImage dimensions', () => {
+    it('reserves the image space when the intrinsic size is known', () => {
+        render(<ContentImage imageId="abc" alt="Photo" sizes="640px" width={1600} height={900} />);
+        const image = screen.getByAltText('Photo');
+        expect(image).toHaveAttribute('width', '1600');
+        expect(image).toHaveAttribute('height', '900');
+    });
+
+    it('renders without dimensions rather than guessing them', () => {
+        render(<ContentImage imageId="abc" alt="Photo" sizes="640px" />);
+        const image = screen.getByAltText('Photo');
+        expect(image).not.toHaveAttribute('width');
+        expect(image).not.toHaveAttribute('height');
+    });
+});

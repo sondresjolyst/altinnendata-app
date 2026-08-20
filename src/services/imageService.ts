@@ -1,5 +1,6 @@
 import axiosInstance from './axiosInstance';
 import { request } from '@/lib/apiRequest';
+import { publicGet } from '@/lib/publicApi';
 
 export interface UploadedImage {
     id: string;
@@ -16,6 +17,30 @@ const SRCSET_WIDTHS = [384, 640, 768, 1024, 1366, 1600];
 
 export const imageSrcSet = (id: string): string =>
     SRCSET_WIDTHS.map(w => `${imageUrl(id)}?w=${w} ${w}w`).join(', ');
+
+interface ImageDimensionsResponse {
+    id: string;
+    width: number;
+    height: number;
+}
+
+/** Intrinsic dimensions by image id, for reserving an image's space before it loads. */
+export type ImageDimensionsMap = Record<string, { width: number; height: number }>;
+
+/**
+ * Dimensions for a set of images, in one request. An id the API cannot measure is absent from
+ * the result; render those without reserved space rather than with a guessed aspect ratio.
+ */
+export async function fetchImageDimensions(ids: readonly (string | null)[], tags?: string[]): Promise<ImageDimensionsMap> {
+    const wanted = [...new Set(ids.filter((id): id is string => id != null))];
+    if (wanted.length === 0) return {};
+
+    const measured = await publicGet<ImageDimensionsResponse[]>(
+        `/content-images/dimensions?ids=${wanted.map(encodeURIComponent).join(',')}`,
+        { tags },
+    );
+    return Object.fromEntries((measured ?? []).map(({ id, width, height }) => [id, { width, height }]));
+}
 
 const ImageService = {
     upload(file: File): Promise<UploadedImage> {

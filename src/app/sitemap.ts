@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
-import { publicGet } from '@/lib/publicApi';
+import { publicGet, publicGetWithMeta } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { BuildSummary } from '@/services/buildService';
+import { Section } from '@/types/content';
 import { LegalPage } from '@/services/legalService';
 import { LOCALES, type Locale } from '@/i18n/config';
 import { latest, localeEntries, parseTimestamp } from '@/lib/seo/sitemap';
@@ -28,6 +29,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             parseTimestamp((await publicGet<LegalPage>(`/content/legal/${key}?locale=${locale}`, { tags: [REVALIDATE_TARGETS.legal] }))?.updatedAt),
         ] as const))) as Partial<Record<typeof LEGAL_KEYS[number], Date>>);
 
+    // The sections carry no timestamp of their own; the API reports it in the response header.
+    const home = await forEachLocale(locale =>
+        publicGetWithMeta<Section[]>(`/content/home?locale=${locale}`, { tags: [REVALIDATE_TARGETS.home] })
+            .then(response => response?.lastModified ?? undefined));
+
     const buildsUpdatedAt = (locale: Locale) =>
         latest((builds[locale] ?? []).map(build => parseTimestamp(build.updatedAt)));
 
@@ -38,8 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const slugs = [...new Set(LOCALES.flatMap(locale => (builds[locale] ?? []).map(build => build.slug)))];
 
     return [
-        // The front page: the API serves its sections with no timestamp of their own.
-        ...localeEntries(''),
+        ...localeEntries('', { lastModified: locale => home[locale] }),
         ...localeEntries('/builds', { lastModified: buildsUpdatedAt }),
         ...localeEntries('/contact'),
         ...LEGAL_KEYS.flatMap(key => localeEntries(`/${key}`, {
