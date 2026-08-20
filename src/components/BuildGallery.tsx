@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { imageUrl, imageSrcSet } from '@/services/imageService';
+import ContentImage from '@/components/ContentImage';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function BuildGallery({ imageIds, alt }: { imageIds: string[]; alt: string }) {
@@ -18,12 +18,10 @@ export default function BuildGallery({ imageIds, alt }: { imageIds: string[]; al
     return (
         <div className="min-w-0 space-y-3">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-gray-200 bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={imageUrl(imageIds[active])}
-                    srcSet={imageSrcSet(imageIds[active])}
-                    sizes="(max-width: 1024px) 100vw, 640px"
+                <ContentImage
+                    imageId={imageIds[active]}
                     alt={alt}
+                    sizes="(max-width: 1024px) 100vw, 640px"
                     className="h-full w-full object-contain"
                 />
 
@@ -65,8 +63,7 @@ export default function BuildGallery({ imageIds, alt }: { imageIds: string[]; al
                                 index === active ? 'border-primary ring-2 ring-primary/30' : 'border-gray-200 hover:border-gray-300'
                             }`}
                         >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={`${imageUrl(id)}?w=384`} alt="" className="h-full w-full object-cover" />
+                            <ContentImage imageId={id} alt="" sizes="80px" className="h-full w-full object-cover" />
                         </button>
                     ))}
                 </div>

@@ -1,20 +1,15 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import Markdown from '@/components/Markdown';
+import ContentImage from '@/components/ContentImage';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { Section } from '@/types/content';
-import { imageUrl } from '@/services/imageService';
 import FeaturedBuilds from './FeaturedBuilds';
 import ContactForm from './ContactForm';
 import StatsBand from './StatsBand';
 import SmartLink from './SmartLink';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-
-function Img(props: React.ImgHTMLAttributes<HTMLImageElement>) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} />;
-}
 
 function ScrimText({ text, big }: { text: string; big?: boolean }) {
     if (!text) return null;
@@ -33,13 +28,15 @@ export default function SectionRenderer({ section, locale }: { section: Section;
 
     switch (section.type) {
         case 'hero': {
-            const background = section.backgroundImageId ? imageUrl(section.backgroundImageId) : '/hero.jpg';
             return (
                 <section className="relative isolate overflow-hidden bg-gray-900 flex items-center aspect-square sm:aspect-[3/2] sm:min-h-[420px] lg:aspect-[12/5] xl:aspect-[16/5]">
-                    <Img
-                        src={background}
+                    <ContentImage
+                        imageId={section.backgroundImageId}
+                        fallbackSrc="/hero.jpg"
                         alt=""
-                        aria-hidden="true"
+                        aria-hidden
+                        priority
+                        sizes="100vw"
                         className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_20%] sm:object-[50%_12%]"
                     />
                     <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/65 to-black/45 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/60 sm:to-black/30" />
@@ -140,13 +137,12 @@ export default function SectionRenderer({ section, locale }: { section: Section;
 
         case 'image': {
             if (section.imageId == null) return null;
-            const src = imageUrl(section.imageId);
             const layout = section.layout ?? 'standard';
 
             if (layout === 'full') {
                 return (
                     <section className="py-8">
-                        <Img src={src} alt={section.alt} className="w-full max-h-[70vh] object-cover" />
+                        <ContentImage imageId={section.imageId} alt={section.alt} sizes="100vw" className="w-full max-h-[70vh] object-cover" />
                     </section>
                 );
             }
@@ -155,7 +151,7 @@ export default function SectionRenderer({ section, locale }: { section: Section;
                 return (
                     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
                         <div className="relative rounded-2xl overflow-hidden">
-                            <Img src={src} alt={section.alt} className="w-full h-[420px] object-cover" />
+                            <ContentImage imageId={section.imageId} alt={section.alt} sizes="(max-width: 1280px) 100vw, 1280px" className="w-full h-[420px] object-cover" />
                             <ScrimText text={section.text} />
                         </div>
                     </section>
@@ -165,7 +161,7 @@ export default function SectionRenderer({ section, locale }: { section: Section;
             if (layout === 'overlayFull') {
                 return (
                     <section className="relative">
-                        <Img src={src} alt={section.alt} className="w-full h-[480px] object-cover" />
+                        <ContentImage imageId={section.imageId} alt={section.alt} sizes="100vw" className="w-full h-[480px] object-cover" />
                         <ScrimText text={section.text} big />
                     </section>
                 );
@@ -175,7 +171,12 @@ export default function SectionRenderer({ section, locale }: { section: Section;
                 return (
                     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
                         <div className="grid sm:grid-cols-2 gap-8 items-center">
-                            <Img src={src} alt={section.alt} className={`w-full rounded-2xl ${layout === 'right' ? 'sm:order-2' : ''}`} />
+                            <ContentImage
+                                imageId={section.imageId}
+                                alt={section.alt}
+                                sizes="(max-width: 640px) 100vw, 640px"
+                                className={`w-full rounded-2xl ${layout === 'right' ? 'sm:order-2' : ''}`}
+                            />
                             {section.text && (
                                 <p className="text-gray-700 leading-relaxed whitespace-pre-line">{section.text}</p>
                             )}
@@ -187,7 +188,7 @@ export default function SectionRenderer({ section, locale }: { section: Section;
             return (
                 <section className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
                     <figure>
-                        <Img src={src} alt={section.alt} className="w-full rounded-2xl" />
+                        <ContentImage imageId={section.imageId} alt={section.alt} sizes="(max-width: 1024px) 100vw, 1024px" className="w-full rounded-2xl" />
                         {section.caption && <figcaption className="mt-2 text-center text-sm text-gray-500">{section.caption}</figcaption>}
                     </figure>
                 </section>
