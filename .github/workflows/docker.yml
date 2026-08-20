@@ -9,7 +9,7 @@ on:
         type: string
         required: true
       environment:
-        description: "Deployment environment (dev or prod)"
+        description: "Deployment environment (dev or prod). Also baked in as SITE_ENV, which decides whether the host may be crawled."
         type: string
         required: true
       api_url:
@@ -61,7 +61,7 @@ jobs:
     secrets:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     with:
-      build_args: '{"NEXT_PUBLIC_API_URL":"${{ inputs.api_url }}"}'
+      build_args: '{"NEXT_PUBLIC_API_URL":"${{ inputs.api_url }}","SITE_ENV":"${{ inputs.environment }}"}'
       environment: ${{ inputs.environment }}
       registry: registry.hub.docker.com
       username: sondresjo
