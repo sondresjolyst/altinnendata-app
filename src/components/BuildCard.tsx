@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import { BuildSummary, coverImageSrc, coverImageSrcSet } from '@/services/buildService';
+import { BuildSummary } from '@/services/buildService';
+import ContentImage from '@/components/ContentImage';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { formatPrice } from '@/lib/format';
 
 export default function BuildCard({ build, locale }: { build: BuildSummary; locale: Locale }) {
     const dict = getDictionary(locale);
-    const cover = coverImageSrc(build);
     const availability = dict.builds.availability[build.availability.toLowerCase() as 'available' | 'reserved' | 'sold'];
     const badgeTone = build.availability === 'Sold'
         ? 'bg-gray-200 text-gray-700'
@@ -20,13 +20,11 @@ export default function BuildCard({ build, locale }: { build: BuildSummary; loca
             className="group block rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-gray-300 transition"
         >
             <div className="aspect-video bg-gray-100 relative overflow-hidden">
-                {cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={cover}
-                        srcSet={coverImageSrcSet(build)}
-                        sizes="(max-width: 768px) 100vw, 400px"
+                {build.coverImageId ? (
+                    <ContentImage
+                        imageId={build.coverImageId}
                         alt={build.title}
+                        sizes="(max-width: 768px) 100vw, 400px"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
                 ) : (

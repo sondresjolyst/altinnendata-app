@@ -3,7 +3,7 @@ import axiosInstance from './axiosInstance';
 import { request } from '@/lib/apiRequest';
 import { revalidateTarget } from '@/lib/revalidate';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
-import { imageUrl, imageSrcSet } from './imageService';
+import { imageUrl } from './imageService';
 import type { Section } from '@/types/content';
 import type { Locale } from '@/i18n/config';
 
@@ -94,9 +94,6 @@ const publicClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
 export const coverImageSrc = (build: { coverImageId: string | null }): string | null =>
     build.coverImageId != null ? imageUrl(build.coverImageId) : null;
-
-export const coverImageSrcSet = (build: { coverImageId: string | null }): string | undefined =>
-    build.coverImageId != null ? imageSrcSet(build.coverImageId) : undefined;
 
 const BuildService = {
     list: (locale: Locale, all = false) => {
