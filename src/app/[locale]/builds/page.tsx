@@ -4,8 +4,9 @@ import BuildCard from '@/components/BuildCard';
 import { Availability, BuildSummary } from '@/services/buildService';
 import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
-import { isLocale, LOCALES, LOCALE_TAGS, type Locale } from '@/i18n/config';
+import { isLocale, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
+import { pageMetadata } from '@/lib/seo/metadata';
 
 export const revalidate = 60;
 
@@ -20,14 +21,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     if (!isLocale(locale)) return {};
     const dict = getDictionary(locale);
 
-    return {
+    return pageMetadata({
+        locale,
+        path: '/builds',
         title: dict.builds.title,
         description: dict.builds.intro,
-        alternates: {
-            canonical: `/${locale}/builds`,
-            languages: Object.fromEntries(LOCALES.map(l => [LOCALE_TAGS[l], `/${l}/builds`])),
-        },
-    };
+    });
 }
 
 export default async function BuildsPage({ params }: { params: Promise<{ locale: string }> }) {

@@ -1,27 +1,11 @@
-"use client";
+import type { Metadata } from 'next';
+import { NOINDEX } from '@/lib/seo/metadata';
+import ProtectedGate from './ProtectedGate';
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { useDictionary } from '@/i18n/DictionaryProvider';
-import { localeHref } from '@/i18n/config';
+// A server layout, so the group can export metadata; ProtectedGate holds the session check.
+// Without the metadata here, admin pages inherit the site-wide `index: true`.
+export const metadata: Metadata = { robots: NOINDEX };
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-    const { status } = useSession();
-    const router = useRouter();
-    const { locale, dict } = useDictionary();
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            router.push(localeHref(locale, '/login'));
-        }
-    }, [status, router, locale]);
-
-    if (status === 'loading' || status === 'unauthenticated') {
-        return (
-            <div className="max-w-7xl mx-auto px-4 py-20 text-center text-gray-500">{dict.common.loading}</div>
-        );
-    }
-
-    return <>{children}</>;
+    return <ProtectedGate>{children}</ProtectedGate>;
 }
