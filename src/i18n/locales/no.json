@@ -4,6 +4,7 @@
     "description": "Altinnendata bygger og installerer stasjonære PC-er. Se datamaskinene vi har bygget, be om pristilbud."
   },
   "nav": {
+    "home": "Hjem",
     "builds": "Datamaskiner",
     "contact": "Kontakt",
     "admin": "Admin",

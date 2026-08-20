@@ -4,6 +4,7 @@
     "description": "Altinnendata builds and installs desktop PCs. See the machines we have built and ask for a quote."
   },
   "nav": {
+    "home": "Home",
     "builds": "Computers",
     "contact": "Contact",
     "admin": "Admin",
