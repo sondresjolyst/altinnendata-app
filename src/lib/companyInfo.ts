@@ -1,4 +1,4 @@
-import { publicGet } from '@/lib/publicApi';
+import { publicGetOptional } from '@/lib/publicApi';
 import { COMPANY } from '@/lib/company';
 
 export interface CompanyInfo {
@@ -18,7 +18,7 @@ export interface CompanyInfo {
 }
 
 export async function getCompanyInfo(): Promise<CompanyInfo> {
-    const data = await publicGet<CompanyInfo>('/company');
+    const data = await publicGetOptional<CompanyInfo>('/company');
     return {
         name: data?.name || COMPANY.name,
         legalName: data?.legalName || COMPANY.name,

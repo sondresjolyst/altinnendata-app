@@ -79,11 +79,13 @@ describe('sitemap', () => {
         expect(entries.find(e => e.url === `${COMPANY.url}/no/contact`)?.lastModified).toBeUndefined();
     });
 
-    it('still produces the static pages when the API is unreachable', async () => {
+    /**
+     * A sitemap listing only the static pages would tell Google every build had been removed,
+     * and Next would cache it for the hour. Failing leaves the previous sitemap in place.
+     */
+    it('fails rather than publishing a sitemap with no builds in it', async () => {
         vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'));
-        const listed = urls(await sitemap());
 
-        expect(listed).toContain(`${COMPANY.url}/no`);
-        expect(listed).toContain(`${COMPANY.url}/en/builds`);
+        await expect(sitemap()).rejects.toThrow();
     });
 });

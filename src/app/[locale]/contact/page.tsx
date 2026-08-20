@@ -5,7 +5,7 @@ import { COMPANY } from '@/lib/company';
 import { isLocale, Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata } from '@/lib/seo/metadata';
-import { publicGet } from '@/lib/publicApi';
+import { publicGetOptional } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { BuildDetail } from '@/services/buildService';
 
@@ -26,7 +26,7 @@ async function findBuild(slug: string | string[] | undefined, locale: Locale) {
     const wanted = Array.isArray(slug) ? slug[0] : slug;
     if (!wanted) return null;
 
-    const build = await publicGet<BuildDetail>(
+    const build = await publicGetOptional<BuildDetail>(
         `/builds/${encodeURIComponent(wanted)}?locale=${locale}`,
         { tags: [REVALIDATE_TARGETS.builds] },
     );
