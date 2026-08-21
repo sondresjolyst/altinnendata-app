@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.3.2...v1.4.0) (2026-08-20)
+
+
+### Features
+
+* **seo:** centralise page metadata and indexing policy ([#34](https://github.com/sondresjolyst/altinnendata-app/issues/34)) ([e595b7f](https://github.com/sondresjolyst/altinnendata-app/commit/e595b7f8beb04b98dfec98753c33d7beb93896ab))
+* **seo:** date the sitemap from content and add a share image ([#36](https://github.com/sondresjolyst/altinnendata-app/issues/36)) ([142151c](https://github.com/sondresjolyst/altinnendata-app/commit/142151c0b8a19029a3c9e0aa6fafc043bec65f28))
+* **seo:** describe pages as a schema.org graph ([#35](https://github.com/sondresjolyst/altinnendata-app/issues/35)) ([1b49b6a](https://github.com/sondresjolyst/altinnendata-app/commit/1b49b6af938a190d305fedf5123433f440fb41f2))
+* **seo:** use the company parts, edit times and image sizes ([#38](https://github.com/sondresjolyst/altinnendata-app/issues/38)) ([3d3a57f](https://github.com/sondresjolyst/altinnendata-app/commit/3d3a57ff770b3b0d5fbf472151a71897e0d847c1))
+
+
+### Bug Fixes
+
+* tell an empty API response apart from a failed one ([#40](https://github.com/sondresjolyst/altinnendata-app/issues/40)) ([cf6aff7](https://github.com/sondresjolyst/altinnendata-app/commit/cf6aff77ff1ef9c59f467d090b8069e581895c26))
+
 ## [1.3.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.3.1...v1.3.2) (2026-08-16)
 
 
