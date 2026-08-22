@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.4.0...v1.5.0) (2026-08-22)
+
+
+### Features
+
+* **finn:** keep the advert link the import resolved to ([#46](https://github.com/sondresjolyst/altinnendata-app/issues/46)) ([8318faa](https://github.com/sondresjolyst/altinnendata-app/commit/8318faae5cf21a5346af79ad2ca073ada468482e))
+* **images:** serve content images from this origin ([#44](https://github.com/sondresjolyst/altinnendata-app/issues/44)) ([2237731](https://github.com/sondresjolyst/altinnendata-app/commit/223773165057cf6d0b87818cbf6f909461122c6d))
+* **seo:** keep non-production hosts out of search ([#41](https://github.com/sondresjolyst/altinnendata-app/issues/41)) ([02bacdf](https://github.com/sondresjolyst/altinnendata-app/commit/02bacdfc169b019efb668d5a34012aa43e399bb1))
+
+
+### Bug Fixes
+
+* bound how long a stale page may be served ([#43](https://github.com/sondresjolyst/altinnendata-app/issues/43)) ([6b31dd9](https://github.com/sondresjolyst/altinnendata-app/commit/6b31dd97b5f000f5e7bb5a8a72c0deb7a585d944))
+
 ## [1.4.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.3.2...v1.4.0) (2026-08-20)
 
 
