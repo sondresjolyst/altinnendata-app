@@ -7,10 +7,7 @@ export interface Crumb {
     path?: string;
 }
 
-/**
- * The trail shown in place of the raw URL in search results. The last crumb carries no
- * `item`, per Google's guidance, because it is the page being viewed.
- */
+/** The trail shown in place of the raw URL in search results. The last crumb carries no `item`. */
 export function breadcrumbNode(crumbs: Crumb[], pageUrl: string): SchemaNode {
     return {
         '@type': 'BreadcrumbList',

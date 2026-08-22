@@ -4,7 +4,7 @@ export interface PublicResponse<T> {
     lastModified: Date | null;
 }
 
-/** The API could not be reached, or answered in a way that carries no content. */
+/** The API could not be reached, or answered with no usable content. */
 export class PublicApiError extends Error {
     constructor(readonly path: string, readonly status: number | null, options?: { cause?: unknown }) {
         super(`GET ${path} failed${status == null ? '' : ` with ${status}`}`, options);
@@ -30,7 +30,6 @@ async function get<T>(path: string, opts?: { tags?: string[] }): Promise<PublicR
         throw new PublicApiError(path, null, { cause });
     }
 
-    // The one status that means "there is nothing here", as opposed to "ask again later".
     if (response.status === 404) return null;
     if (!response.ok) throw new PublicApiError(path, response.status);
 
@@ -41,30 +40,18 @@ async function get<T>(path: string, opts?: { tags?: string[] }): Promise<PublicR
     }
 }
 
-/**
- * GET from the public API, keeping the response metadata. Some resources have no field to
- * carry their edit time — the home page sections are a bare JSON array — and report it in
- * `Last-Modified` instead.
- */
+/** GET from the public API, keeping the response metadata. */
 export const publicGetWithMeta = get;
 
 /**
  * GET from the public API. Null means the resource does not exist; an unreachable or failing
- * API throws.
- *
- * The distinction is what keeps an outage from being cached as content: a page that renders
- * "no computers yet" from a failed request looks like a valid render to Next, which stores it
- * and serves it until the next revalidation. Throwing instead leaves the last good page in
- * place.
+ * API throws, so an empty page is never cached in place of a working one.
  */
 export async function publicGet<T>(path: string, opts?: { tags?: string[] }): Promise<T | null> {
     return (await get<T>(path, opts))?.data ?? null;
 }
 
-/**
- * GET from the public API for data a page can do without — branding, image dimensions, a
- * prefilled form field. Yields null on any failure, so the page still renders.
- */
+/** GET for data a page can do without. Null on any failure, so the page still renders. */
 export async function publicGetOptional<T>(path: string, opts?: { tags?: string[] }): Promise<T | null> {
     try {
         return await publicGet<T>(path, opts);

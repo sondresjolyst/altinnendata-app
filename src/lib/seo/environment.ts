@@ -2,12 +2,8 @@
 const PRODUCTION = new Set(['production', 'prod', '']);
 
 /**
- * Whether this deployment is the one search engines should index.
- *
- * Set from `SITE_ENV`, which the deploy workflow fills from the environment it is already
- * building for. An unset value counts as production, so a variable that never reaches a
- * deployment cannot be what removes the live site from Google — a failure that takes weeks to
- * undo, against leaving a test host crawlable, which is merely today's situation.
+ * Whether this deployment is the one search engines should index. An unset `SITE_ENV` counts as
+ * production: a missing variable must not be what deindexes the live site.
  */
 export function isIndexableEnvironment(): boolean {
     return PRODUCTION.has(process.env.SITE_ENV?.trim().toLowerCase() ?? '');

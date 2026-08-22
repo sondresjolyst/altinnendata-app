@@ -20,8 +20,7 @@ export async function POST(req: NextRequest) {
     for (const path of paths) {
         revalidatePath(path, path.includes('[') ? 'page' : undefined);
     }
-    // Purge the data cache by tag too: catches fetches the path purge misses
-    // when a different route rendered them. expire 0 = stale at once.
+    // By tag as well: a path purge misses fetches another route rendered. expire 0 = stale now.
     revalidateTag(target, { expire: 0 });
     return NextResponse.json({ revalidated: true, target });
 }

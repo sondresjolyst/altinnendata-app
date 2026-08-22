@@ -1,8 +1,6 @@
 /**
- * Paths below the locale segment that must never be indexed or crawled.
- *
- * Each one needs a route-group layout setting `robots: NOINDEX`: a robots.txt rule stops
- * crawling but does not remove a page Google already knows about.
+ * Paths below the locale segment that must never be indexed or crawled. Each also needs a
+ * route-group layout setting `robots: NOINDEX`; a robots.txt rule alone will not deindex.
  */
 export const PRIVATE_PATHS = ['/admin', '/login', '/reset-password', '/profile'] as const;
 

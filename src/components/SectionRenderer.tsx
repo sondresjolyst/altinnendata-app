@@ -28,10 +28,7 @@ export default function SectionRenderer({
 }: {
     section: Section;
     locale: Locale;
-    /**
-     * Intrinsic dimensions by image id. Only the layouts that let an image keep its own aspect
-     * ratio need them; the rest sit in a fixed-ratio box and cannot shift.
-     */
+    /** Intrinsic dimensions by image id, for the layouts that let an image keep its aspect ratio. */
     imageDimensions?: ImageDimensionsMap;
 }) {
     if (!section.visible) return null;

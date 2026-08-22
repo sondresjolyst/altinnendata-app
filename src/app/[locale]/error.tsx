@@ -4,12 +4,7 @@ import Link from 'next/link';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
-/**
- * Shown when a page cannot be rendered — in practice, when the API is unreachable.
- *
- * The response stays a 500, which is what tells a crawler to come back later; only the screen
- * a visitor sees changes.
- */
+/** Shown when a page cannot be rendered. The response is still a 500. */
 export default function LocaleError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
     const { locale, dict } = useDictionary();
 

@@ -49,7 +49,7 @@ describe('getCompanyInfo', () => {
     });
 
     it('leaves the parts empty against an API that does not send them', async () => {
-        // The version of the API that predates the structured fields.
+        // An API that sends no address parts.
         respond({ name: 'Altinnendata', address: 'Mårvegen 21a, 4347 Lye' });
 
         const info = await getCompanyInfo();
