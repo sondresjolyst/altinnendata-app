@@ -1,4 +1,4 @@
-import { imageUrl, imageSrcSet } from '@/services/imageService';
+import { imagePath, imageSrcSet } from '@/services/imageService';
 
 export interface ContentImageProps {
     /** Uploaded image id. Null falls back to `fallbackSrc`, which is served as-is. */
@@ -42,7 +42,7 @@ export default function ContentImage({
     priority = false,
     'aria-hidden': ariaHidden,
 }: ContentImageProps) {
-    const src = imageId != null ? imageUrl(imageId) : fallbackSrc;
+    const src = imageId != null ? imagePath(imageId) : fallbackSrc;
     if (!src) return null;
 
     return (
