@@ -6,7 +6,7 @@ import { ArrowDownTrayIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outl
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import ComponentService, { CategoryTree } from '@/services/componentService';
 import FinnService from '@/services/finnService';
-import ImageService, { imageUrl } from '@/services/imageService';
+import ImageService, { imagePath } from '@/services/imageService';
 import { ImagePicker } from '@/components/SectionsEditor';
 import LocaleTabs from '@/components/LocaleTabs';
 import TextInput from '@/components/TextInput';
@@ -265,7 +265,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                         {imageIds.map((id, index) => (
                             <li key={id} className="relative">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={`${imageUrl(id)}?w=384`} alt="" className="h-24 w-32 rounded-lg border border-gray-200 object-cover" />
+                                <img src={`${imagePath(id)}?w=384`} alt="" className="h-24 w-32 rounded-lg border border-gray-200 object-cover" />
                                 <div className="mt-1 flex items-center justify-between gap-1">
                                     <div className="flex gap-1">
                                         <button type="button" onClick={() => moveImage(index, -1)} disabled={index === 0} className="rounded px-1.5 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-30">←</button>

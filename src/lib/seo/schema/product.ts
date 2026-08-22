@@ -1,5 +1,6 @@
 import type { Availability, BuildDetail } from '@/services/buildService';
-import { imageUrl } from '@/services/imageService';
+import { imagePath } from '@/services/imageService';
+import { absoluteUrl } from '../urls';
 import { LOCALE_TAGS, type Locale } from '@/i18n/config';
 import { ref, SCHEMA_IDS, type SchemaNode } from './graph';
 
@@ -26,9 +27,11 @@ function specs(build: BuildDetail) {
 
 /** One machine as a sellable product. A build without a price gets no `offers` block. */
 export function productNode(build: BuildDetail, locale: Locale, pageUrl: string): SchemaNode {
+    // Absolute: a consumer of the graph has no page to resolve against.
+    const image = (id: string) => absoluteUrl(imagePath(id));
     const images = [
-        ...(build.coverImageId ? [imageUrl(build.coverImageId)] : []),
-        ...build.imageIds.filter(id => id !== build.coverImageId).map(imageUrl),
+        ...(build.coverImageId ? [image(build.coverImageId)] : []),
+        ...build.imageIds.filter(id => id !== build.coverImageId).map(image),
     ];
     const properties = specs(build);
 

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import {
     ArrowUpIcon, ArrowDownIcon, TrashIcon, PlusIcon, EyeIcon, EyeSlashIcon, DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
-import ImageService, { imageUrl } from '@/services/imageService';
+import ImageService, { imagePath } from '@/services/imageService';
 import { Section, SectionType, createSection, cloneSection, StatItem, ImageSection, FeedAvailability } from '@/types/content';
 import TextInput from '@/components/TextInput';
 import { useDictionary } from '@/i18n/DictionaryProvider';
@@ -310,7 +310,7 @@ export function ImagePicker({ imageId, onChange, label }: { imageId: string | nu
             <label className="block text-sm font-medium text-gray-700 mb-1">{label ?? dict.sections.image}</label>
             {imageId != null && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={imageUrl(imageId)} alt="" className="mb-2 h-32 w-auto rounded-lg border border-gray-200 object-cover" />
+                <img src={imagePath(imageId)} alt="" className="mb-2 h-32 w-auto rounded-lg border border-gray-200 object-cover" />
             )}
             <div className="flex items-center gap-3">
                 <label className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 text-gray-700 font-medium px-4 py-2 text-sm hover:bg-gray-200 transition cursor-pointer">

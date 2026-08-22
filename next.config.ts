@@ -11,16 +11,39 @@ function getApiOrigin(): string {
     }
 }
 
+/** The API base, including its path prefix, with no trailing slash. */
+function getApiBaseUrl(): string {
+    const url = process.env.NEXT_PUBLIC_API_URL;
+    if (!url) return '';
+    try {
+        return new URL(url).toString().replace(/\/$/, '');
+    } catch {
+        return '';
+    }
+}
+
 const nextConfig: NextConfig = {
     output: 'standalone',
-    // How long a cache may keep serving a page after it goes stale. Next defaults to a year, so
-    // a returning visitor's browser could hand back a year-old page and only fetch the current
-    // one in the background — which is why a newly published machine showed up on some devices
-    // and not others. Five minutes bounds that, and matches the client router cache's stale time.
+    // How long a cache may go on serving a page after it goes stale. Next's default is a year,
+    // long enough for a browser to hand back an old page and fetch the current one behind it.
+    // Five minutes, matching the client router cache's stale time.
     expireTime: 300,
     images: {
         qualities: [75, 100],
     },
+    /**
+     * Content images, proxied so the browser never contacts the API host. A rewrite, not a route
+     * handler: it passes the query string and the Accept header through, which webp needs.
+     */
+    async rewrites() {
+        const apiBaseUrl = getApiBaseUrl();
+        if (!apiBaseUrl) return [];
+
+        return [
+            { source: '/content-images/:path*', destination: `${apiBaseUrl}/content-images/:path*` },
+        ];
+    },
+
     async headers() {
         const apiOrigin = getApiOrigin();
         const connectSrc = ['self', apiOrigin]
@@ -43,7 +66,7 @@ const nextConfig: NextConfig = {
             .map(s => s === 'self' ? "'self'" : s)
             .join(' ');
 
-        const imgSrc = ['self', apiOrigin, 'data:', 'blob:']
+        const imgSrc = ['self', 'data:', 'blob:']
             .filter(Boolean)
             .map(s => s === 'self' ? "'self'" : s)
             .join(' ');

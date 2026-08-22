@@ -7,15 +7,15 @@ export interface UploadedImage {
     url: string;
 }
 
-export const imageUrl = (id: string): string =>
-    `${process.env.NEXT_PUBLIC_API_URL}/content-images/${id}`;
+/** Where the browser fetches an uploaded image. Site-relative; see the rewrite in next.config.ts. */
+export const imagePath = (id: string): string => `/content-images/${id}`;
 
 // The API serves the nearest webp variant at or above the requested width, or the
 // original when the browser does not accept webp.
 const SRCSET_WIDTHS = [384, 640, 768, 1024, 1366, 1600];
 
 export const imageSrcSet = (id: string): string =>
-    SRCSET_WIDTHS.map(w => `${imageUrl(id)}?w=${w} ${w}w`).join(', ');
+    SRCSET_WIDTHS.map(w => `${imagePath(id)}?w=${w} ${w}w`).join(', ');
 
 interface ImageDimensionsResponse {
     id: string;
