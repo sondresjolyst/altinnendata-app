@@ -3,10 +3,7 @@ import { imageUrl } from '@/services/imageService';
 import { LOCALE_TAGS, type Locale } from '@/i18n/config';
 import { ref, SCHEMA_IDS, type SchemaNode } from './graph';
 
-/**
- * schema.org has no "held for a buyer" state; LimitedAvailability is the honest reading of a
- * reserved machine — it exists and is listed, but cannot currently be bought.
- */
+/** schema.org has no "held for a buyer" state; a reserved machine maps to LimitedAvailability. */
 const AVAILABILITY: Record<Availability, string> = {
     Available: 'https://schema.org/InStock',
     Reserved: 'https://schema.org/LimitedAvailability',
@@ -14,9 +11,8 @@ const AVAILABILITY: Record<Availability, string> = {
 };
 
 /**
- * Components as machine-readable specs, in the order the build lists them. Every category the
- * API defines is a real specification, so there is no allowlist here to fall behind when one
- * is added; a component with no category is skipped, as it would yield a nameless property.
+ * Components as machine-readable specs, in the order the build lists them. A component with no
+ * category is skipped, as it would yield a nameless property.
  */
 function specs(build: BuildDetail) {
     return build.components
@@ -28,11 +24,7 @@ function specs(build: BuildDetail) {
         }));
 }
 
-/**
- * One machine as a sellable product. Price and availability are what make a listing eligible
- * for a rich result, so a build without a price gets no `offers` block rather than a
- * placeholder one.
- */
+/** One machine as a sellable product. A build without a price gets no `offers` block. */
 export function productNode(build: BuildDetail, locale: Locale, pageUrl: string): SchemaNode {
     const images = [
         ...(build.coverImageId ? [imageUrl(build.coverImageId)] : []),

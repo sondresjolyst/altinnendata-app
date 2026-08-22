@@ -3,10 +3,6 @@ import { metadata as authMetadata } from '@/app/[locale]/(auth)/layout';
 import { metadata as protectedMetadata } from '@/app/[locale]/(protected)/layout';
 import { PRIVATE_PATHS } from '@/lib/seo/routes';
 
-/**
- * Blocking a path in robots.txt does not remove a page Google already knows about — only a
- * noindex it can read does. Every private path needs a layout that emits one.
- */
 describe('private route groups', () => {
     it('keep sign-in and password reset out of the index', () => {
         expect(authMetadata.robots).toEqual({ index: false, follow: false });

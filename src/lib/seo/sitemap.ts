@@ -12,10 +12,8 @@ export interface LocaleEntryOptions {
 }
 
 /**
- * One sitemap entry per locale a page exists in, each listing the others as alternates. Only
- * locales the page is served in are listed, so no entry advertises a translation that does not
- * exist, and `lastModified` is omitted when unknown — an invented one teaches crawlers to
- * ignore the field.
+ * One entry per locale a page is served in, each listing the others as alternates. `lastModified`
+ * is omitted when unknown rather than invented.
  */
 export function localeEntries(path: string, options: LocaleEntryOptions = {}): MetadataRoute.Sitemap {
     const locales = options.locales ?? LOCALES;

@@ -85,7 +85,7 @@ describe('organization node', () => {
     });
 
     it('falls back to the one-line address when the API has no parts to give', () => {
-        // The API that predates the structured fields answers with the one line only.
+        // An API that sends the one-line address only.
         const oneLine = { ...company, streetAddress: '', postalCode: '', addressLocality: '', addressRegion: '' };
         expect(organizationNode(oneLine).address).toEqual({
             '@type': 'PostalAddress',

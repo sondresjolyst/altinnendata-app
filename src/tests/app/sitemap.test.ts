@@ -73,16 +73,12 @@ describe('sitemap', () => {
         mockApi({ '/builds?locale=': [] });
         const entries = await sitemap();
 
-        // The front page: the API answers without a Last-Modified header here.
+        // The front page: no Last-Modified header in this mock.
         expect(entries.find(e => e.url === `${COMPANY.url}/no`)?.lastModified).toBeUndefined();
         // Contact is a static page with no content behind it at all.
         expect(entries.find(e => e.url === `${COMPANY.url}/no/contact`)?.lastModified).toBeUndefined();
     });
 
-    /**
-     * A sitemap listing only the static pages would tell Google every build had been removed,
-     * and Next would cache it for the hour. Failing leaves the previous sitemap in place.
-     */
     it('fails rather than publishing a sitemap with no builds in it', async () => {
         vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'));
 

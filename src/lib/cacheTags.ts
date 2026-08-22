@@ -1,7 +1,6 @@
 import { LOCALES } from '@/i18n/config';
 
-// Identifiers the client sends to POST /api/revalidate, mapped server-side to
-// the ISR paths each one affects.
+// Sent to POST /api/revalidate, which maps each to the ISR paths it affects.
 export const REVALIDATE_TARGETS = {
     home: 'home',
     builds: 'builds',
@@ -13,8 +12,7 @@ export type RevalidateTarget = (typeof REVALIDATE_TARGETS)[keyof typeof REVALIDA
 const perLocale = (paths: string[]): string[] =>
     LOCALES.flatMap(locale => paths.map(path => `/${locale}${path}`));
 
-// Builds also appear on the front page (featured builds + stats), so they purge
-// the front page too, and the sitemap.
+// Builds appear on the front page too, through featured builds and the stats band.
 export const TARGET_PATHS: Record<RevalidateTarget, string[]> = {
     home: perLocale(['']),
     builds: [...perLocale(['', '/builds', '/builds/[slug]']), '/sitemap.xml'],

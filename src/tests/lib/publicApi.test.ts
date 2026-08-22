@@ -39,11 +39,6 @@ describe('publicGet', () => {
         expect(await publicGet('/builds/gone')).toBeNull();
     });
 
-    /**
-     * The distinction the whole module exists for: a page that renders its empty state from a
-     * failed request looks like a valid render to Next, which caches it. Throwing keeps the
-     * last good page in place instead.
-     */
     it('throws when the API is unreachable, rather than reading as empty', async () => {
         vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('ECONNREFUSED'));
 

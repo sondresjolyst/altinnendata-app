@@ -22,10 +22,6 @@ describe('isIndexableEnvironment', () => {
         }
     });
 
-    /**
-     * The asymmetry this defaults around: wrongly blocking removes the live site from Google and
-     * takes weeks to undo; wrongly allowing leaves a test host crawlable, which is the status quo.
-     */
     it('assumes production when unset or blank, rather than risk deindexing it', () => {
         expect(isIndexableEnvironment()).toBe(true);
 

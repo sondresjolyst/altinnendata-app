@@ -4,7 +4,7 @@ import { DEFAULT_LOCALE, LOCALES, LOCALE_TAGS, type Locale } from '@/i18n/config
 import { getDictionary } from '@/i18n/dictionaries';
 import { localePath } from './urls';
 
-/** Dimensions of the generated share image, shared with the route that renders it. */
+/** Dimensions of the generated share image. */
 export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 } as const;
 
 /** Robots directive for pages that exist for signed-in users only. */
@@ -21,12 +21,7 @@ export interface PageMetadataInput {
     images?: string[];
 }
 
-/**
- * Language alternates for one page, keyed by BCP 47 tag.
- *
- * `x-default` points at the default locale because `/` redirects there; without it Google
- * has no instruction for visitors whose language matches neither alternate.
- */
+/** Language alternates keyed by BCP 47 tag. `x-default` follows `/`, which redirects there. */
 function languageAlternates(path: string): Record<string, string> {
     return {
         ...Object.fromEntries(LOCALES.map(l => [LOCALE_TAGS[l], localePath(l, path)])),
@@ -35,10 +30,7 @@ function languageAlternates(path: string): Record<string, string> {
 }
 
 /** Canonical, hreflang set and Open Graph for one public page, from its locale and path. */
-/**
- * The default share preview for a locale. Explicit rather than Next's `opengraph-image` file
- * convention, which a page's own `openGraph` block replaces — leaving that page with no image.
- */
+/** The default share preview for a locale. See the route in `[locale]/og`. */
 function defaultShareImage(locale: Locale) {
     const dict = getDictionary(locale);
     return {
@@ -71,10 +63,7 @@ export function pageMetadata({ locale, path = '', title, description, images }: 
     };
 }
 
-/**
- * Metadata for the locale root layout: the front page's own, plus what every page below it
- * inherits — the title template, `metadataBase`, the manifest and the default index directive.
- */
+/** Metadata for the locale root layout, including what every page below it inherits. */
 export function siteMetadata(locale: Locale): Metadata {
     const dict = getDictionary(locale);
     const title = `${COMPANY.name} — ${dict.meta.tagline}`;

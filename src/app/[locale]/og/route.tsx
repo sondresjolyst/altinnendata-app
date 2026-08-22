@@ -12,10 +12,8 @@ export function generateStaticParams() {
 }
 
 /**
- * The default share preview, at a stable URL per locale, referenced from `pageMetadata`.
- *
- * A route rather than Next's `opengraph-image` file convention: that image belongs to the
- * segment declaring it, and a page supplying its own `openGraph` block replaces it.
+ * The default share preview, referenced from `pageMetadata`. Not the `opengraph-image` file
+ * convention, whose image a page's own `openGraph` block replaces.
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;

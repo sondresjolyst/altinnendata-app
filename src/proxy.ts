@@ -8,8 +8,7 @@ export default function proxy(req: NextRequest) {
 
     const url = req.nextUrl.clone();
     url.pathname = `/${DEFAULT_LOCALE}${pathname === '/' ? '' : pathname}`;
-    // 308 rather than the default 307: the target never varies, so search engines should
-    // treat the locale-prefixed URL as canonical and pass ranking signals to it.
+    // 308, not the default 307: the target never varies, so signals pass to the prefixed URL.
     return NextResponse.redirect(url, 308);
 }
 

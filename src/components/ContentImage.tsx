@@ -5,32 +5,20 @@ export interface ContentImageProps {
     imageId: string | null;
     /** Empty string for images that carry no meaning of their own, e.g. a decorative backdrop. */
     alt: string;
-    /**
-     * Widths the image is displayed at, as a CSS `sizes` list. Required — a browser given none
-     * assumes the full viewport width and fetches a larger rendition than it needs.
-     */
+    /** Widths the image is displayed at. Required: without it a browser assumes 100vw. */
     sizes: string;
     /** Static path used when there is no uploaded image. */
     fallbackSrc?: string;
     className?: string;
-    /**
-     * Intrinsic dimensions, so the browser can reserve the image's space before it loads.
-     * Only worth passing where the layout does not already fix the aspect ratio.
-     */
+    /** Intrinsic dimensions, to reserve space. Only needed where the layout fixes no ratio. */
     width?: number;
     height?: number;
-    /**
-     * Set on the one image visible without scrolling, usually the hero: loaded eagerly and at
-     * high priority. Everything else waits until it nears the viewport.
-     */
+    /** Set on the one image visible without scrolling. Loaded eagerly, at high priority. */
     priority?: boolean;
     'aria-hidden'?: boolean;
 }
 
-/**
- * An image from the content API, served responsively: every uploaded image has webp renditions
- * behind it, and this picks between them from the `sizes` the call site declares.
- */
+/** An image from the content API, served responsively from the `sizes` a call site declares. */
 export default function ContentImage({
     imageId,
     alt,
