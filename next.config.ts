@@ -13,6 +13,11 @@ function getApiOrigin(): string {
 
 const nextConfig: NextConfig = {
     output: 'standalone',
+    // How long a cache may keep serving a page after it goes stale. Next defaults to a year, so
+    // a returning visitor's browser could hand back a year-old page and only fetch the current
+    // one in the background — which is why a newly published machine showed up on some devices
+    // and not others. Five minutes bounds that, and matches the client router cache's stale time.
+    expireTime: 300,
     images: {
         qualities: [75, 100],
     },
