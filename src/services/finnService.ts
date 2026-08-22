@@ -2,6 +2,7 @@ import axiosInstance from './axiosInstance';
 import { request } from '@/lib/apiRequest';
 
 export interface FinnImport {
+    /** The advert itself, which a short link redirects to. */
     url: string;
     title: string | null;
     summary: string | null;

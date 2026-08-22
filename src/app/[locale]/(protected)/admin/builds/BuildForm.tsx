@@ -109,6 +109,8 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         try {
             const ad = await FinnService.import(finnUrl.trim());
 
+            // A link copied from the finn.no app is a short one; store the advert it leads to.
+            setFinnUrl(ad.url);
             if (ad.title) patchTranslation(activeLocale, { title: ad.title });
             if (ad.summary) patchTranslation(activeLocale, { summary: ad.summary });
             if (ad.description) patchTranslation(activeLocale, { description: ad.description });
@@ -231,7 +233,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                             label={dict.admin.finnUrl}
                             value={finnUrl}
                             onChange={e => setFinnUrl(e.target.value)}
-                            placeholder="https://www.finn.no/recommerce/forsale/item/..."
+                            placeholder="https://www.finn.no/..."
                         />
                     </div>
                     <button
