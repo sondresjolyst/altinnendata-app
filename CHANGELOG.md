@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.0...v1.5.1) (2026-08-24)
+
+
+### Dependencies
+
+* **github-actions:** bump `equinor/ops-actions/.github/workflows/docker.yml` from 9.39.6 to 9.40.0 ([#48](https://github.com/sondresjolyst/altinnendata-app/issues/48)) ([bf2b1dc](https://github.com/sondresjolyst/altinnendata-app/commit/bf2b1dcc6db43b6e41fa458d33482d5bb9cedc05))
+* **github-actions:** bump `equinor/ops-actions/.github/workflows/release-please-manifest.yml` from 9.39.6 to 9.40.0 ([#47](https://github.com/sondresjolyst/altinnendata-app/issues/47)) ([2c7d970](https://github.com/sondresjolyst/altinnendata-app/commit/2c7d97022df9c13e8c2243197d3af931ed4561fc))
+* **npm:** bump the next group with 2 updates ([#49](https://github.com/sondresjolyst/altinnendata-app/issues/49)) ([834b9c8](https://github.com/sondresjolyst/altinnendata-app/commit/834b9c80f66c1b8211bc2c5a433c7dd13ae3a9a4))
+* **npm:** bump the testing group with 2 updates ([#50](https://github.com/sondresjolyst/altinnendata-app/issues/50)) ([9d55ef5](https://github.com/sondresjolyst/altinnendata-app/commit/9d55ef591d989b5852ed3b9d65e60488e38ba828))
+
 ## [1.5.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.4.0...v1.5.0) (2026-08-22)
 
 
