@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.1...v1.5.2) (2026-08-30)
+
+
+### Dependencies
+
+* **npm:** bump eslint from 10.8.1 to 10.9.0 in the eslint group ([#56](https://github.com/sondresjolyst/altinnendata-app/issues/56)) ([5e0142e](https://github.com/sondresjolyst/altinnendata-app/commit/5e0142ec02bc0f0ecd8be2beaa9e51ec046342b9))
+* **npm:** bump the next group across 1 directory with 2 updates ([#55](https://github.com/sondresjolyst/altinnendata-app/issues/55)) ([a524532](https://github.com/sondresjolyst/altinnendata-app/commit/a524532bcac0590ef5d11abb8feb07ca2b47f9a3))
+* **npm:** bump the testing group with 3 updates ([#57](https://github.com/sondresjolyst/altinnendata-app/issues/57)) ([42e777b](https://github.com/sondresjolyst/altinnendata-app/commit/42e777b1e25b2f2211fa25f280c53ae22fa2c53d))
+
 ## [1.5.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.0...v1.5.1) (2026-08-24)
 
 
