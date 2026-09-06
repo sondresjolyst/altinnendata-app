@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { ArrowDownTrayIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import ComponentService, { CategoryTree } from '@/services/componentService';
 import FinnService from '@/services/finnService';
 import ImageService, { imagePath } from '@/services/imageService';
+import TranslationService, { TranslatableFields } from '@/services/translationService';
 import { ImagePicker } from '@/components/SectionsEditor';
 import LocaleTabs from '@/components/LocaleTabs';
 import TextInput from '@/components/TextInput';
 import Toggle from '@/components/Toggle';
-import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
+import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 const AVAILABILITIES: Availability[] = ['Available', 'Reserved', 'Sold'];
@@ -75,6 +76,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const [finnUrl, setFinnUrl] = useState(build?.finnUrl ?? '');
     const [imageIds, setImageIds] = useState<string[]>(build?.imageIds ?? []);
     const [importing, setImporting] = useState(false);
+    const [translating, setTranslating] = useState(false);
     const [uploading, setUploading] = useState(false);
 
     const [tree, setTree] = useState<CategoryTree[]>([]);
@@ -125,10 +127,39 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                     ? dict.admin.importedSkipped.replace('{count}', String(ad.skippedImages))
                     : dict.admin.imported,
             );
+
+            const imported = { title: ad.title, summary: ad.summary, description: ad.description };
+            if (imported.title || imported.summary || imported.description) {
+                await translateInto(activeLocale, imported);
+            }
         } catch (err) {
             toast.error(err instanceof Error ? err.message : dict.admin.importFailed);
         } finally {
             setImporting(false);
+        }
+    };
+
+    // The advert is Norwegian; the other languages are filled from it so the admin edits a
+    // draft instead of writing each one from scratch.
+    const translateInto = async (source: Locale, fields: TranslatableFields) => {
+        const targets = LOCALES.filter(locale => locale !== source);
+        setTranslating(true);
+        try {
+            for (const target of targets) {
+                const translated = await TranslationService.translate(fields, source, target);
+                patchTranslation(target, {
+                    title: translated.title ?? '',
+                    summary: translated.summary,
+                    description: translated.description,
+                });
+            }
+            toast.success(
+                dict.admin.translated.replace('{locales}', targets.map(l => LOCALE_LABELS[l]).join(', ')),
+            );
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : dict.admin.translateFailed);
+        } finally {
+            setTranslating(false);
         }
     };
 
@@ -242,7 +273,8 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                         disabled={importing || finnUrl.trim() === ''}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 text-gray-700 font-medium px-4 py-2 text-sm hover:bg-gray-200 disabled:opacity-50"
                     >
-                        <ArrowDownTrayIcon className="h-4 w-4" /> {importing ? dict.admin.importing : dict.admin.importFromFinn}
+                        <ArrowDownTrayIcon className="h-4 w-4" />
+                        {translating ? dict.admin.translating : importing ? dict.admin.importing : dict.admin.importFromFinn}
                     </button>
                 </div>
                 <p className="text-xs text-gray-500">
@@ -284,11 +316,25 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             </div>
 
             <div className="space-y-4">
-                <LocaleTabs
-                    active={activeLocale}
-                    onChange={setActiveLocale}
-                    filled={Object.fromEntries(LOCALES.map(l => [l, translations[l].title.trim() !== ''])) as Record<Locale, boolean>}
-                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <LocaleTabs
+                        active={activeLocale}
+                        onChange={setActiveLocale}
+                        filled={Object.fromEntries(LOCALES.map(l => [l, translations[l].title.trim() !== ''])) as Record<Locale, boolean>}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => translateInto(activeLocale, {
+                            title: translation.title.trim() || null,
+                            summary: translation.summary?.trim() || null,
+                            description: translation.description?.trim() || null,
+                        })}
+                        disabled={translating || importing || translation.title.trim() === ''}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 text-gray-700 font-medium px-3 py-1.5 text-xs hover:bg-gray-200 disabled:opacity-50"
+                    >
+                        <LanguageIcon className="h-4 w-4" /> {translating ? dict.admin.translating : dict.admin.translate}
+                    </button>
+                </div>
                 <TextInput
                     label={dict.admin.buildTitle}
                     value={translation.title}
