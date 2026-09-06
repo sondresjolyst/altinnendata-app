@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.2...v1.5.3) (2026-09-06)
+
+
+### Dependencies
+
+* **npm:** bump @types/node from 26.2.0 to 26.4.0 in the types group ([#64](https://github.com/sondresjolyst/altinnendata-app/issues/64)) ([33a76af](https://github.com/sondresjolyst/altinnendata-app/commit/33a76af8fadf7da8e2ef5edb380d3c98f8186953))
+* **npm:** bump @types/react-dom from 19.2.4 to 19.2.5 in the react group ([#60](https://github.com/sondresjolyst/altinnendata-app/issues/60)) ([70f0e7c](https://github.com/sondresjolyst/altinnendata-app/commit/70f0e7cf6cb597ad17c98aaf6648ad568170be07))
+* **npm:** bump eslint from 10.9.0 to 10.9.1 in the eslint group ([#62](https://github.com/sondresjolyst/altinnendata-app/issues/62)) ([8ea8bc4](https://github.com/sondresjolyst/altinnendata-app/commit/8ea8bc46c591db2cbfe15559ad94ccd2baf20425))
+* **npm:** bump the next group with 2 updates ([#61](https://github.com/sondresjolyst/altinnendata-app/issues/61)) ([967c186](https://github.com/sondresjolyst/altinnendata-app/commit/967c1868750bfab563fe50d60863438b8c838692))
+* **npm:** bump the testing group with 2 updates ([#63](https://github.com/sondresjolyst/altinnendata-app/issues/63)) ([e871213](https://github.com/sondresjolyst/altinnendata-app/commit/e871213cf6d78e31cfd45e06df8e6106e7800f1b))
+
 ## [1.5.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.1...v1.5.2) (2026-08-30)
 
 
