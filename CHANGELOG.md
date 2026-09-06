@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.3...v1.6.0) (2026-09-06)
+
+
+### Features
+
+* translate build text between languages ([#66](https://github.com/sondresjolyst/altinnendata-app/issues/66)) ([dfcc0ca](https://github.com/sondresjolyst/altinnendata-app/commit/dfcc0ca55821cd7a8f92dac51d27e00ab2b11bc6))
+
 ## [1.5.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.2...v1.5.3) (2026-09-06)
 
 
