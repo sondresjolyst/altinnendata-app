@@ -31,7 +31,10 @@ server-rendered for speed and SEO.
 Every page lives under a locale segment — `/no/...` and `/en/...` — and `/`
 redirects to Norwegian; visitors switch language themselves. UI strings come from
 `src/i18n/locales/*.json`; content written by an admin (front page, builds,
-legal pages) is stored per language in the API.
+legal pages) is stored per language in the API. A build's text is machine
+translated into the other languages — on FINN import, or from the Translate
+button above the language tabs — by a self-hosted
+[LibreTranslate](https://github.com/LibreTranslate/LibreTranslate).
 
 To add a language: add its tag to `LOCALES` in `src/i18n/config.ts`, drop in a
 dictionary file next to the others, add the same tag to `Locales.Supported` in
@@ -59,6 +62,12 @@ npm run dev            # http://localhost:3000
 [altinnendata-api](https://github.com/sondresjolyst/altinnendata-api) must be running and
 reachable at `NEXT_PUBLIC_API_URL`.
 
+Translation needs a LibreTranslate instance; it downloads its models on first boot:
+
+```bash
+docker run -d --name libretranslate -p 5055:5000 -e LT_LOAD_ONLY=en,nb libretranslate/libretranslate
+```
+
 ### Environment
 
 | Variable                  | What it's for                                           |
@@ -67,6 +76,8 @@ reachable at `NEXT_PUBLIC_API_URL`.
 | `NEXTAUTH_URL`            | This app's URL (e.g. `http://localhost:3000`).          |
 | `NEXTAUTH_SECRET`         | next-auth session secret.                               |
 | `ALTINNENDATA_API_JWT_SECRET` | Must match the API's `Jwt__Key` (verifies its tokens).  |
+| `LIBRETRANSLATE_URL`      | LibreTranslate instance (e.g. `http://localhost:5055`). Unset turns translation off. |
+| `LIBRETRANSLATE_API_KEY`  | Only for an instance that requires a key.               |
 
 ### Scripts
 
