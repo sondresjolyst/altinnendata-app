@@ -19,13 +19,13 @@ export default function BuildCard({ build, locale }: { build: BuildSummary; loca
             href={localeHref(locale, `/builds/${build.slug}`)}
             className="group block rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-gray-300 transition"
         >
-            <div className="aspect-video bg-gray-100 relative overflow-hidden">
+            <div className="aspect-video bg-gray-100 relative overflow-hidden flex items-center justify-center">
                 {build.coverImageId ? (
                     <ContentImage
                         imageId={build.coverImageId}
                         alt={build.title}
                         sizes="(max-width: 768px) 100vw, 400px"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300 text-2xl font-black">
