@@ -138,7 +138,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                                         </th>
                                         <td className="px-4 py-2.5 text-gray-900 sm:px-5">
                                             {component.name}
-                                            {component.details && <span className="text-gray-500"> — {component.details}</span>}
+                                            {component.details && <span className="whitespace-pre-line text-gray-500"> — {component.details}</span>}
                                         </td>
                                     </tr>
                                 ))}
