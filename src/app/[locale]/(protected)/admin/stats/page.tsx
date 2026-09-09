@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AdminService, { AdminStats, DailyStat, EmailStats } from '@/services/adminService';
 import StatHistoryChart from '@/components/StatHistoryChart';
+import { formatPrice } from '@/lib/format';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 function formatBytes(n: number): string {
@@ -14,7 +15,7 @@ function formatBytes(n: number): string {
 }
 
 export default function AdminStatsPage() {
-    const { dict } = useDictionary();
+    const { dict, locale } = useDictionary();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [history, setHistory] = useState<DailyStat[]>([]);
     const [email, setEmail] = useState<EmailStats | null>(null);
@@ -29,9 +30,19 @@ export default function AdminStatsPage() {
         { label: dict.stats.users, value: stats.totalUsers },
         { label: dict.stats.builds, value: stats.publishedBuilds },
         { label: dict.admin.drafts, value: stats.draftBuilds },
+        { label: dict.builds.availability.sold, value: stats.soldBuilds },
         { label: dict.stats.parts, value: stats.catalogParts },
         { label: dict.stats.images, value: stats.contentImages },
     ] : [];
+
+    // An API that predates the sales fields sends none of them; show a dash rather than NaN.
+    const countOrDash = (value: number | undefined) => (typeof value === 'number' ? value : '—');
+    const priceOrDash = (value: number | undefined) => (typeof value === 'number' ? formatPrice(value, locale) : '—');
+
+    const priced = stats ? stats.soldBuilds - stats.soldWithoutPrice : 0;
+    const averageSoldPrice = stats && typeof stats.revenueNok === 'number' && priced > 0
+        ? Math.round(stats.revenueNok / priced)
+        : undefined;
 
     return (
         <div className="space-y-8">
@@ -47,6 +58,35 @@ export default function AdminStatsPage() {
             <div className="rounded-2xl border border-gray-200 p-5">
                 <h2 className="font-bold text-gray-900 mb-4">{dict.admin.overTime}</h2>
                 <StatHistoryChart data={history} />
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-gray-200 p-5">
+                    <h2 className="font-bold text-gray-900 mb-3">{dict.admin.builds}</h2>
+                    {stats ? (
+                        <div className="space-y-1.5 text-sm text-gray-700">
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.builds.availability.available}</span><span className="tabular-nums">{countOrDash(stats.availableBuilds)}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.builds.availability.reserved}</span><span className="tabular-nums">{countOrDash(stats.reservedBuilds)}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.builds.availability.sold}</span><span className="tabular-nums">{countOrDash(stats.soldBuilds)}</span></div>
+                        </div>
+                    ) : <p className="text-sm text-gray-500">{dict.common.loading}</p>}
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 p-5">
+                    <h2 className="font-bold text-gray-900 mb-3">{dict.admin.sales}</h2>
+                    {stats ? (
+                        <div className="space-y-1.5 text-sm text-gray-700">
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.revenue}</span><span className="tabular-nums font-semibold text-gray-900">{priceOrDash(stats.revenueNok)}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.averagePrice}</span><span className="tabular-nums">{priceOrDash(averageSoldPrice)}</span></div>
+                            {stats.soldWithoutPrice > 0 && (
+                                <div className="flex justify-between"><span className="text-gray-500">{dict.admin.soldWithoutPrice}</span><span className="tabular-nums">{stats.soldWithoutPrice}</span></div>
+                            )}
+                            {stats.soldWithoutDate > 0 && (
+                                <div className="flex justify-between"><span className="text-gray-500">{dict.admin.soldWithoutDate}</span><span className="tabular-nums">{stats.soldWithoutDate}</span></div>
+                            )}
+                        </div>
+                    ) : <p className="text-sm text-gray-500">{dict.common.loading}</p>}
+                </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">

@@ -62,6 +62,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const [availability, setAvailability] = useState<Availability>(build?.availability ?? 'Available');
     const [priceNok, setPriceNok] = useState(build?.priceNok?.toString() ?? '');
     const [builtOn, setBuiltOn] = useState(build?.builtOn ?? '');
+    const [soldOn, setSoldOn] = useState(build?.soldOn ?? '');
     const [coverImageId, setCoverImageId] = useState<string | null>(build?.coverImageId ?? null);
     const [published, setPublished] = useState(build?.published ?? false);
     const [sortOrder, setSortOrder] = useState(build?.sortOrder ?? 0);
@@ -189,6 +190,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             availability,
             priceNok: priceNok === '' ? null : Number(priceNok),
             builtOn: builtOn || null,
+            soldOn: availability === 'Sold' ? soldOn || null : null,
             finnUrl: finnUrl.trim() || null,
             published,
             sortOrder,
@@ -251,6 +253,9 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
                 <TextInput label={dict.admin.price} type="number" value={priceNok} onChange={e => setPriceNok(e.target.value)} />
                 <TextInput label={dict.builds.builtOn} type="date" value={builtOn} onChange={e => setBuiltOn(e.target.value)} />
+                {availability === 'Sold' && (
+                    <TextInput label={dict.admin.soldOn} type="date" value={soldOn} onChange={e => setSoldOn(e.target.value)} />
+                )}
                 <TextInput label={dict.admin.sortOrder} type="number" value={sortOrder.toString()} onChange={e => setSortOrder(Number(e.target.value) || 0)} />
 
                 <div className="flex items-end">

@@ -28,6 +28,7 @@ export interface BuildSummary {
     availability: Availability;
     priceNok: number | null;
     builtOn: string | null;
+    soldOn: string | null;
     coverImageId: string | null;
     published: boolean;
     sortOrder: number;
@@ -60,6 +61,7 @@ export interface BuildAdmin {
     availability: Availability;
     priceNok: number | null;
     builtOn: string | null;
+    soldOn: string | null;
     coverImageId: string | null;
     finnUrl: string | null;
     published: boolean;
@@ -76,6 +78,7 @@ export interface BuildInput {
     availability: Availability;
     priceNok: number | null;
     builtOn: string | null;
+    soldOn: string | null;
     finnUrl: string | null;
     published: boolean;
     sortOrder: number;
