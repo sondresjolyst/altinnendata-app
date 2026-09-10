@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.6.0...v1.7.0) (2026-09-10)
+
+
+### Features
+
+* build classes, sales stats and catalog editing ([#71](https://github.com/sondresjolyst/altinnendata-app/issues/71)) ([fd4e652](https://github.com/sondresjolyst/altinnendata-app/commit/fd4e652bd38fbf2f0c094f5d575375285c1cfc2a))
+
+
+### Dependencies
+
+* **npm:** bump `browserslist` from 4.28.2 to 4.28.9 ([#69](https://github.com/sondresjolyst/altinnendata-app/issues/69)) ([ef823dd](https://github.com/sondresjolyst/altinnendata-app/commit/ef823dd4daf116acc6ec0892afd82d780c574395))
+
 ## [1.6.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.5.3...v1.6.0) (2026-09-06)
 
 
