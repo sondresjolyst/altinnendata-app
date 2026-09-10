@@ -33,14 +33,17 @@ export default function StatHistoryChart({ data }: { data: DailyStat[] }) {
     const shown = SERIES.filter(s => !hidden.includes(s.key));
     const innerW = W - PAD.left - PAD.right;
     const innerH = H - PAD.top - PAD.bottom;
-    const maxVal = Math.max(1, ...data.flatMap(d => shown.map(s => d[s.key])));
+    // An API without a given series sends no value; treat it as zero rather than poisoning
+    // the whole scale with NaN.
+    const value = (d: DailyStat, key: SeriesKey) => Number(d[key]) || 0;
+    const maxVal = Math.max(1, ...data.flatMap(d => shown.map(s => value(d, s.key))));
     const n = data.length;
 
     const x = (i: number) => PAD.left + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
     const y = (v: number) => PAD.top + innerH - (v / maxVal) * innerH;
 
     const path = (key: SeriesKey) =>
-        data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(d[key]).toFixed(1)}`).join(' ');
+        data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(value(d, key)).toFixed(1)}`).join(' ');
 
     const ticks = [...new Set([0, Math.round(maxVal / 2), maxVal])];
     const labelIdx = n === 1 ? [0] : [0, Math.floor((n - 1) / 2), n - 1];

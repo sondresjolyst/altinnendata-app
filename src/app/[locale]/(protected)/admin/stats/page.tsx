@@ -26,20 +26,20 @@ export default function AdminStatsPage() {
         AdminService.getEmailStats().then(setEmail).catch(() => { });
     }, []);
 
-    const tiles = stats ? [
-        { label: dict.stats.users, value: stats.totalUsers },
-        { label: dict.stats.builds, value: stats.publishedBuilds },
-        { label: dict.admin.drafts, value: stats.draftBuilds },
-        { label: dict.builds.availability.sold, value: stats.soldBuilds },
-        { label: dict.stats.parts, value: stats.catalogParts },
-        { label: dict.stats.images, value: stats.contentImages },
-    ] : [];
-
     // An API that predates the sales fields sends none of them; show a dash rather than NaN.
     const countOrDash = (value: number | undefined) => (typeof value === 'number' ? value : '—');
     const priceOrDash = (value: number | undefined) => (typeof value === 'number' ? formatPrice(value, locale) : '—');
 
-    const priced = stats ? stats.soldBuilds - stats.soldWithoutPrice : 0;
+    const tiles = stats ? [
+        { label: dict.stats.users, value: stats.totalUsers },
+        { label: dict.stats.builds, value: stats.publishedBuilds },
+        { label: dict.admin.drafts, value: stats.draftBuilds },
+        { label: dict.builds.availability.sold, value: countOrDash(stats.soldBuilds) },
+        { label: dict.stats.parts, value: stats.catalogParts },
+        { label: dict.stats.images, value: stats.contentImages },
+    ] : [];
+
+    const priced = stats ? (stats.soldBuilds ?? 0) - (stats.soldWithoutPrice ?? 0) : 0;
     const averageSoldPrice = stats && typeof stats.revenueNok === 'number' && priced > 0
         ? Math.round(stats.revenueNok / priced)
         : undefined;
@@ -78,10 +78,10 @@ export default function AdminStatsPage() {
                         <div className="space-y-1.5 text-sm text-gray-700">
                             <div className="flex justify-between"><span className="text-gray-500">{dict.admin.revenue}</span><span className="tabular-nums font-semibold text-gray-900">{priceOrDash(stats.revenueNok)}</span></div>
                             <div className="flex justify-between"><span className="text-gray-500">{dict.admin.averagePrice}</span><span className="tabular-nums">{priceOrDash(averageSoldPrice)}</span></div>
-                            {stats.soldWithoutPrice > 0 && (
+                            {(stats.soldWithoutPrice ?? 0) > 0 && (
                                 <div className="flex justify-between"><span className="text-gray-500">{dict.admin.soldWithoutPrice}</span><span className="tabular-nums">{stats.soldWithoutPrice}</span></div>
                             )}
-                            {stats.soldWithoutDate > 0 && (
+                            {(stats.soldWithoutDate ?? 0) > 0 && (
                                 <div className="flex justify-between"><span className="text-gray-500">{dict.admin.soldWithoutDate}</span><span className="tabular-nums">{stats.soldWithoutDate}</span></div>
                             )}
                         </div>

@@ -5,12 +5,13 @@ export interface AdminStats {
     totalUsers: number;
     publishedBuilds: number;
     draftBuilds: number;
-    soldBuilds: number;
-    reservedBuilds: number;
-    availableBuilds: number;
-    revenueNok: number;
-    soldWithoutPrice: number;
-    soldWithoutDate: number;
+    /** Optional: an API older than the sales stats sends none of these. */
+    soldBuilds?: number;
+    reservedBuilds?: number;
+    availableBuilds?: number;
+    revenueNok?: number;
+    soldWithoutPrice?: number;
+    soldWithoutDate?: number;
     catalogParts: number;
     contentImages: number;
     storageUsedBytes: number;
@@ -23,7 +24,7 @@ export interface DailyStat {
     totalUsers: number;
     publishedBuilds: number;
     draftBuilds: number;
-    soldBuilds: number;
+    soldBuilds?: number;
     catalogParts: number;
     contentImages: number;
 }
