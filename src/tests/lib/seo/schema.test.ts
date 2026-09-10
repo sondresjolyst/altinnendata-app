@@ -28,6 +28,7 @@ const build: BuildDetail = {
     priceNok: 6999,
     builtOn: null,
     soldOn: null,
+    buildClass: null,
     coverImageId: 'cover',
     published: true,
     sortOrder: 0,

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
+import BuildClassService, { BuildClass } from '@/services/buildClassService';
 import ComponentService, { CategoryTree } from '@/services/componentService';
 import FinnService from '@/services/finnService';
 import ImageService, { imagePath } from '@/services/imageService';
@@ -59,6 +60,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     );
 
     const [category, setCategory] = useState(build?.category ?? '');
+    const [buildClassId, setBuildClassId] = useState<number | ''>(build?.buildClass?.id ?? '');
     const [availability, setAvailability] = useState<Availability>(build?.availability ?? 'Available');
     const [priceNok, setPriceNok] = useState(build?.priceNok?.toString() ?? '');
     const [builtOn, setBuiltOn] = useState(build?.builtOn ?? '');
@@ -82,6 +84,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const [uploading, setUploading] = useState(false);
 
     const [tree, setTree] = useState<CategoryTree[]>([]);
+    const [classes, setClasses] = useState<BuildClass[]>([]);
     const [saving, setSaving] = useState(false);
 
     const moveImage = (index: number, delta: number) => {
@@ -167,6 +170,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
     useEffect(() => {
         ComponentService.getTree(DEFAULT_LOCALE).then(setTree).catch(() => setTree([]));
+        BuildClassService.list(DEFAULT_LOCALE).then(setClasses).catch(() => setClasses([]));
     }, []);
 
     const patchTranslation = (locale: Locale, changes: Partial<BuildTranslation>) =>
@@ -187,6 +191,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
         const input: BuildInput = {
             category: category || null,
+            buildClassId: buildClassId === '' ? null : Number(buildClassId),
             availability,
             priceNok: priceNok === '' ? null : Number(priceNok),
             builtOn: builtOn || null,
@@ -223,6 +228,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     };
 
     const translation = translations[activeLocale];
+    const selectedClass = classes.find(c => c.id === buildClassId);
     const allParts = tree.flatMap(category => category.parts);
 
     return (
@@ -238,6 +244,21 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                         <option value="">—</option>
                         {CATEGORIES.map(key => <option key={key} value={key}>{CATEGORY_LABELS[key]}</option>)}
                     </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.buildClass}</label>
+                    <select
+                        value={buildClassId}
+                        onChange={e => setBuildClassId(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    >
+                        <option value="">—</option>
+                        {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                    {selectedClass?.description && (
+                        <p className="mt-1 text-xs text-gray-500">{selectedClass.description}</p>
+                    )}
                 </div>
 
                 <div>

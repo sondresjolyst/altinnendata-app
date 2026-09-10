@@ -21,11 +21,20 @@ export interface BuildComponent {
     sortOrder: number;
 }
 
+/** The build's class in the requested locale, as the card and spec table show it. */
+export interface BuildClassRef {
+    id: number;
+    key: string;
+    name: string;
+    description: string | null;
+}
+
 export interface BuildSummary {
     id: number;
     slug: string;
     category: string | null;
     availability: Availability;
+    buildClass: BuildClassRef | null;
     priceNok: number | null;
     builtOn: string | null;
     soldOn: string | null;
@@ -59,6 +68,7 @@ export interface BuildAdmin {
     slug: string;
     category: string | null;
     availability: Availability;
+    buildClass: BuildClassRef | null;
     priceNok: number | null;
     builtOn: string | null;
     soldOn: string | null;
@@ -76,6 +86,7 @@ export interface BuildAdmin {
 export interface BuildInput {
     category: string | null;
     availability: Availability;
+    buildClassId: number | null;
     priceNok: number | null;
     builtOn: string | null;
     soldOn: string | null;

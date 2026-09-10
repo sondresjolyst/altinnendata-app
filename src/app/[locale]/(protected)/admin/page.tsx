@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { CpuChipIcon, Cog6ToothIcon, Squares2X2Icon, PresentationChartLineIcon, UsersIcon, ScaleIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { CpuChipIcon, Cog6ToothIcon, Squares2X2Icon, PresentationChartLineIcon, TagIcon, UsersIcon, ScaleIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
@@ -12,6 +12,7 @@ export default function AdminOverview() {
         { href: '/admin/content', icon: Squares2X2Icon, title: dict.admin.content, text: dict.admin.cardContent },
         { href: '/admin/builds', icon: CpuChipIcon, title: dict.admin.builds, text: dict.admin.cardBuilds },
         { href: '/admin/components', icon: WrenchScrewdriverIcon, title: dict.admin.components, text: dict.admin.cardComponents },
+        { href: '/admin/classes', icon: TagIcon, title: dict.admin.classes, text: dict.admin.cardClasses },
         { href: '/admin/legal', icon: ScaleIcon, title: dict.admin.legal, text: dict.admin.cardLegal },
         { href: '/admin/stats', icon: PresentationChartLineIcon, title: dict.admin.stats, text: dict.admin.cardStats },
         { href: '/admin/users', icon: UsersIcon, title: dict.admin.users, text: dict.admin.cardUsers },
