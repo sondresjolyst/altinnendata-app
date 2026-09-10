@@ -20,6 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: localeHref(locale, '/admin/content'), label: dict.admin.content },
         { href: localeHref(locale, '/admin/builds'), label: dict.admin.builds },
         { href: localeHref(locale, '/admin/components'), label: dict.admin.components },
+        { href: localeHref(locale, '/admin/classes'), label: dict.admin.classes },
         { href: localeHref(locale, '/admin/legal'), label: dict.admin.legal },
         { href: localeHref(locale, '/admin/stats'), label: dict.admin.stats },
         { href: localeHref(locale, '/admin/users'), label: dict.admin.users },

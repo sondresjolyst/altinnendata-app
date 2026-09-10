@@ -49,7 +49,7 @@ export default async function LocaleLayout({
                     <Providers initialBranding={branding}>
                         <Navbar />
                         <main className="flex-1">{children}</main>
-                        <Footer />
+                        <Footer company={company} />
                     </Providers>
                 </DictionaryProvider>
             </body>

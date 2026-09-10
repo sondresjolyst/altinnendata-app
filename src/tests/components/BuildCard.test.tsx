@@ -10,6 +10,8 @@ const base: BuildSummary = {
     availability: 'Available',
     priceNok: 18990,
     builtOn: '2026-05-01',
+    soldOn: null,
+    buildClass: null,
     coverImageId: null,
     published: true,
     sortOrder: 0,

@@ -84,6 +84,16 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                         <p className="mt-6 text-3xl font-extrabold text-gray-900">{formatPrice(build.priceNok, locale)}</p>
                     )}
 
+                    {/* The class name carries its own wording, so it stands on its own rather than behind a label. */}
+                    {build.buildClass && (
+                        <div className="mt-4">
+                            <p className="font-bold text-gray-900">{build.buildClass.name}</p>
+                            {build.buildClass.description && (
+                                <p className="mt-0.5 text-sm text-gray-600">{build.buildClass.description}</p>
+                            )}
+                        </div>
+                    )}
+
                     <dl className="mt-6 space-y-1 text-sm text-gray-500">
                         {build.builtOn && (
                             <div className="flex gap-2">
@@ -138,7 +148,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                                         </th>
                                         <td className="px-4 py-2.5 text-gray-900 sm:px-5">
                                             {component.name}
-                                            {component.details && <span className="text-gray-500"> — {component.details}</span>}
+                                            {component.details && <span className="whitespace-pre-line text-gray-500"> — {component.details}</span>}
                                         </td>
                                     </tr>
                                 ))}

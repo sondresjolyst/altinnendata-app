@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useBranding } from '@/components/BrandingProvider';
-import { COMPANY } from '@/lib/company';
+import { formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
-export default function Footer() {
+export default function Footer({ company }: { company: CompanyInfo }) {
     const year = new Date().getFullYear();
     const { logoUrl } = useBranding();
     const { locale, dict } = useDictionary();
@@ -20,9 +20,9 @@ export default function Footer() {
                 <div className="flex items-center gap-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={logoUrl ?? '/logo.png'} alt="" className="h-7 w-7 rounded-md object-cover" />
-                    <span className="text-sm font-semibold text-gray-900">{COMPANY.name}</span>
-                    {COMPANY.orgNumber && (
-                        <span className="text-xs text-gray-500">{dict.footer.orgNumber} {COMPANY.orgNumber}</span>
+                    <span className="text-sm font-semibold text-gray-900">{company.name}</span>
+                    {company.orgNumber && (
+                        <span className="text-xs text-gray-500">{dict.footer.orgNumber} {formatOrgNumber(company)}</span>
                     )}
                 </div>
 
@@ -37,7 +37,7 @@ export default function Footer() {
                 </nav>
 
                 <p className="text-xs text-gray-400">
-                    © {year} {COMPANY.name} · {dict.footer.createdBy}{' '}
+                    © {year} {company.name} · {dict.footer.createdBy}{' '}
                     <span className="text-gray-500">Sjølyst Innovations</span>
                 </p>
             </div>

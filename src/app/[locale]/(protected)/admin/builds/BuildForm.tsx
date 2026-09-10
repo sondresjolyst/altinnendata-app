@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
+import BuildClassService, { BuildClass } from '@/services/buildClassService';
 import ComponentService, { CategoryTree } from '@/services/componentService';
 import FinnService from '@/services/finnService';
 import ImageService, { imagePath } from '@/services/imageService';
 import TranslationService, { TranslatableFields } from '@/services/translationService';
 import { ImagePicker } from '@/components/SectionsEditor';
 import LocaleTabs from '@/components/LocaleTabs';
+import TextArea from '@/components/TextArea';
 import TextInput from '@/components/TextInput';
 import Toggle from '@/components/Toggle';
 import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
@@ -58,9 +60,11 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     );
 
     const [category, setCategory] = useState(build?.category ?? '');
+    const [buildClassId, setBuildClassId] = useState<number | ''>(build?.buildClass?.id ?? '');
     const [availability, setAvailability] = useState<Availability>(build?.availability ?? 'Available');
     const [priceNok, setPriceNok] = useState(build?.priceNok?.toString() ?? '');
     const [builtOn, setBuiltOn] = useState(build?.builtOn ?? '');
+    const [soldOn, setSoldOn] = useState(build?.soldOn ?? '');
     const [coverImageId, setCoverImageId] = useState<string | null>(build?.coverImageId ?? null);
     const [published, setPublished] = useState(build?.published ?? false);
     const [sortOrder, setSortOrder] = useState(build?.sortOrder ?? 0);
@@ -80,6 +84,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const [uploading, setUploading] = useState(false);
 
     const [tree, setTree] = useState<CategoryTree[]>([]);
+    const [classes, setClasses] = useState<BuildClass[]>([]);
     const [saving, setSaving] = useState(false);
 
     const moveImage = (index: number, delta: number) => {
@@ -165,6 +170,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
     useEffect(() => {
         ComponentService.getTree(DEFAULT_LOCALE).then(setTree).catch(() => setTree([]));
+        BuildClassService.list(DEFAULT_LOCALE).then(setClasses).catch(() => setClasses([]));
     }, []);
 
     const patchTranslation = (locale: Locale, changes: Partial<BuildTranslation>) =>
@@ -185,9 +191,11 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
         const input: BuildInput = {
             category: category || null,
+            buildClassId: buildClassId === '' ? null : Number(buildClassId),
             availability,
             priceNok: priceNok === '' ? null : Number(priceNok),
             builtOn: builtOn || null,
+            soldOn: availability === 'Sold' ? soldOn || null : null,
             finnUrl: finnUrl.trim() || null,
             published,
             sortOrder,
@@ -220,6 +228,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     };
 
     const translation = translations[activeLocale];
+    const selectedClass = classes.find(c => c.id === buildClassId);
     const allParts = tree.flatMap(category => category.parts);
 
     return (
@@ -238,6 +247,21 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 </div>
 
                 <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.buildClass}</label>
+                    <select
+                        value={buildClassId}
+                        onChange={e => setBuildClassId(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    >
+                        <option value="">—</option>
+                        {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                    {selectedClass?.description && (
+                        <p className="mt-1 text-xs text-gray-500">{selectedClass.description}</p>
+                    )}
+                </div>
+
+                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.availability.label}</label>
                     <select
                         value={availability}
@@ -250,6 +274,9 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
                 <TextInput label={dict.admin.price} type="number" value={priceNok} onChange={e => setPriceNok(e.target.value)} />
                 <TextInput label={dict.builds.builtOn} type="date" value={builtOn} onChange={e => setBuiltOn(e.target.value)} />
+                {availability === 'Sold' && (
+                    <TextInput label={dict.admin.soldOn} type="date" value={soldOn} onChange={e => setSoldOn(e.target.value)} />
+                )}
                 <TextInput label={dict.admin.sortOrder} type="number" value={sortOrder.toString()} onChange={e => setSortOrder(Number(e.target.value) || 0)} />
 
                 <div className="flex items-end">
@@ -366,60 +393,65 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Deleliste</h3>
                 <div className="space-y-2">
                     {parts.map((part, i) => (
-                        <div key={i} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 p-3">
-                            <label className="text-xs text-gray-600">
-                                Del fra katalog
-                                <select
-                                    value={part.componentPartId ?? ''}
-                                    onChange={e => {
-                                        const id = e.target.value === '' ? null : Number(e.target.value);
-                                        const chosen = allParts.find(p => p.id === id);
-                                        patchPart(i, {
-                                            componentPartId: id,
-                                            componentCategoryId: chosen?.categoryId ?? part.componentCategoryId,
-                                        });
-                                    }}
-                                    className="mt-1 block w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                                >
-                                    <option value="">— fritekst —</option>
-                                    {tree.map(category => (
-                                        <optgroup key={category.id} label={category.name}>
-                                            {category.parts.map(p => (
-                                                <option key={p.id} value={p.id}>
-                                                    {[p.manufacturerName, p.name].filter(Boolean).join(' ')}
-                                                </option>
-                                            ))}
-                                        </optgroup>
-                                    ))}
-                                </select>
-                            </label>
-
-                            {part.componentPartId == null && (
-                                <>
-                                    <label className="text-xs text-gray-600">
-                                        Kategori
+                        <div key={i} className="space-y-3 rounded-lg border border-gray-200 p-3">
+                            <div className="flex items-end gap-3">
+                                <div className="grid flex-1 gap-3 sm:grid-cols-3">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Del fra katalog</label>
                                         <select
-                                            value={part.componentCategoryId ?? ''}
-                                            onChange={e => patchPart(i, { componentCategoryId: e.target.value === '' ? null : Number(e.target.value) })}
-                                            className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                            value={part.componentPartId ?? ''}
+                                            onChange={e => {
+                                                const id = e.target.value === '' ? null : Number(e.target.value);
+                                                const chosen = allParts.find(p => p.id === id);
+                                                patchPart(i, {
+                                                    componentPartId: id,
+                                                    componentCategoryId: chosen?.categoryId ?? part.componentCategoryId,
+                                                });
+                                            }}
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                                         >
-                                            <option value="">—</option>
-                                            {tree.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                            <option value="">— fritekst —</option>
+                                            {tree.map(category => (
+                                                <optgroup key={category.id} label={category.name}>
+                                                    {category.parts.map(p => (
+                                                        <option key={p.id} value={p.id}>
+                                                            {[p.manufacturerName, p.name].filter(Boolean).join(' ')}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                            ))}
                                         </select>
-                                    </label>
-                                    <div className="flex-1 min-w-[12rem]">
-                                        <TextInput label="Navn" value={part.name} onChange={e => patchPart(i, { name: e.target.value })} />
                                     </div>
-                                </>
-                            )}
 
-                            <div className="flex-1 min-w-[10rem]">
-                                <TextInput label="Detaljer" value={part.details} onChange={e => patchPart(i, { details: e.target.value })} />
+                                    {part.componentPartId == null && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                                                <select
+                                                    value={part.componentCategoryId ?? ''}
+                                                    onChange={e => patchPart(i, { componentCategoryId: e.target.value === '' ? null : Number(e.target.value) })}
+                                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                                >
+                                                    <option value="">—</option>
+                                                    {tree.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                </select>
+                                            </div>
+                                            <TextInput label="Navn" value={part.name} onChange={e => patchPart(i, { name: e.target.value })} />
+                                        </>
+                                    )}
+                                </div>
+
+                                <button type="button" onClick={() => setParts(parts.filter((_, j) => j !== i))} className="p-2 rounded-lg text-red-500 hover:bg-red-50">
+                                    <TrashIcon className="h-4 w-4" />
+                                </button>
                             </div>
 
-                            <button type="button" onClick={() => setParts(parts.filter((_, j) => j !== i))} className="p-2 rounded-lg text-red-500 hover:bg-red-50">
-                                <TrashIcon className="h-4 w-4" />
-                            </button>
+                            <TextArea
+                                label="Detaljer"
+                                rows={2}
+                                value={part.details}
+                                onChange={e => patchPart(i, { details: e.target.value })}
+                            />
                         </div>
                     ))}
                     <button
