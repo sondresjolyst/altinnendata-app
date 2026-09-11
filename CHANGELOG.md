@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.8.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.7.0...v1.8.0) (2026-09-11)
+
+
+### Features
+
+* part conditions and grouped admin builds ([#75](https://github.com/sondresjolyst/altinnendata-app/issues/75)) ([7a687fb](https://github.com/sondresjolyst/altinnendata-app/commit/7a687fb2d3b431ec3d700c4fcf79806dc89f3049))
+
+
+### Dependencies
+
+* **npm:** bump `sharp` from 0.35.3 to 0.35.4 ([#72](https://github.com/sondresjolyst/altinnendata-app/issues/72)) ([46e5982](https://github.com/sondresjolyst/altinnendata-app/commit/46e5982e4ec7d7326ffebdac88fdf7d848204ca1))
+
 ## [1.7.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.6.0...v1.7.0) (2026-09-10)
 
 
