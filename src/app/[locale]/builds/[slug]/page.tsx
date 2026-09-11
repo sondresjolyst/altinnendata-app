@@ -145,6 +145,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                                     <tr key={component.id}>
                                         <th scope="row" className="w-32 px-4 py-2.5 text-left align-top font-medium text-gray-500 sm:w-48 sm:px-5">
                                             {component.categoryName ?? component.categoryKey ?? ''}
+                                            {component.condition && <span className="font-normal"> ({component.condition.name})</span>}
                                         </th>
                                         <td className="px-4 py-2.5 text-gray-900 sm:px-5">
                                             {component.name}

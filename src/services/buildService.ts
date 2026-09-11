@@ -18,7 +18,15 @@ export interface BuildComponent {
     manufacturerName: string | null;
     name: string;
     details: string | null;
+    condition: ComponentConditionRef | null;
     sortOrder: number;
+}
+
+/** A part's condition in the requested locale, e.g. "Brukt". */
+export interface ComponentConditionRef {
+    id: number;
+    key: string;
+    name: string;
 }
 
 /** The build's class in the requested locale, as the card and spec table show it. */
@@ -98,6 +106,7 @@ export interface BuildInput {
     components: Array<{
         componentPartId: number | null;
         componentCategoryId: number | null;
+        componentConditionId: number | null;
         name: string | null;
         details: string | null;
         sortOrder: number;

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import BuildClassService, { BuildClass } from '@/services/buildClassService';
+import ComponentConditionService, { ComponentCondition } from '@/services/componentConditionService';
 import ComponentService, { CategoryTree } from '@/services/componentService';
 import FinnService from '@/services/finnService';
 import ImageService, { imagePath } from '@/services/imageService';
@@ -37,6 +38,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 interface PartLine {
     componentPartId: number | null;
     componentCategoryId: number | null;
+    componentConditionId: number | null;
     name: string;
     details: string;
 }
@@ -72,6 +74,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         build?.components.map(c => ({
             componentPartId: c.componentPartId,
             componentCategoryId: c.componentCategoryId,
+            componentConditionId: c.condition?.id ?? null,
             name: c.componentPartId ? '' : c.name,
             details: c.details ?? '',
         })) ?? [],
@@ -85,6 +88,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
     const [tree, setTree] = useState<CategoryTree[]>([]);
     const [classes, setClasses] = useState<BuildClass[]>([]);
+    const [conditions, setConditions] = useState<ComponentCondition[]>([]);
     const [saving, setSaving] = useState(false);
 
     const moveImage = (index: number, delta: number) => {
@@ -171,6 +175,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     useEffect(() => {
         ComponentService.getTree(DEFAULT_LOCALE).then(setTree).catch(() => setTree([]));
         BuildClassService.list(DEFAULT_LOCALE).then(setClasses).catch(() => setClasses([]));
+        ComponentConditionService.list(DEFAULT_LOCALE).then(setConditions).catch(() => setConditions([]));
     }, []);
 
     const patchTranslation = (locale: Locale, changes: Partial<BuildTranslation>) =>
@@ -208,6 +213,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             components: parts.map((p, i) => ({
                 componentPartId: p.componentPartId,
                 componentCategoryId: p.componentCategoryId,
+                componentConditionId: p.componentConditionId,
                 name: p.componentPartId ? null : p.name.trim() || null,
                 details: p.details.trim() || null,
                 sortOrder: i,
@@ -395,7 +401,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                     {parts.map((part, i) => (
                         <div key={i} className="space-y-3 rounded-lg border border-gray-200 p-3">
                             <div className="flex items-end gap-3">
-                                <div className="grid flex-1 gap-3 sm:grid-cols-3">
+                                <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Del fra katalog</label>
                                         <select
@@ -439,6 +445,18 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                                             <TextInput label="Navn" value={part.name} onChange={e => patchPart(i, { name: e.target.value })} />
                                         </>
                                     )}
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.condition}</label>
+                                        <select
+                                            value={part.componentConditionId ?? ''}
+                                            onChange={e => patchPart(i, { componentConditionId: e.target.value === '' ? null : Number(e.target.value) })}
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                        >
+                                            <option value="">—</option>
+                                            {conditions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <button type="button" onClick={() => setParts(parts.filter((_, j) => j !== i))} className="p-2 rounded-lg text-red-500 hover:bg-red-50">
@@ -456,7 +474,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                     ))}
                     <button
                         type="button"
-                        onClick={() => setParts([...parts, { componentPartId: null, componentCategoryId: null, name: '', details: '' }])}
+                        onClick={() => setParts([...parts, { componentPartId: null, componentCategoryId: null, componentConditionId: null, name: '', details: '' }])}
                         className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
                     >
                         <PlusIcon className="h-4 w-4" /> Legg til del
