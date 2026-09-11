@@ -41,8 +41,8 @@ const build: BuildDetail = {
     description: null,
     imageIds: ['cover', 'second'],
     components: [
-        { id: 1, componentPartId: null, componentCategoryId: 1, categoryKey: 'cpu', categoryName: 'Prosessor', manufacturerName: null, name: 'Ryzen 7', details: null, sortOrder: 0 },
-        { id: 2, componentPartId: null, componentCategoryId: 9, categoryKey: 'other', categoryName: 'Annet', manufacturerName: null, name: 'Kabel', details: null, sortOrder: 1 },
+        { id: 1, componentPartId: null, componentCategoryId: 1, categoryKey: 'cpu', categoryName: 'Prosessor', manufacturerName: null, name: 'Ryzen 7', details: null, condition: null, sortOrder: 0 },
+        { id: 2, componentPartId: null, componentCategoryId: 9, categoryKey: 'other', categoryName: 'Annet', manufacturerName: null, name: 'Kabel', details: null, condition: null, sortOrder: 1 },
     ],
     availableLocales: ['no'],
 };
