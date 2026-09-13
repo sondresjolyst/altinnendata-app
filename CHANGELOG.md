@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.8.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.8.0...v1.8.1) (2026-09-13)
+
+
+### Dependencies
+
+* **npm:** bump @types/react-dom from 19.2.5 to 19.2.7 in the react group ([#76](https://github.com/sondresjolyst/altinnendata-app/issues/76)) ([39af93b](https://github.com/sondresjolyst/altinnendata-app/commit/39af93b6dfa0fa425f2a2538d948a08642aae9e2))
+* **npm:** bump eslint from 10.9.1 to 10.10.0 in the eslint group ([#79](https://github.com/sondresjolyst/altinnendata-app/issues/79)) ([27a4839](https://github.com/sondresjolyst/altinnendata-app/commit/27a483995db7b8c3a6d5b08d2d09ce822b3b14c3))
+* **npm:** bump postcss from 8.5.26 to 8.5.28 in the tailwind group ([#81](https://github.com/sondresjolyst/altinnendata-app/issues/81)) ([2cedceb](https://github.com/sondresjolyst/altinnendata-app/commit/2cedcebc9fd28db50f1d500ee813ffd5ad1360a2))
+* **npm:** bump the next group with 2 updates ([#78](https://github.com/sondresjolyst/altinnendata-app/issues/78)) ([6eaf9a3](https://github.com/sondresjolyst/altinnendata-app/commit/6eaf9a3a9458f66b1987c6135578589fd48e569e))
+* **npm:** bump the testing group across 1 directory with 2 updates ([#80](https://github.com/sondresjolyst/altinnendata-app/issues/80)) ([3937bc3](https://github.com/sondresjolyst/altinnendata-app/commit/3937bc330a1c1fe675b1a3bde3ad7c24b14f787d))
+
 ## [1.8.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.7.0...v1.8.0) (2026-09-11)
 
 
