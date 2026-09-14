@@ -83,6 +83,13 @@
     "useCase": "Hva skal maskinen brukes til?",
     "useCasePlaceholder": "Gaming, kontor, video …",
     "budget": "Budsjett (kr)",
+    "budgetPlaceholder": "Velg budsjett",
+    "budgetRanges": {
+      "5000-10000": "5 000 - 10 000 kr",
+      "10000-15000": "10 000 - 15 000 kr",
+      "15000-25000": "15 000 - 25 000 kr",
+      "25000+": "25 000+ kr"
+    },
     "build": "Gjelder datamaskin",
     "message": "Melding",
     "send": "Send",

@@ -6,7 +6,7 @@ export interface ContactRequest {
     email: string;
     phone?: string;
     useCase?: string;
-    budgetNok?: number | null;
+    budgetNok?: string | null;
     buildSlug?: string;
     message: string;
 }
