@@ -1,6 +1,8 @@
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
 import { formatApiError } from '@/lib/errors';
+import { revalidateTarget } from '@/lib/revalidate';
+import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 
 export interface Branding {
     logoData?: string | null;
@@ -25,12 +27,14 @@ const BrandingService = {
     },
 
     async update(form: FormData): Promise<Branding> {
+        let branding: Branding;
         try {
-            const response = await axiosInstance.put<Branding>('/branding', form);
-            return response.data;
+            branding = (await axiosInstance.put<Branding>('/branding', form)).data;
         } catch (error: unknown) {
             throw new Error(formatApiError(error, 'Failed to save branding'));
         }
+        await revalidateTarget(REVALIDATE_TARGETS.branding);
+        return branding;
     },
 };
 

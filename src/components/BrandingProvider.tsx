@@ -28,17 +28,6 @@ export default function BrandingProvider({ children, initial }: { children: Reac
         return () => clearInterval(id);
     }, [refresh, initial]);
 
-    useEffect(() => {
-        const iconUrl = toDataUrl(branding.iconData, branding.iconContentType);
-        if (!iconUrl) return;
-        const existing = document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]');
-        existing.forEach(el => el.remove());
-        const link = document.createElement('link');
-        link.rel = 'icon';
-        link.href = iconUrl;
-        document.head.appendChild(link);
-    }, [branding.iconData, branding.iconContentType]);
-
     const logoUrl = toDataUrl(branding.logoData, branding.logoContentType);
 
     return (
