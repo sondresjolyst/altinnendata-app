@@ -9,7 +9,7 @@ const valid = {
     email: 'ola@kunde.no',
     phone: '',
     useCase: 'gaming',
-    budgetNok: 20000,
+    budgetNok: '25000+',
     buildSlug: '',
     message: 'Hei!',
 };
@@ -34,8 +34,8 @@ describe('contactSchema', () => {
         expect(result.success).toBe(false);
     });
 
-    it('rejects a negative budget', () => {
-        const result = contactSchema.safeParse({ ...valid, budgetNok: -1 });
+    it('rejects an invalid budget range', () => {
+        const result = contactSchema.safeParse({ ...valid, budgetNok: '1-2' });
         expect(result.success).toBe(false);
     });
 });

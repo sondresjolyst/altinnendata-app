@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import TextInput from './TextInput';
 import ContactService from '@/services/contactService';
-import { contactSchema, fieldErrors, ContactInput } from '@/lib/validation';
+import { contactSchema, fieldErrors, budgetRanges, ContactInput } from '@/lib/validation';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function ContactForm({ build }: { build?: { slug: string; title: string } | null }) {
@@ -27,8 +27,8 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
     const update = (field: keyof ContactInput) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
         setForm(f => ({ ...f, [field]: e.target.value }));
 
-    const updateBudget = (e: React.ChangeEvent<HTMLInputElement>) =>
-        setForm(f => ({ ...f, budgetNok: e.target.value === '' ? null : Number(e.target.value) }));
+    const updateBudget = (e: React.ChangeEvent<HTMLSelectElement>) =>
+        setForm(f => ({ ...f, budgetNok: e.target.value === '' ? null : (e.target.value as ContactInput['budgetNok']) }));
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -72,14 +72,26 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
                             error={errors.useCase}
                             placeholder={dict.contact.useCasePlaceholder}
                         />
-                        <TextInput
-                            label={dict.contact.budget}
-                            name="budgetNok"
-                            type="number"
-                            value={form.budgetNok?.toString() ?? ''}
-                            onChange={updateBudget}
-                            error={errors.budgetNok}
-                        />
+                        <div>
+                            <label htmlFor="budgetNok" className="block text-sm font-medium text-gray-700 mb-1">
+                                {dict.contact.budget}
+                            </label>
+                            <select
+                                id="budgetNok"
+                                name="budgetNok"
+                                value={form.budgetNok ?? ''}
+                                onChange={updateBudget}
+                                className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.budgetNok ? 'border-red-400' : 'border-gray-300'}`}
+                            >
+                                <option value="">{dict.contact.budgetPlaceholder}</option>
+                                {budgetRanges.map(range => (
+                                    <option key={range} value={range}>
+                                        {dict.contact.budgetRanges[range]}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.budgetNok && <p className="mt-1 text-xs text-red-600">{errors.budgetNok}</p>}
+                        </div>
                     </>
                 )}
             </div>
