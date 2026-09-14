@@ -6,6 +6,7 @@ import Providers from "../providers";
 import Navbar from "./navbar";
 import Footer from "./footer";
 import { publicGetOptional } from "@/lib/publicApi";
+import { REVALIDATE_TARGETS } from "@/lib/cacheTags";
 import { Branding } from "@/services/brandingService";
 import { LOCALES, LOCALE_TAGS, isLocale, type Locale } from "@/i18n/config";
 import { siteMetadata } from "@/lib/seo/metadata";
@@ -35,7 +36,7 @@ export default async function LocaleLayout({
     if (!isLocale(locale)) notFound();
 
     const [branding, company] = await Promise.all([
-        publicGetOptional<Branding>("/branding").then(value => value ?? {}),
+        publicGetOptional<Branding>("/branding", { tags: [REVALIDATE_TARGETS.branding] }),
         getCompanyInfo(),
     ]);
 
@@ -46,7 +47,8 @@ export default async function LocaleLayout({
             <JsonLd nodes={[organizationNode(company), webSiteNode(locale)]} />
             <body className="min-h-screen flex flex-col bg-background text-foreground">
                 <DictionaryProvider locale={locale}>
-                    <Providers initialBranding={branding}>
+                    {/* Undefined when the API was unreachable, so the client fetches it instead. */}
+                    <Providers initialBranding={branding ?? undefined}>
                         <Navbar />
                         <main className="flex-1">{children}</main>
                         <Footer company={company} />

@@ -5,6 +5,7 @@ export const REVALIDATE_TARGETS = {
     home: 'home',
     builds: 'builds',
     legal: 'legal',
+    branding: 'branding',
 } as const;
 
 export type RevalidateTarget = (typeof REVALIDATE_TARGETS)[keyof typeof REVALIDATE_TARGETS];
@@ -17,4 +18,6 @@ export const TARGET_PATHS: Record<RevalidateTarget, string[]> = {
     home: perLocale(['']),
     builds: [...perLocale(['', '/builds', '/builds/[slug]']), '/sitemap.xml'],
     legal: perLocale(['/terms', '/privacy', '/cookies']),
+    // Every page renders branding through the layout, and so does /icon: the tag reaches them all.
+    branding: [],
 };

@@ -13,6 +13,7 @@ export default function proxy(req: NextRequest) {
 }
 
 // Keep in sync with LOCALES in src/i18n/config.ts — Turbopack requires a static matcher.
+// `icon$`: the generated favicon route has no file extension, so the dot rule misses it.
 export const config = {
-    matcher: ['/((?!api|_next|content-images|no|en|.*\\..*).*)'],
+    matcher: ['/((?!api|_next|content-images|no|en|icon$|.*\\..*).*)'],
 };
