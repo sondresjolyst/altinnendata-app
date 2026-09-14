@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.0...v1.9.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* serve favicon from branding settings ([#86](https://github.com/sondresjolyst/altinnendata-app/issues/86)) ([e77e1c1](https://github.com/sondresjolyst/altinnendata-app/commit/e77e1c128ec989548bea4b3d8727e5602982f902))
+
 ## [1.9.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.8.1...v1.9.0) (2026-09-14)
 
 
