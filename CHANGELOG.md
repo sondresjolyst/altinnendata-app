@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.8.1...v1.9.0) (2026-09-14)
+
+
+### Features
+
+* replace budget free text with range dropdown ([#84](https://github.com/sondresjolyst/altinnendata-app/issues/84)) ([51bc439](https://github.com/sondresjolyst/altinnendata-app/commit/51bc4394b6f2e28991b033561d32a2b71d271d26))
+
 ## [1.8.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.8.0...v1.8.1) (2026-09-13)
 
 
