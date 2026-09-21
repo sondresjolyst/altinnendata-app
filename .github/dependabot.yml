@@ -28,6 +28,17 @@ updates:
       patterns:
       - next
       - eslint-config-next
+    expo:
+      patterns:
+      - expo
+      - expo-*
+      - '@expo/*'
+    react-native:
+      patterns:
+      - react-native
+      - react-native-*
+      - '@react-native/*'
+      - '@react-navigation/*'
     eslint:
       patterns:
       - eslint
@@ -38,6 +49,9 @@ updates:
       - '@vitejs/*'
       - '@testing-library/*'
       - jsdom
+      - jest
+      - jest-*
+      - babel-jest
     tailwind:
       patterns:
       - tailwindcss
