@@ -1,6 +1,6 @@
 {
   "name": "altinnendata-app",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -16,8 +16,8 @@
     "jsonwebtoken": "^9.0.2",
     "next": "^16.3.5",
     "next-auth": "^4.24.15",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0",
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.1",
