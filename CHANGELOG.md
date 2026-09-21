@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.9.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.1...v1.9.2) (2026-09-21)
+
+
+### Dependencies
+
+* **docker:** bump `node` from 23.10.0-slim to 26.8-slim ([#91](https://github.com/sondresjolyst/altinnendata-app/issues/91)) ([c4c95a0](https://github.com/sondresjolyst/altinnendata-app/commit/c4c95a078edd916827c500f517b35986016a5b98))
+* **npm:** bump @types/node from 26.4.0 to 26.5.0 in the types group ([#90](https://github.com/sondresjolyst/altinnendata-app/issues/90)) ([d96ea59](https://github.com/sondresjolyst/altinnendata-app/commit/d96ea5919b8c862eefd92729f5ac779c6fd276a3))
+* **npm:** bump `@types/node` from 26.5.0 to 26.5.1 ([#97](https://github.com/sondresjolyst/altinnendata-app/issues/97)) ([4a702a1](https://github.com/sondresjolyst/altinnendata-app/commit/4a702a1f8d2e51a1b4f395438f352e0b3d6c76e8))
+* **npm:** bump `axios` from 1.19.0 to 1.20.0 ([#93](https://github.com/sondresjolyst/altinnendata-app/issues/93)) ([36189eb](https://github.com/sondresjolyst/altinnendata-app/commit/36189eba6ca4e5ef50bd8966ea4876c05eddcef7))
+* **npm:** bump `zod` from 4.4.3 to 4.5.4 ([#92](https://github.com/sondresjolyst/altinnendata-app/issues/92)) ([222921b](https://github.com/sondresjolyst/altinnendata-app/commit/222921b7dab39ad7c1839353849b1f1ebacd4497))
+* **npm:** bump the next group across 1 directory with 2 updates ([#96](https://github.com/sondresjolyst/altinnendata-app/issues/96)) ([a4a45f8](https://github.com/sondresjolyst/altinnendata-app/commit/a4a45f89b70d2f2eb9e9a8b2786847f2d41fff26))
+* **npm:** bump the react group across 1 directory with 4 updates ([#95](https://github.com/sondresjolyst/altinnendata-app/issues/95)) ([00cb933](https://github.com/sondresjolyst/altinnendata-app/commit/00cb9339a59b98180d73e9e88bc37a224fa6a6a1))
+
 ## [1.9.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.0...v1.9.1) (2026-09-14)
 
 
