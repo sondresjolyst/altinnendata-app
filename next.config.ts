@@ -24,6 +24,10 @@ function getApiBaseUrl(): string {
 
 const nextConfig: NextConfig = {
     output: 'standalone',
+    poweredByHeader: false,
+    // The container runs with a read-only root filesystem, and Next writes revalidated pages to
+    // .next/server/app rather than to .next/cache. Keep the incremental cache in memory.
+    experimental: { isrFlushToDisk: false },
     // How long a cache may go on serving a page after it goes stale. Next's default is a year,
     // long enough for a browser to hand back an old page and fetch the current one behind it.
     // Five minutes, matching the client router cache's stale time.
@@ -80,7 +84,10 @@ const nextConfig: NextConfig = {
             `frame-src ${frameSrc}`,
             `object-src ${objectSrc}`,
             "font-src 'self'",
+            "base-uri 'self'",
+            "form-action 'self'",
             "frame-ancestors 'none'",
+            "upgrade-insecure-requests",
         ].join('; ');
 
         const headers = [
@@ -88,19 +95,13 @@ const nextConfig: NextConfig = {
             { key: 'X-Frame-Options', value: 'DENY' },
             { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
             { key: 'X-DNS-Prefetch-Control', value: 'on' },
+            { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+            { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
             { key: 'Content-Security-Policy', value: csp },
         ];
 
-        const proxyHeaders = [
-            { key: 'X-Content-Type-Options', value: 'nosniff' },
-            { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-            { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-            { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
-        ];
-
         return [
-            { source: '/api/report/:path*', headers: proxyHeaders },
-            { source: '/((?!api/report/).*)', headers },
+            { source: '/:path*', headers },
         ];
     },
 };
