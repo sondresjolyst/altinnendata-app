@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.2...v1.9.3) (2026-09-25)
+
+
+### Bug Fixes
+
+* harden the image and the response headers ([#101](https://github.com/sondresjolyst/altinnendata-app/issues/101)) ([2b26bed](https://github.com/sondresjolyst/altinnendata-app/commit/2b26bedcedf0a06c76c4d90cd6f84baf457157ec))
+
 ## [1.9.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.1...v1.9.2) (2026-09-21)
 
 
