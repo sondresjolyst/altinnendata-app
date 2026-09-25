@@ -25,6 +25,9 @@ function getApiBaseUrl(): string {
 const nextConfig: NextConfig = {
     output: 'standalone',
     poweredByHeader: false,
+    // The container runs with a read-only root filesystem, and Next writes revalidated pages to
+    // .next/server/app rather than to .next/cache. Keep the incremental cache in memory.
+    experimental: { isrFlushToDisk: false },
     // How long a cache may go on serving a page after it goes stale. Next's default is a year,
     // long enough for a browser to hand back an old page and fetch the current one behind it.
     // Five minutes, matching the client router cache's stale time.
