@@ -5,14 +5,14 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Names the environment being built for. Anything but prod/production serves a robots.txt that
 # disallows crawling, so a test host is not indexed as a duplicate of the live site.
-ARG SITE_ENV
+ARG SITE_ENV=dev
 ENV SITE_ENV=${SITE_ENV}
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
@@ -24,13 +24,15 @@ FROM node:26.8-slim AS runner
 
 WORKDIR /app
 
-ARG SITE_ENV
+ARG SITE_ENV=dev
 ENV SITE_ENV=${SITE_ENV}
 ENV NODE_ENV=production
 
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/public ./public
+
+USER node
 
 EXPOSE 3000
 
