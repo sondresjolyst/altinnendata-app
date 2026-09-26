@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.5](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.4...v1.9.5) (2026-09-26)
+
+
+### Bug Fixes
+
+* gallery accessibility, spec table chevron, current logo and PWA icon ([#106](https://github.com/sondresjolyst/altinnendata-app/issues/106)) ([e8a651d](https://github.com/sondresjolyst/altinnendata-app/commit/e8a651d8f0584ab49834d9d5e1dce6c191a9c72a))
+
 ## [1.9.4](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.3...v1.9.4) (2026-09-26)
 
 
