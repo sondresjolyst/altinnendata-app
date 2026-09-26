@@ -62,21 +62,26 @@ export default function AdminConditionsPage() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editCondition, setEditCondition] = useState<ConditionDraft>(EMPTY_DRAFT);
 
+    // Leaves `loading` alone: the first render already shows the spinner, and an effect must not set state synchronously.
     const load = useCallback(() => {
-        setLoading(true);
         ComponentConditionService.list(DEFAULT_LOCALE)
             .then(setConditions)
             .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.conditionsLoadFailed))
             .finally(() => setLoading(false));
-    }, []);
+    }, [dict.admin.conditionsLoadFailed]);
 
-    useEffect(load, [load]);
+    useEffect(() => { load(); }, [load]);
+
+    const reload = () => {
+        setLoading(true);
+        reload();
+    };
 
     const run = async (action: () => Promise<unknown>, success: string) => {
         try {
             await action();
             toast.success(success);
-            load();
+            reload();
             return true;
         } catch (err) {
             toast.error(err instanceof Error ? err.message : dict.common.actionFailed);

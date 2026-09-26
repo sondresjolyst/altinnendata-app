@@ -112,8 +112,8 @@ export default function AdminComponentsPage() {
     const [editingPartId, setEditingPartId] = useState<number | null>(null);
     const [editPart, setEditPart] = useState<PartDraft>(EMPTY_PART);
 
+    // Leaves `loading` alone: the first render already shows the spinner, and an effect must not set state synchronously.
     const load = useCallback(() => {
-        setLoading(true);
         Promise.all([
             ComponentService.getTree(DEFAULT_LOCALE),
             ComponentService.listCategories(DEFAULT_LOCALE),
@@ -126,15 +126,20 @@ export default function AdminComponentsPage() {
             })
             .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.catalogLoadFailed))
             .finally(() => setLoading(false));
-    }, []);
+    }, [dict.admin.catalogLoadFailed]);
 
-    useEffect(load, [load]);
+    useEffect(() => { load(); }, [load]);
+
+    const reload = () => {
+        setLoading(true);
+        reload();
+    };
 
     const run = async (action: () => Promise<unknown>, success: string) => {
         try {
             await action();
             toast.success(success);
-            load();
+            reload();
             return true;
         } catch (err) {
             toast.error(err instanceof Error ? err.message : dict.common.actionFailed);

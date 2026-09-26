@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import Markdown from '@/components/Markdown';
 import ContentImage from '@/components/ContentImage';
 import type { ImageDimensionsMap } from '@/services/imageService';
@@ -10,7 +9,6 @@ import ContactForm from './ContactForm';
 import StatsBand from './StatsBand';
 import SmartLink from './SmartLink';
 import { localeHref, type Locale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
 
 function ScrimText({ text, big }: { text: string; big?: boolean }) {
     if (!text) return null;
@@ -33,7 +31,6 @@ export default function SectionRenderer({
 }) {
     if (!section.visible) return null;
 
-    const dict = getDictionary(locale);
     const href = (path: string) => localeHref(locale, path);
 
     switch (section.type) {
@@ -114,7 +111,7 @@ export default function SectionRenderer({
 
         case 'contact':
             return (
-                <section id="contact" className="bg-gray-50 border-t border-gray-200">
+                <section id="contact" className="scroll-mt-20 bg-gray-50 border-t border-gray-200">
                     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
                         {section.heading && <h2 className="text-2xl font-bold text-gray-900">{section.heading}</h2>}
                         {section.text && <p className="mt-1 text-sm text-gray-600 mb-6">{section.text}</p>}

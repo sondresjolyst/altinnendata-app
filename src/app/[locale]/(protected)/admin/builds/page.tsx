@@ -22,15 +22,20 @@ export default function AdminBuildsPage() {
     const [creating, setCreating] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    // Leaves `loading` alone: the first render already shows the spinner, and an effect must not set state synchronously.
     const load = useCallback(() => {
-        setLoading(true);
         BuildService.list(DEFAULT_LOCALE, true)
             .then(setBuilds)
             .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.buildsLoadFailed))
             .finally(() => setLoading(false));
-    }, []);
+    }, [dict.admin.buildsLoadFailed]);
 
-    useEffect(load, [load]);
+    useEffect(() => { load(); }, [load]);
+
+    const reload = () => {
+        setLoading(true);
+        reload();
+    };
 
     const edit = async (id: number) => {
         try {
@@ -46,7 +51,7 @@ export default function AdminBuildsPage() {
         try {
             await BuildService.remove(build.id);
             toast.success(dict.admin.buildDeleted);
-            load();
+            reload();
         } catch (err) {
             toast.error(err instanceof Error ? err.message : dict.admin.buildDeleteFailed);
         }
@@ -59,7 +64,7 @@ export default function AdminBuildsPage() {
 
     const savedAndClose = () => {
         closeForm();
-        load();
+        reload();
     };
 
     if (creating || editing) {

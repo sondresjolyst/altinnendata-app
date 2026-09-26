@@ -82,21 +82,26 @@ export default function AdminClassesPage() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editClass, setEditClass] = useState<ClassDraft>(EMPTY_DRAFT);
 
+    // Leaves `loading` alone: the first render already shows the spinner, and an effect must not set state synchronously.
     const load = useCallback(() => {
-        setLoading(true);
         BuildClassService.list(DEFAULT_LOCALE)
             .then(setClasses)
             .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.classesLoadFailed))
             .finally(() => setLoading(false));
-    }, []);
+    }, [dict.admin.classesLoadFailed]);
 
-    useEffect(load, [load]);
+    useEffect(() => { load(); }, [load]);
+
+    const reload = () => {
+        setLoading(true);
+        reload();
+    };
 
     const run = async (action: () => Promise<unknown>, success: string) => {
         try {
             await action();
             toast.success(success);
-            load();
+            reload();
             return true;
         } catch (err) {
             toast.error(err instanceof Error ? err.message : dict.common.actionFailed);

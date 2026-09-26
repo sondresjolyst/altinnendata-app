@@ -43,7 +43,7 @@ export default function Navbar() {
 
                 <Link href={href('/')} onClick={close} className="flex items-center gap-2.5 shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logoUrl ?? '/logo.png'} alt={COMPANY.name} className="h-9 w-9 rounded-lg object-cover" />
+                    <img src={logoUrl ?? '/logo.png'} alt="" className="h-9 w-9 rounded-lg object-cover" />
                     <span className="text-sm font-bold tracking-wide text-gray-900">
                         {COMPANY.name}
                     </span>

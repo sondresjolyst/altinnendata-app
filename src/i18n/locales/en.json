@@ -12,7 +12,8 @@
     "signOut": "Sign out",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "language": "Language"
+    "language": "Language",
+    "skipToContent": "Skip to content"
   },
   "common": {
     "loading": "Loading…",

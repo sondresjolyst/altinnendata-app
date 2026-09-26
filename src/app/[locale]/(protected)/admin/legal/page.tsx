@@ -8,12 +8,6 @@ import TextInput from '@/components/TextInput';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
-const KEY_LABELS: Record<LegalKey, string> = {
-    terms: 'Vilkår',
-    privacy: 'Personvern',
-    cookies: 'Informasjonskapsler',
-};
-
 type Draft = { title: string; bodyMarkdown: string };
 
 const emptyDraft: Draft = { title: '', bodyMarkdown: '' };
@@ -33,7 +27,7 @@ export default function AdminLegalPage() {
             })
             .catch(err => toast.error(err instanceof Error ? err.message : dict.admin.legalLoadFailed))
             .finally(() => setLoading(false));
-    }, []);
+    }, [dict.admin.legalLoadFailed]);
 
     const slot = `${activeKey}:${activeLocale}`;
     const draft = drafts[slot] ?? emptyDraft;
