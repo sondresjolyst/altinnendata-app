@@ -25,7 +25,7 @@ export default function BuildCard({ build, locale }: { build: BuildSummary; loca
                         imageId={build.coverImageId}
                         alt={build.title}
                         sizes="(max-width: 768px) 100vw, 400px"
-                        className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform"
+                        className="h-full w-auto max-w-full object-contain motion-safe:group-hover:scale-105 motion-safe:transition-transform"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300 text-2xl font-black">
