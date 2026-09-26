@@ -10,7 +10,7 @@ export default function LocaleSwitcher() {
     const { locale, dict } = useDictionary();
 
     return (
-        <div className="flex items-center gap-1" aria-label={dict.nav.language}>
+        <div role="group" className="flex items-center gap-1" aria-label={dict.nav.language}>
             {LOCALES.map(target => (
                 <Link
                     key={target}
