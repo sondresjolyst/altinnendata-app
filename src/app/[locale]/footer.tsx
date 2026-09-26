@@ -38,7 +38,7 @@ export default function Footer({ company }: { company: CompanyInfo }) {
 
                 <p className="text-xs text-gray-400">
                     © {year} {company.name} · {dict.footer.createdBy}{' '}
-                    <span className="text-gray-500">Sjølyst Innovations</span>
+                    <span className="text-gray-500">Sjølyst Innovation AS</span>
                 </p>
             </div>
         </footer>
