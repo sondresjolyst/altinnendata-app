@@ -2,7 +2,7 @@
   "name": "Altinnendata",
   "short_name": "Altinnendata",
   "theme_color": "#00887a",
-  "background_color": "#131313",
+  "background_color": "#ffffff",
   "display": "standalone",
   "scope": "/",
   "start_url": "/no",

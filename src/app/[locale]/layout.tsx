@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import "../globals.css";
@@ -14,6 +14,10 @@ import JsonLd from "@/components/JsonLd";
 import { organizationNode, webSiteNode } from "@/lib/seo/schema/organization";
 import { getCompanyInfo } from "@/lib/companyInfo";
 import { DictionaryProvider } from "@/i18n/DictionaryProvider";
+
+export const viewport: Viewport = {
+    themeColor: "#00887a",
+};
 
 export function generateStaticParams() {
     return LOCALES.map(locale => ({ locale }));
