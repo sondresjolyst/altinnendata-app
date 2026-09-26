@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import BuildGallery from '@/components/BuildGallery';
 import Markdown from '@/components/Markdown';
 import { BuildDetail, coverImageSrc } from '@/services/buildService';
@@ -134,9 +135,11 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
             </div>
 
             {build.components.length > 0 && (
-                <details open className="mt-12 max-w-3xl rounded-2xl border border-gray-200 bg-white">
-                    <summary className="cursor-pointer list-none px-5 py-4 text-lg font-bold text-gray-900 marker:content-none">
-                        {dict.builds.specs}
+                <details open className="group mt-12 max-w-3xl rounded-2xl border border-gray-200 bg-white">
+                    {/* The chevron shows it folds; the default marker is hidden because it does not. */}
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-lg font-bold text-gray-900 marker:content-none [&::-webkit-details-marker]:hidden">
+                        <h2>{dict.builds.specs}</h2>
+                        <ChevronDownIcon aria-hidden className="h-5 w-5 shrink-0 text-gray-500 transition-transform group-open:rotate-180" />
                     </summary>
                     <div className="overflow-x-auto">
                         <table className="w-full border-t border-gray-200 text-sm">
