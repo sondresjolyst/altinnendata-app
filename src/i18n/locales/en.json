@@ -72,7 +72,10 @@
     "seeOnFinn": "See the advert on FINN",
     "description": "About this machine",
     "draft": "Draft",
-    "askSimilar": "Ask for a similar machine"
+    "askSimilar": "Ask for a similar machine",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "imageOf": "Image {n} of {total}"
   },
   "contact": {
     "title": "Contact",
@@ -310,9 +313,7 @@
     "roleAssigned": "{name} was given the {role} role",
     "roleRemoved": "{role} was removed from {name}",
     "partFromCatalog": "Part from catalog",
-    "freeTextOption": "— free text —",
-    "previousImage": "Previous image",
-    "nextImage": "Next image"
+    "freeTextOption": "— free text —"
   },
   "stats": {
     "builds": "Computers published",

@@ -72,7 +72,10 @@
     "seeOnFinn": "Se annonsen på FINN",
     "description": "Om maskinen",
     "draft": "Utkast",
-    "askSimilar": "Be om en tilsvarende maskin"
+    "askSimilar": "Be om en tilsvarende maskin",
+    "previousImage": "Forrige bilde",
+    "nextImage": "Neste bilde",
+    "imageOf": "Bilde {n} av {total}"
   },
   "contact": {
     "title": "Kontakt",
@@ -310,9 +313,7 @@
     "roleAssigned": "{name} har fått rollen {role}",
     "roleRemoved": "{role} er fjernet fra {name}",
     "partFromCatalog": "Del fra katalog",
-    "freeTextOption": "— fritekst —",
-    "previousImage": "Forrige bilde",
-    "nextImage": "Neste bilde"
+    "freeTextOption": "— fritekst —"
   },
   "stats": {
     "builds": "Datamaskiner publisert",
