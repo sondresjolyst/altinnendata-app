@@ -75,7 +75,7 @@ export function siteMetadata(locale: Locale): Metadata {
             default: title,
             template: `%s — ${COMPANY.name}`,
         },
-        manifest: '/manifest.json',
+        manifest: '/manifest.webmanifest',
         robots: { index: true, follow: true },
     };
 }
