@@ -24,7 +24,7 @@ export default function AdminStatsPage() {
         AdminService.getStats().then(setStats).catch(err => toast.error(err instanceof Error ? err.message : dict.admin.statsLoadFailed));
         AdminService.getStatsHistory().then(setHistory).catch(() => { });
         AdminService.getEmailStats().then(setEmail).catch(() => { });
-    }, []);
+    }, [dict.admin.statsLoadFailed]);
 
     // An API that predates the sales fields sends none of them; show a dash rather than NaN.
     const countOrDash = (value: number | undefined) => (typeof value === 'number' ? value : '—');

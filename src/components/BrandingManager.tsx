@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { TrashIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import BrandingService, { toDataUrl } from '@/services/brandingService';
@@ -17,17 +17,13 @@ function Slot({
     hint: string;
 }) {
     const inputRef = useRef<HTMLInputElement>(null);
-    const [objectUrl, setObjectUrl] = useState<string | null>(null);
+    // Derived from the picked file, so nothing to sync; the effect only revokes a URL once it is replaced.
+    const objectUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
 
     useEffect(() => {
-        if (!file) {
-            setObjectUrl(null);
-            return;
-        }
-        const url = URL.createObjectURL(file);
-        setObjectUrl(url);
-        return () => URL.revokeObjectURL(url);
-    }, [file]);
+        if (!objectUrl) return;
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [objectUrl]);
 
     const preview = objectUrl ?? currentUrl;
     return (

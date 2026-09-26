@@ -33,7 +33,7 @@ export default function AdminSettingsPage() {
             .then(setSettings)
             .catch(() => toast.error(dict.admin.settingsLoadFailed))
             .finally(() => setLoading(false));
-    }, []);
+    }, [dict.admin.settingsLoadFailed]);
 
     const patch = (changes: Partial<Settings>) => setSettings(prev => ({ ...prev, ...changes }));
 
