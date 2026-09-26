@@ -59,9 +59,9 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
                 </div>
             )}
             <div className="grid sm:grid-cols-2 gap-4">
-                <TextInput label={dict.contact.name} name="name" value={form.name} onChange={update('name')} error={errors.name} required />
-                <TextInput label={dict.contact.email} name="email" type="email" value={form.email} onChange={update('email')} error={errors.email} required />
-                <TextInput label={dict.contact.phone} name="phone" value={form.phone ?? ''} onChange={update('phone')} error={errors.phone} />
+                <TextInput label={dict.contact.name} name="name" autoComplete="name" value={form.name} onChange={update('name')} error={errors.name} required />
+                <TextInput label={dict.contact.email} name="email" type="email" autoComplete="email" value={form.email} onChange={update('email')} error={errors.email} required />
+                <TextInput label={dict.contact.phone} name="phone" type="tel" autoComplete="tel" value={form.phone ?? ''} onChange={update('phone')} error={errors.phone} />
                 {!build && (
                     <>
                         <TextInput
@@ -81,6 +81,8 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
                                 name="budgetNok"
                                 value={form.budgetNok ?? ''}
                                 onChange={updateBudget}
+                                aria-invalid={errors.budgetNok ? true : undefined}
+                                aria-describedby={errors.budgetNok ? 'budgetNok-error' : undefined}
                                 className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.budgetNok ? 'border-red-400' : 'border-gray-300'}`}
                             >
                                 <option value="">{dict.contact.budgetPlaceholder}</option>
@@ -90,7 +92,7 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
                                     </option>
                                 ))}
                             </select>
-                            {errors.budgetNok && <p className="mt-1 text-xs text-red-600">{errors.budgetNok}</p>}
+                            {errors.budgetNok && <p id="budgetNok-error" className="mt-1 text-xs text-red-600">{errors.budgetNok}</p>}
                         </div>
                     </>
                 )}
@@ -105,11 +107,13 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
                     name="message"
                     rows={5}
                     aria-required
+                    aria-invalid={errors.message ? true : undefined}
+                    aria-describedby={errors.message ? 'message-error' : undefined}
                     value={form.message}
                     onChange={update('message')}
                     className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.message ? 'border-red-400' : 'border-gray-300'}`}
                 />
-                {errors.message && <p className="mt-1 text-xs text-red-600">{errors.message}</p>}
+                {errors.message && <p id="message-error" className="mt-1 text-xs text-red-600">{errors.message}</p>}
             </div>
             <button
                 type="submit"
