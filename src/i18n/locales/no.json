@@ -12,7 +12,8 @@
     "signOut": "Logg ut",
     "openMenu": "Åpne meny",
     "closeMenu": "Lukk meny",
-    "language": "Språk"
+    "language": "Språk",
+    "skipToContent": "Hopp til innholdet"
   },
   "common": {
     "loading": "Laster…",
