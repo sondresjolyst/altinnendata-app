@@ -42,10 +42,11 @@ export default async function LocaleLayout({
 
     return (
         <html lang={LOCALE_TAGS[locale as Locale]}>
-            <Script src="/register-sw.js" />
-            {/* Business and site identity, on every page so page-scoped nodes can reference them. */}
-            <JsonLd nodes={[organizationNode(company), webSiteNode(locale)]} />
+            {/* Both inside body: React only accepts head or body as children of html. */}
             <body className="min-h-screen flex flex-col bg-background text-foreground">
+                <Script src="/register-sw.js" />
+                {/* Business and site identity, on every page so page-scoped nodes can reference them. */}
+                <JsonLd nodes={[organizationNode(company), webSiteNode(locale)]} />
                 <DictionaryProvider locale={locale}>
                     {/* Undefined when the API was unreachable, so the client fetches it instead. */}
                     <Providers initialBranding={branding ?? undefined}>
