@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.4](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.3...v1.9.4) (2026-09-26)
+
+
+### Bug Fixes
+
+* small frontend and accessibility fixes ([#104](https://github.com/sondresjolyst/altinnendata-app/issues/104)) ([90fd279](https://github.com/sondresjolyst/altinnendata-app/commit/90fd2790bc70da70b76cfb456c6077b12c755438))
+
 ## [1.9.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.2...v1.9.3) (2026-09-25)
 
 
