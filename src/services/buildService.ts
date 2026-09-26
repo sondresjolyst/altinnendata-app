@@ -4,7 +4,6 @@ import { request } from '@/lib/apiRequest';
 import { revalidateTarget } from '@/lib/revalidate';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { imagePath } from './imageService';
-import type { Section } from '@/types/content';
 import type { Locale } from '@/i18n/config';
 
 export type Availability = 'Available' | 'Reserved' | 'Sold';
