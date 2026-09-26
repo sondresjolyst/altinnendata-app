@@ -114,7 +114,7 @@ export default function SectionRenderer({
 
         case 'contact':
             return (
-                <section id="contact" className="bg-gray-50 border-t border-gray-200">
+                <section id="contact" className="scroll-mt-20 bg-gray-50 border-t border-gray-200">
                     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
                         {section.heading && <h2 className="text-2xl font-bold text-gray-900">{section.heading}</h2>}
                         {section.text && <p className="mt-1 text-sm text-gray-600 mb-6">{section.text}</p>}
