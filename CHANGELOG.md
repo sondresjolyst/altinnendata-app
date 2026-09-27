@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.9.6](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.5...v1.9.6) (2026-09-27)
+
+
+### Dependencies
+
+* **npm:** bump @types/node from 26.5.1 to 26.6.2 in the types group ([#111](https://github.com/sondresjolyst/altinnendata-app/issues/111)) ([c3c04ab](https://github.com/sondresjolyst/altinnendata-app/commit/c3c04aba99a85e815e7788e771b33d2c585ca2d7))
+* **npm:** bump the react group across 1 directory with 4 updates ([#108](https://github.com/sondresjolyst/altinnendata-app/issues/108)) ([4ff668b](https://github.com/sondresjolyst/altinnendata-app/commit/4ff668b9b8f0e471088358d40aef1572199094fd))
+* **npm:** bump the testing group with 2 updates ([#110](https://github.com/sondresjolyst/altinnendata-app/issues/110)) ([ae0f0d4](https://github.com/sondresjolyst/altinnendata-app/commit/ae0f0d4809fed7886bad2d3b5993a9b551724bc5))
+
 ## [1.9.5](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.4...v1.9.5) (2026-09-26)
 
 
