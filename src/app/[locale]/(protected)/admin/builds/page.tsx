@@ -34,7 +34,7 @@ export default function AdminBuildsPage() {
 
     const reload = () => {
         setLoading(true);
-        reload();
+        load();
     };
 
     const edit = async (id: number) => {
