@@ -31,7 +31,7 @@ export default function AdminUsersPage() {
 
     const reload = () => {
         setLoading(true);
-        reload();
+        load(includeDeleted);
     };
 
     const toggleDeleted = (deleted: boolean) => {

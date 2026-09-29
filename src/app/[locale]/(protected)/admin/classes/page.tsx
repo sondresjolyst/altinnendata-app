@@ -94,7 +94,7 @@ export default function AdminClassesPage() {
 
     const reload = () => {
         setLoading(true);
-        reload();
+        load();
     };
 
     const run = async (action: () => Promise<unknown>, success: string) => {
