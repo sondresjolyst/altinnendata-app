@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.7](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.6...v1.9.7) (2026-09-29)
+
+
+### Bug Fixes
+
+* admin pages reload calling itself instead of reloading data ([#114](https://github.com/sondresjolyst/altinnendata-app/issues/114)) ([be7807e](https://github.com/sondresjolyst/altinnendata-app/commit/be7807e78c3d68d9d0aee9851d0ee468aa9300e9))
+
 ## [1.9.6](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.5...v1.9.6) (2026-09-27)
 
 
