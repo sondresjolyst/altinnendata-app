@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.9.8](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.7...v1.9.8) (2026-10-04)
+
+
+### Dependencies
+
+* **npm:** bump @types/node from 26.6.2 to 26.6.3 in the types group ([#120](https://github.com/sondresjolyst/altinnendata-app/issues/120)) ([1eb006b](https://github.com/sondresjolyst/altinnendata-app/commit/1eb006b2ac9bc3ed6618f13f582dbcf8f611b136))
+* **npm:** bump `brace-expansion` from 5.0.9 to 5.0.12 ([#122](https://github.com/sondresjolyst/altinnendata-app/issues/122)) ([02fcd2d](https://github.com/sondresjolyst/altinnendata-app/commit/02fcd2deb23465e0c74bb90a3c5fb4bdbe69e5dc))
+* **npm:** bump the next group across 1 directory with 2 updates ([#117](https://github.com/sondresjolyst/altinnendata-app/issues/117)) ([d174d74](https://github.com/sondresjolyst/altinnendata-app/commit/d174d7422b095f9c421df057eb2c250fd835c5ce))
+* **npm:** bump the testing group with 2 updates ([#119](https://github.com/sondresjolyst/altinnendata-app/issues/119)) ([724b903](https://github.com/sondresjolyst/altinnendata-app/commit/724b90399a800f4db152f5c48fb90fdece001bcd))
+
 ## [1.9.7](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.6...v1.9.7) (2026-09-29)
 
 
