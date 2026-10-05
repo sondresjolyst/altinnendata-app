@@ -11,13 +11,14 @@ declare module 'next-auth' {
         };
         accessToken: string;
         error?: string;
+        absoluteExpiresAt?: number;
     }
 }
 
 declare module 'next-auth/jwt' {
     interface JWT {
         accessToken?: string;
-        accessTokenExpires?: number;
+        refreshAt?: number;
         refreshToken?: string;
         loginAt?: number;
         user?: {
