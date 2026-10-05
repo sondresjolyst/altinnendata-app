@@ -27,13 +27,21 @@ export function useSessionGate() {
     if (usable && usableAt !== pathname) setUsableAt(pathname);
     const wasUsable = usableAt === pathname;
 
+    // The page is already open and the prompt is recovering the session in place.
+    const recovering = promptOpen && wasUsable;
+
     return {
         session,
         status,
         promptOpen,
         usable,
         wasUsable,
-        /** The page is already open and the prompt is recovering the session in place. */
-        recovering: promptOpen && wasUsable,
+        recovering,
+        /**
+         * The single answer every gate on the way down must use. Deciding this twice is how the
+         * admin layout came to blank the page that the gate above it had chosen to keep.
+         */
+        mayRender: recovering
+            || !((status === 'loading' && !wasUsable) || status === 'unauthenticated' || (!usable && !wasUsable)),
     };
 }

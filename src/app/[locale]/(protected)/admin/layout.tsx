@@ -9,7 +9,7 @@ import { localeHref } from '@/i18n/config';
 import { useSessionGate } from '@/lib/useSessionGate';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-    const { session, status, recovering } = useSessionGate();
+    const { session, status, recovering, mayRender } = useSessionGate();
     const router = useRouter();
     const pathname = usePathname();
     const { locale, dict } = useDictionary();
@@ -34,9 +34,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
     }, [status, isAdmin, router, locale]);
 
-    // ProtectedGate has already decided this page stays while the prompt recovers the session.
-    // Blanking it here would undo that one level down, and the form would be gone anyway.
-    if (!recovering && (status !== 'authenticated' || !isAdmin)) {
+    // One decision, taken in useSessionGate. Deciding again here is what blanked the page the
+    // gate above had chosen to keep. The role is this layout's own concern, and a session being
+    // recovered reports no roles yet.
+    if (!mayRender || (!isAdmin && !recovering)) {
         return <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 text-center text-gray-500">{dict.common.loading}</div>;
     }
 
