@@ -84,7 +84,7 @@ describe('useFormDraft', () => {
 
     it('still saves new typing while the offer is unanswered', async () => {
         // The reason the offer is held in memory rather than gating the writer: an admin who
-        // ignores the banner and types a whole recipe must not end up with nothing stored.
+        // ignores the banner and types a whole build must not end up with nothing stored.
         storedAt({ title: 'Halvferdig' });
         render(<Form />);
 

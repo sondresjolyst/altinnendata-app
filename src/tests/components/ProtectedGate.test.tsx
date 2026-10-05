@@ -113,7 +113,7 @@ describe('ProtectedGate', () => {
 
         render(gate());
 
-        // The prompt recovers the session in place; navigating away would unmount the form it
+        // The prompt recovers the session in place. Navigating away would unmount the form it
         // is trying to save.
         expect(push).not.toHaveBeenCalled();
     });

@@ -35,7 +35,7 @@ const apiClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
 /**
  * The API refused the refresh token itself: it is expired, revoked, or outside the reuse
- * grace window. Only this warrants ending the session; every other failure is transient
+ * grace window. Only this warrants ending the session. Every other failure is transient
  * and worth retrying with the same refresh token.
  */
 export class RefreshTokenRejectedError extends Error {

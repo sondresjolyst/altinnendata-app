@@ -253,4 +253,37 @@ describe('SessionExpiryGuard', () => {
 
         expect(save).toHaveFocus();
     });
+
+    it('still refuses another account after the cookie is gone', async () => {
+        sessionState = { data: session(), status: 'authenticated' };
+        const view = render(guard());
+
+        // The cookie is lost, so useSession reports nobody. Reading the owner from the live
+        // session here would leave nothing to compare against and accept any account.
+        sessionState = { data: null, status: 'unauthenticated' };
+        view.rerender(guard());
+        act(() => openSessionPrompt());
+
+        signIn.mockResolvedValue({ error: null });
+        getSession.mockResolvedValue({
+            user: { id: '2', name: 'other', email: 'c@d.no', roles: ['Admin'] },
+            accessToken: 'token',
+            expires: '',
+        });
+        await signInWith('Password1');
+
+        expect(signOut).toHaveBeenCalled();
+        expect(screen.getByText(dict.auth.sessionWrongUser)).toBeInTheDocument();
+    });
+
+    it('offers the owner email back after the cookie is gone', async () => {
+        sessionState = { data: session(), status: 'authenticated' };
+        const view = render(guard());
+
+        sessionState = { data: null, status: 'unauthenticated' };
+        view.rerender(guard());
+        act(() => openSessionPrompt());
+
+        expect(screen.getByLabelText(new RegExp(`^${dict.auth.email}`))).toHaveValue('a@b.no');
+    });
 });

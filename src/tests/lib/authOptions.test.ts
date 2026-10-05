@@ -33,7 +33,7 @@ function sessionToken(overrides: Partial<JWT> = {}): JWT {
     };
 }
 
-// The callback's declared signature carries next-auth's full argument union; the jwt callback
+// The callback's declared signature carries next-auth's full argument union. The jwt callback
 // reads only token and user.
 const runJwt = (token: JWT): Promise<JWT> =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

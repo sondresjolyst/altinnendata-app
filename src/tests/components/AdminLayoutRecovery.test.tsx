@@ -7,7 +7,7 @@ import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { closeSessionPrompt, openSessionPrompt } from '@/lib/sessionExpiry';
 
 const push = vi.fn();
-let pathname = '/no/admin/recipes/new';
+let pathname = '/no/admin/builds';
 let sessionState: { data: Session | null; status: 'loading' | 'authenticated' | 'unauthenticated' };
 
 vi.mock('next/navigation', () => ({
@@ -40,7 +40,7 @@ const tree = () => (
 describe('the admin layout inside the gate', () => {
     beforeEach(() => {
         push.mockClear();
-        pathname = '/no/admin/recipes/new';
+        pathname = '/no/admin/builds';
         sessionState = { data: session(), status: 'authenticated' };
         closeSessionPrompt();
     });
