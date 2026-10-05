@@ -127,7 +127,7 @@ describe('SessionExpiryGuard', () => {
 
         render(guard());
 
-        expect(screen.queryByText(/{minutes}/)).not.toBeInTheDocument();
+        expect(screen.queryByText(dict.auth.sessionExpiringSoon.replace('{minutes}', '12'))).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: dict.auth.reSignIn })).not.toBeInTheDocument();
     });
 

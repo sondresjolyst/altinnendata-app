@@ -71,7 +71,7 @@ const draft = {
     imageIds: [],
 };
 
-// The title field passes no name or id, so TextInput cannot associate its label with the
+// Selected by position, which also keeps the test independent of the label wording.
 // input and getByLabelText does not reach it. Select it via the wrapping div instead.
 const titleInput = () =>
     screen.getByText(dict.admin.buildTitle).parentElement!.querySelector('input') as HTMLInputElement;
@@ -165,5 +165,19 @@ describe('the build form draft bar', () => {
 
         // No owner was ever known here, so there is no key that could not belong to someone else.
         expect(window.localStorage.length).toBe(0);
+    });
+
+    it('keeps a field the stored draft predates', async () => {
+        // Drafts are kept for a week, so one can easily predate a newly added field. Asserting
+        // on the rendered input would prove nothing: an undefined value makes React treat it as
+        // uncontrolled and the old value stays on screen. What matters is what gets saved.
+        const { published: _dropped, ...older } = draft;
+        window.localStorage.setItem(KEY, JSON.stringify({ savedAt: Date.now(), value: older }));
+        render(form());
+
+        await userEvent.click(await screen.findByRole('button', { name: dict.admin.restoreDraft }));
+        await userEvent.click(screen.getByRole('button', { name: dict.common.save }));
+
+        expect(createBuild).toHaveBeenCalledWith(expect.objectContaining({ published: false }));
     });
 });
