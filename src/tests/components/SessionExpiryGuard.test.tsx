@@ -40,7 +40,7 @@ const guard = () => (
 );
 
 const signInWith = async (password: string) => {
-    await userEvent.type(screen.getByLabelText(dict.auth.password), password);
+    await userEvent.type(screen.getByLabelText(new RegExp(`^${dict.auth.password}`)), password);
     await userEvent.click(screen.getByRole('button', { name: dict.auth.signIn }));
 };
 
@@ -69,7 +69,7 @@ describe('SessionExpiryGuard', () => {
         act(() => openSessionPrompt());
 
         expect(screen.getByRole('dialog')).toBeInTheDocument();
-        expect(screen.getByLabelText(dict.auth.email, { exact: false })).toHaveValue('a@b.no');
+        expect(screen.getByLabelText(new RegExp(`^${dict.auth.email}`))).toHaveValue('a@b.no');
     });
 
     it('signs in without navigating away from the form', async () => {
@@ -196,7 +196,7 @@ describe('SessionExpiryGuard', () => {
 
         act(() => openSessionPrompt());
 
-        expect(screen.getByLabelText(dict.auth.password)).toHaveFocus();
+        expect(screen.getByLabelText(new RegExp(`^${dict.auth.password}`))).toHaveFocus();
     });
 
     it('closes on Escape', async () => {
