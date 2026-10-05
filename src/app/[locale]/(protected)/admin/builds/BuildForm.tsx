@@ -127,7 +127,9 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         const stored = draft.pending;
         if (!stored) return;
         for (const [key, set] of Object.entries(setters) as [keyof typeof values, (value: unknown) => void][]) {
-            set(stored[key]);
+            // A draft saved before a field was added lacks that key, and assigning undefined
+            // would drop the field's own default.
+            if (stored[key] !== undefined) set(stored[key]);
         }
         draft.dismiss();
     };
