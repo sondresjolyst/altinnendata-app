@@ -31,18 +31,34 @@ function read<T>(key: string): T | null {
     }
 }
 
+interface DraftOptions<T> {
+    /**
+     * The signed-in user's id. A browser profile can be shared, so the draft is stored per
+     * user: without that, the next person to sign in is offered the previous one's work. The
+     * last known owner is kept, because a lost cookie reports nobody and that is the moment
+     * the draft matters most. Nothing is stored until an owner is known.
+     */
+    owner: string | undefined;
+    /** Identifies the form and the entity it edits, for example `recipe:new` or `recipe:42`. */
+    scope: string;
+    value: T;
+}
+
 /**
  * Keeps a form's values in localStorage so a sign-out, reload or closed tab cannot lose them.
  *
  * A draft found at mount is offered for restore rather than applied, so an edit form never
  * silently overwrites what the API returned. Saving starts immediately either way: the offer is
  * held in memory, so the newest work is always the thing on disk.
- *
- * The key must identify the signed-in user as well as the form, because a browser profile can
- * be shared: without that, the next person to sign in is offered the previous one's draft. Pass
- * a null key to store nothing, which is what callers should do while the user is unknown.
  */
-export function useFormDraft<T>(key: string | null, value: T) {
+export function useFormDraft<T>({ owner, scope, value }: DraftOptions<T>) {
+    // Adjusted during render rather than in an effect, which is the supported way to derive
+    // state from changing inputs.
+    const [lastOwner, setLastOwner] = useState<string | undefined>(undefined);
+    if (owner && owner !== lastOwner) setLastOwner(owner);
+
+    const key = lastOwner ? `${lastOwner}:${scope}` : null;
+
     const [pending, setPending] = useState<T | null>(null);
     const json = JSON.stringify(value);
     const untouched = useRef(json);
@@ -52,8 +68,9 @@ export function useFormDraft<T>(key: string | null, value: T) {
         // Re-base on a key change too: the values on screen belong to the old key, and writing
         // them under the new one would put this form's work in another form's draft.
         untouched.current = json;
+        // Reading the store is an external-system read, which is what an effect is for.
+        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
         setPending(key == null ? null : read<T>(key));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key]);
 
     useEffect(() => {
