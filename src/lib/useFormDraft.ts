@@ -69,8 +69,11 @@ export function useFormDraft<T>({ owner, scope, value }: DraftOptions<T>) {
         // them under the new one would put this form's work in another form's draft.
         untouched.current = json;
         // Reading the store is an external-system read, which is what an effect is for.
-        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPending(key == null ? null : read<T>(key));
+        // Keyed on the draft key alone on purpose. Re-reading whenever the values change would
+        // re-offer a draft the user has already answered.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key]);
 
     useEffect(() => {
