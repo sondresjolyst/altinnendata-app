@@ -123,7 +123,14 @@
     "newPassword": "New password",
     "requestCode": "Send code",
     "setPassword": "Save password",
-    "resetDone": "Your password has been changed. You can sign in now."
+    "resetDone": "Your password has been changed. You can sign in now.",
+    "sessionExpiredTitle": "Your session has expired",
+    "sessionExpiredBody": "Sign in again to save.",
+    "sessionExpiringSoon": "Your session expires in {minutes} min. Sign in again to continue without interruption.",
+    "reSignIn": "Sign in again",
+    "sessionRestored": "You're signed in again. Try saving again.",
+    "sessionNotRestored": "We could not renew your session. Please try again.",
+    "sessionWrongUser": "This page belongs to a different user. Sign in with the same account."
   },
   "footer": {
     "orgNumber": "Org. no",

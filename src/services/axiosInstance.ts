@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { getSession, signOut } from 'next-auth/react';
+import { getSession } from 'next-auth/react';
+import { isTerminalSessionError, openSessionPrompt } from '@/lib/sessionExpiry';
 
 const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -21,8 +22,12 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         if (error.response?.status === 401) {
             const session = await getSession();
-            if (session?.error) {
-                await signOut({ callbackUrl: '/login' });
+            // Ask for a new sign-in in place rather than signing out here: a hard redirect
+            // would unmount whatever form the user is filling in and throw their work away.
+            // A missing session counts too, because the cookie is gone (signed out in another
+            // tab, or cleared by next-auth after a callback error) and no error field survives.
+            if (!session || isTerminalSessionError(session.error)) {
+                openSessionPrompt();
             }
         }
         return Promise.reject(error);
