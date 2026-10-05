@@ -33,9 +33,8 @@ const ABSOLUTE_SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 // rather than in the middle of their next save.
 const MAX_REFRESH_SKEW_MS = 5 * 60 * 1000;
 
-// The soonest a session read will try another rotation. It bounds both an unreadable token and
-// a transient failure: without it an API restart turns every click into another refresh POST,
-// and a rotated API secret rotates the token on every read until the absolute cap.
+// The soonest a refresh may be due. Only a floor on the skew, so a short-lived API token
+// cannot put every session read into a refresh.
 const MIN_REFRESH_GAP_MS = 30 * 1000;
 
 function parseApiToken(token: string): DecodedToken {
@@ -69,6 +68,12 @@ function nextRefreshAt(decoded: DecodedToken): number {
 // Collapse refreshes of one token into a single request, and keep the answer for a short while
 // afterwards: a read whose request was already on the wire still carries the consumed token,
 // and it arrives after the rotation has settled.
+//
+// The map is per Node process. One container today, so this covers every racing read. A second
+// replica would not share it, and the losers would present a consumed token again.
+//
+// It also sets the real retry gap after a failure, because a sooner retry would be served the
+// remembered failure rather than reaching the API.
 const REMEMBER_ROTATION_MS = 60 * 1000;
 
 const inFlight = new Map<string, Promise<JWT>>();
@@ -106,7 +111,7 @@ async function rotate(token: JWT): Promise<JWT> {
             code: axios.isAxiosError(error) ? error.code : undefined,
             message: error instanceof Error ? error.message : String(error),
         });
-        return { ...token, refreshAt: Date.now() + MIN_REFRESH_GAP_MS } as JWT;
+        return { ...token, refreshAt: Date.now() + REMEMBER_ROTATION_MS } as JWT;
     }
 
     // The API has rotated by this point, so the new tokens must be kept whatever happens below.
@@ -129,7 +134,7 @@ async function rotate(token: JWT): Promise<JWT> {
         console.error('Could not read the refreshed access token, retrying shortly', {
             message: error instanceof Error ? error.message : String(error),
         });
-        next.refreshAt = Date.now() + MIN_REFRESH_GAP_MS;
+        next.refreshAt = Date.now() + REMEMBER_ROTATION_MS;
     }
 
     return next;
