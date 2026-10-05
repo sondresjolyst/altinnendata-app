@@ -1,5 +1,10 @@
 interface AlertProps {
     variant?: 'error' | 'success' | 'info' | 'warning';
+    /**
+     * Defaults to alert, which a screen reader interrupts for. Use status for text that keeps
+     * changing, such as a countdown, so it is not announced on every tick.
+     */
+    role?: 'alert' | 'status';
     children: React.ReactNode;
 }
 
@@ -10,9 +15,9 @@ const styles: Record<NonNullable<AlertProps['variant']>, string> = {
     warning: 'bg-amber-50 border-amber-200 text-amber-900',
 };
 
-export default function Alert({ variant = 'info', children }: AlertProps) {
+export default function Alert({ variant = 'info', role = 'alert', children }: AlertProps) {
     return (
-        <div className={`rounded-lg border px-3 py-2 text-sm ${styles[variant]}`} role="alert">
+        <div className={`rounded-lg border px-3 py-2 text-sm ${styles[variant]}`} role={role}>
             {children}
         </div>
     );

@@ -118,7 +118,7 @@ export default function SessionExpiryGuard() {
                 // Anchored to the bottom: the navbar is sticky at the top with the same
                 // stacking level.
                 <div className="fixed inset-x-0 bottom-0 z-40">
-                    <Alert variant="warning">
+                    <Alert variant="warning" role={expired ? 'alert' : 'status'}>
                         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
                             <span>
                                 {expired
