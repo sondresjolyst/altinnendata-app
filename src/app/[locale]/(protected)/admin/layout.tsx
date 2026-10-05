@@ -1,15 +1,15 @@
 "use client";
 
-import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { ADMIN_ROLE } from '@/lib/roles';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
+import { useSessionGate } from '@/lib/useSessionGate';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-    const { data: session, status } = useSession();
+    const { session, status, recovering, mayRender } = useSessionGate();
     const router = useRouter();
     const pathname = usePathname();
     const { locale, dict } = useDictionary();
@@ -34,7 +34,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
     }, [status, isAdmin, router, locale]);
 
-    if (status !== 'authenticated' || !isAdmin) {
+    // One decision, taken in useSessionGate. Deciding again here is what blanked the page the
+    // gate above had chosen to keep. The role is this layout's own concern, and a session being
+    // recovered reports no roles yet.
+    if (!mayRender || (!isAdmin && !recovering)) {
         return <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 text-center text-gray-500">{dict.common.loading}</div>;
     }
 

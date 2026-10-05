@@ -33,6 +33,18 @@ export interface TokenResponse {
 
 const apiClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
+/**
+ * The API refused the refresh token itself: it is expired, revoked, or outside the reuse
+ * grace window. Only this warrants ending the session. Every other failure is transient
+ * and worth retrying with the same refresh token.
+ */
+export class RefreshTokenRejectedError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'RefreshTokenRejectedError';
+    }
+}
+
 const UserService = {
     async login(data: LoginData): Promise<TokenResponse> {
         try {
@@ -52,8 +64,18 @@ const UserService = {
     },
 
     async refreshToken(data: TokenResponse): Promise<TokenResponse> {
-        const response = await apiClient.post<TokenResponse>('/auth/refresh-token', data);
-        return response.data;
+        try {
+            // Bounded on purpose: session reads queue behind this one request, so a connection
+            // that blackholes would otherwise freeze the whole admin UI.
+            const response = await apiClient.post<TokenResponse>('/auth/refresh-token', data, { timeout: 10_000 });
+            return response.data;
+        } catch (error: unknown) {
+            const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+            if (status === 400 || status === 401) {
+                throw new RefreshTokenRejectedError(formatApiError(error, 'Refresh token was rejected'));
+            }
+            throw error;
+        }
     },
 
     async requestPasswordReset(data: { email: string }): Promise<{ message: string }> {

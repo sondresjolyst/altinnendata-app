@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label: string;
@@ -6,7 +6,11 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export default function TextInput({ label, error, id, required, ...props }: TextInputProps) {
-    const inputId = id ?? props.name;
+    // Fall back to a generated id so the label is always tied to its control. Without it, a
+    // call site that passes neither id nor name renders a label pointing at nothing, which
+    // leaves screen reader users with an unidentified field.
+    const generated = useId();
+    const inputId = id ?? props.name ?? generated;
     const errorId = `${inputId}-error`;
     return (
         <div>

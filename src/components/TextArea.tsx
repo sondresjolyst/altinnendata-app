@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     label: string;
@@ -20,7 +20,11 @@ export default function TextArea({
     value,
     ...props
 }: TextAreaProps) {
-    const inputId = id ?? props.name;
+    // Fall back to a generated id so the label is always tied to its control. Without it, a
+    // call site that passes neither id nor name renders a label pointing at nothing, which
+    // leaves screen reader users with an unidentified field.
+    const generated = useId();
+    const inputId = id ?? props.name ?? generated;
     const ref = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
