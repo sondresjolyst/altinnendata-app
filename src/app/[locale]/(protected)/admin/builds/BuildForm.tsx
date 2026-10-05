@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import Alert from '@/components/Alert';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import BuildClassService, { BuildClass } from '@/services/buildClassService';
 import ComponentConditionService, { ComponentCondition } from '@/services/componentConditionService';
@@ -17,6 +19,7 @@ import TextInput from '@/components/TextInput';
 import Toggle from '@/components/Toggle';
 import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { useFormDraft } from '@/lib/useFormDraft';
 
 const AVAILABILITIES: Availability[] = ['Available', 'Reserved', 'Sold'];
 
@@ -51,6 +54,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     onCancel: () => void;
 }) {
     const { dict } = useDictionary();
+    const { data: session } = useSession();
     const [activeLocale, setActiveLocale] = useState<Locale>(DEFAULT_LOCALE);
     const [translations, setTranslations] = useState<Record<Locale, BuildTranslation>>(() =>
         Object.fromEntries(
@@ -90,6 +94,47 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const [classes, setClasses] = useState<BuildClass[]>([]);
     const [conditions, setConditions] = useState<ComponentCondition[]>([]);
     const [saving, setSaving] = useState(false);
+
+    const values = {
+        translations, category, buildClassId, availability, priceNok, builtOn, soldOn,
+        coverImageId, published, sortOrder, parts, finnUrl, imageIds,
+    };
+    // Scoped to the signed-in user: a shared browser profile must not offer one admin the
+    // draft another one left behind. Remembered, because a lost cookie reports no user at all,
+    // and that is the moment the draft matters most. A different user signing in replaces it.
+    const [ownerId, setOwnerId] = useState<string | undefined>(undefined);
+    useEffect(() => {
+        if (session?.user?.id) setOwnerId(session.user.id);
+    }, [session?.user?.id]);
+
+    const draft = useFormDraft(ownerId ? `${ownerId}:build:${build?.id ?? 'new'}` : null, values);
+
+    // One setter per persisted field, checked by the compiler: adding a field to `values`
+    // without one here is an error rather than a field that silently fails to restore.
+    const setters: { [K in keyof typeof values]: (value: (typeof values)[K]) => void } = {
+        translations: setTranslations,
+        category: setCategory,
+        buildClassId: setBuildClassId,
+        availability: setAvailability,
+        priceNok: setPriceNok,
+        builtOn: setBuiltOn,
+        soldOn: setSoldOn,
+        coverImageId: setCoverImageId,
+        published: setPublished,
+        sortOrder: setSortOrder,
+        parts: setParts,
+        finnUrl: setFinnUrl,
+        imageIds: setImageIds,
+    };
+
+    const restoreDraft = () => {
+        const stored = draft.pending;
+        if (!stored) return;
+        for (const [key, set] of Object.entries(setters) as [keyof typeof values, (value: unknown) => void][]) {
+            set(stored[key]);
+        }
+        draft.dismiss();
+    };
 
     const moveImage = (index: number, delta: number) => {
         const target = index + delta;
@@ -225,6 +270,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             if (build) await BuildService.update(build.id, input);
             else await BuildService.create(input);
             toast.success(build ? dict.admin.buildSaved : dict.admin.buildCreated);
+            draft.clear();
             onSaved();
         } catch (err) {
             toast.error(err instanceof Error ? err.message : dict.admin.buildSaveFailed);
@@ -239,6 +285,21 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
     return (
         <div className="space-y-6 rounded-2xl border border-gray-200 p-5">
+            {draft.pending && (
+                <Alert variant="warning">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span>{dict.admin.draftFound}</span>
+                        <span className="flex gap-3">
+                            <button type="button" onClick={restoreDraft} className="font-semibold underline underline-offset-2">
+                                {dict.admin.restoreDraft}
+                            </button>
+                            <button type="button" onClick={() => { draft.clear(); draft.dismiss(); }} className="underline underline-offset-2">
+                                {dict.admin.discardDraft}
+                            </button>
+                        </span>
+                    </div>
+                </Alert>
+            )}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.category.label}</label>
