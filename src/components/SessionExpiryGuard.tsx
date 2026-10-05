@@ -58,6 +58,22 @@ export default function SessionExpiryGuard() {
     // redirecting a dead session for the rest of the page's life.
     useEffect(() => closeSessionPrompt, []);
 
+    // Who the prompt opened for. signIn refreshes the session before its promise resolves, so
+    // comparing against the live owner would end up comparing the new account with itself. The
+    // submit handler's closure happens to hold the old owner today, so this ref is what makes
+    // that correctness explicit rather than incidental. No test can tell the two apart, which
+    // is the reason to prefer the explicit one.
+    const promptOwner = useRef<{ id: string; email: string } | null>(null);
+    useEffect(() => {
+        if (!open) {
+            promptOwner.current = null;
+            return;
+        }
+        // Only on the way open. Reassigning while open would adopt the account that just
+        // signed in, which is the very thing being checked against.
+        promptOwner.current ??= owner;
+    }, [open, owner]);
+
     const dialog = useRef<HTMLDivElement | null>(null);
 
     // Keyboard handling for the dialog: Escape closes it, Tab cycles inside it, and focus
@@ -104,7 +120,8 @@ export default function SessionExpiryGuard() {
         // enough, because signIn has already replaced the session: end it, or the new account
         // keeps the page and can save the previous user's work as their own. Nothing is lost,
         // since that draft is stored under its owner's id and returns when they sign in.
-        if (owner && next.user?.id !== owner.id) {
+        const opener = promptOwner.current ?? owner;
+        if (opener && next.user?.id !== opener.id) {
             await signOut({ callbackUrl: localeHref(locale, '/login') });
             throw new SignInRejected(dict.auth.sessionWrongUser);
         }

@@ -286,4 +286,5 @@ describe('SessionExpiryGuard', () => {
 
         expect(screen.getByLabelText(new RegExp(`^${dict.auth.email}`))).toHaveValue('a@b.no');
     });
+
 });
