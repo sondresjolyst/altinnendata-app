@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { getSession, useSession } from 'next-auth/react';
+import { getSession, signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import Alert from './Alert';
 import CredentialsForm, { SignInRejected } from './CredentialsForm';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { localeHref } from '@/i18n/config';
 import {
     closeSessionPrompt,
     getSessionPromptOpen,
@@ -25,7 +26,7 @@ const WARN_TICK_MS = 60 * 1000;
  */
 export default function SessionExpiryGuard() {
     const { data: session, status } = useSession();
-    const { dict } = useDictionary();
+    const { locale, dict } = useDictionary();
 
     const open = useSyncExternalStore(subscribeSessionPrompt, getSessionPromptOpen, () => false);
     const [minutesLeft, setMinutesLeft] = useState<number | null>(null);
@@ -95,10 +96,13 @@ export default function SessionExpiryGuard() {
         if (!next || isTerminalSessionError(next.error)) {
             throw new SignInRejected(dict.auth.sessionNotRestored);
         }
-        // The form on the page belongs to whoever opened it. Letting a different account take
-        // it over would save their work under the wrong author.
+        // The form on the page belongs to whoever opened it. Refusing in the dialog is not
+        // enough, because signIn has already replaced the session: end it, or the new account
+        // keeps the page and can save the previous user's work as their own. Nothing is lost,
+        // since that draft is stored under its owner's id and returns when they sign in.
         const owner = session?.user?.id;
         if (owner && next.user?.id !== owner) {
+            await signOut({ callbackUrl: localeHref(locale, '/login') });
             throw new SignInRejected(dict.auth.sessionWrongUser);
         }
         closeSessionPrompt();
