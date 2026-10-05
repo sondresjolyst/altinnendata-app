@@ -147,7 +147,9 @@ describe('the jwt callback', () => {
         // next read replay a dead token, which revokes every device the user is signed in on.
         expect(result.refreshToken).toBe('RT-next');
         expect(result.error).toBeUndefined();
-        expect(result.refreshAt).toBeGreaterThan(Date.now());
+        // Near the window the rotation is remembered for. A sooner retry would be answered
+        // from that memory instead of reaching the API.
+        expect(result.refreshAt! - Date.now()).toBeGreaterThan(55_000);
     });
 
     it('stops asking the API once the session is terminally dead', async () => {
@@ -222,7 +224,8 @@ describe('the jwt callback', () => {
 
         // NaN is falsy, so an unguarded refreshAt would make every session read spend a
         // rotation, and each rotation is a chance to replay.
-        expect(result.refreshAt).toBeGreaterThan(Date.now());
+        // The skew floor, not the retry window: this token was read, it just has no lifetime.
+        expect(result.refreshAt! - Date.now()).toBeGreaterThan(25_000);
     });
 
     it('backs off instead of retrying a sick API on every request', async () => {
@@ -231,7 +234,9 @@ describe('the jwt callback', () => {
         const result = await runJwt(sessionToken({ refreshAt: 0 }));
 
         expect(result.error).toBeUndefined();
-        expect(result.refreshAt).toBeGreaterThan(Date.now());
+        // Near the window the rotation is remembered for. A sooner retry would be answered
+        // from that memory instead of reaching the API.
+        expect(result.refreshAt! - Date.now()).toBeGreaterThan(55_000);
     });
 
     it('shortens the skew for a short-lived access token so not every read refreshes', async () => {
