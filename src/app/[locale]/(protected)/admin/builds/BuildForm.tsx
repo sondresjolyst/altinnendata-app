@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import Alert from '@/components/Alert';
+import { Alert } from '@sjolystinnovation/app-kit/ui';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import BuildClassService, { BuildClass } from '@/services/buildClassService';
 import ComponentConditionService, { ComponentCondition } from '@/services/componentConditionService';

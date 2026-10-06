@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import TextInput from './TextInput';
-import PasswordInput from './PasswordInput';
-import Alert from './Alert';
+import { Alert, PasswordInput } from '@sjolystinnovation/app-kit/ui';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 /** Thrown by an onSignedIn handler when the message is meant for the user to read. */

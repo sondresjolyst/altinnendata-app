@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getSession } from 'next-auth/react';
 import axiosInstance from './axiosInstance';
-import { formatApiError } from '@/lib/errors';
+import { formatApiError } from '@sjolystinnovation/app-kit';
 import { request } from '@/lib/apiRequest';
 
 export interface LoginData {

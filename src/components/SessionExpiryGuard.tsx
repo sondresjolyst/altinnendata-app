@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { getSession, signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import Alert from './Alert';
+import { Alert } from '@sjolystinnovation/app-kit/ui';
 import CredentialsForm, { SignInRejected } from './CredentialsForm';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';

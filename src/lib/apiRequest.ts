@@ -1,4 +1,4 @@
-import { formatApiError } from './errors';
+import { formatApiError } from '@sjolystinnovation/app-kit';
 
 export async function request<T>(call: () => Promise<{ data: T }>, fallback: string): Promise<T> {
     try {
