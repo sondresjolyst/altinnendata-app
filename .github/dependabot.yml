@@ -27,6 +27,7 @@ updates:
     next:
       patterns:
       - next
+      - next-auth
       - eslint-config-next
     expo:
       patterns:
@@ -41,8 +42,11 @@ updates:
       - '@react-navigation/*'
     eslint:
       patterns:
+      - '@eslint/*'
       - eslint
       - eslint-config-*
+      - eslint-plugin-*
+      - typescript-eslint
     testing:
       patterns:
       - vitest
