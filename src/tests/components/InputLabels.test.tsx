@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import TextInput from '@/components/TextInput';
 import TextArea from '@/components/TextArea';
-import PasswordInput from '@/components/PasswordInput';
+import { PasswordInput } from '@sjolystinnovation/app-kit/ui';
 
 // Every long admin form passes a label and nothing else, so the components have to associate
 // the two themselves or the field is unidentifiable to a screen reader.

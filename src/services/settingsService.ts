@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { formatApiError } from '@/lib/errors';
+import { formatApiError } from '@sjolystinnovation/app-kit';
 
 export interface Settings {
     contactRecipientEmail: string;

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@sjolystinnovation/app-kit/styles.css";
 
 /* Palette taken from the Altinnendata profile picture: teal panel, dark ink, lime accent. */
 @theme {
