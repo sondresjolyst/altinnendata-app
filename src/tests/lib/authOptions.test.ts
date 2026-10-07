@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import type { JWT } from 'next-auth/jwt';
 import { authOptions } from '@/lib/authOptions';
 import { apiClient } from '@/services/userService';
-import { SESSION_ERRORS, isTerminalSessionError } from '@/lib/sessionExpiry';
+import { SESSION_ERRORS, isTerminalSessionError } from '@sjolystinnovation/app-kit/session';
 
 const SECRET = 'a-test-secret-long-enough-for-hmac-sha256';
 process.env.ALTINNENDATA_API_JWT_SECRET = SECRET;

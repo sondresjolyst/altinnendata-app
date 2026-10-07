@@ -8,7 +8,7 @@ vi.mock('next-auth/react', () => ({
 }));
 
 const { default: axiosInstance } = await import('@/services/axiosInstance');
-const { closeSessionPrompt, getSessionPromptOpen } = await import('@/lib/sessionExpiry');
+const { closeSessionPrompt, getSessionPromptOpen } = await import('@sjolystinnovation/app-kit/session');
 
 const session = (error?: string): Session => ({
     user: { id: '1', name: 'admin', email: 'a@b.no', roles: ['Admin'] },

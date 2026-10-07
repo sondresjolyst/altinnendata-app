@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ADMIN_ROLE } from '@/lib/roles';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
-import { useSessionGate } from '@/lib/useSessionGate';
+import { useSessionGate } from '@sjolystinnovation/app-kit/session/react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const { session, status, recovering, mayRender } = useSessionGate();

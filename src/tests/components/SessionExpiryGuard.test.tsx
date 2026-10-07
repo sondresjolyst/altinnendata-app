@@ -5,7 +5,7 @@ import type { Session } from 'next-auth';
 import SessionExpiryGuard from '@/components/SessionExpiryGuard';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
-import { closeSessionPrompt, getSessionPromptOpen, openSessionPrompt } from '@/lib/sessionExpiry';
+import { closeSessionPrompt, getSessionPromptOpen, openSessionPrompt } from '@sjolystinnovation/app-kit/session';
 
 const dict = getDictionary('no');
 

@@ -19,7 +19,8 @@ import TextInput from '@/components/TextInput';
 import Toggle from '@/components/Toggle';
 import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import { useFormDraft } from '@/lib/useFormDraft';
+import { useFormDraft } from '@sjolystinnovation/app-kit/forms';
+import { sessionConfig } from '@/lib/session';
 
 const AVAILABILITIES: Availability[] = ['Available', 'Reserved', 'Sold'];
 
@@ -99,7 +100,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         translations, category, buildClassId, availability, priceNok, builtOn, soldOn,
         coverImageId, published, sortOrder, parts, finnUrl, imageIds,
     };
-    const draft = useFormDraft({
+    const draft = useFormDraft(sessionConfig, {
         owner: session?.user?.id,
         scope: `build:${build?.id ?? 'new'}`,
         value: values,

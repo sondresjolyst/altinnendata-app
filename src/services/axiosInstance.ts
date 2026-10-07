@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getSession } from 'next-auth/react';
-import { isTerminalSessionError, openSessionPrompt } from '@/lib/sessionExpiry';
+import { isTerminalSessionError, openSessionPrompt } from '@sjolystinnovation/app-kit/session';
 
 const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
