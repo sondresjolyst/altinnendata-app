@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { TrashIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import BrandingService, { toDataUrl } from '@/services/brandingService';
@@ -17,13 +17,21 @@ function Slot({
     hint: string;
 }) {
     const inputRef = useRef<HTMLInputElement>(null);
-    // Derived from the picked file, so nothing to sync; the effect only revokes a URL once it is replaced.
-    const objectUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+    const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
+    // An object URL is an outside resource with a lifetime, which is what an effect is for. Creating
+    // it during render instead leaks the second URL that StrictMode builds when it renders twice.
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
-        if (!objectUrl) return;
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [objectUrl]);
+        if (!file) {
+            setObjectUrl(null);
+            return;
+        }
+        const url = URL.createObjectURL(file);
+        setObjectUrl(url);
+        return () => URL.revokeObjectURL(url);
+    }, [file]);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const preview = objectUrl ?? currentUrl;
     return (
