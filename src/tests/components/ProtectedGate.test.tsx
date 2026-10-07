@@ -3,7 +3,7 @@ import { act, render, screen } from '@testing-library/react';
 import type { Session } from 'next-auth';
 import ProtectedGate from '@/app/[locale]/(protected)/ProtectedGate';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
-import { closeSessionPrompt, openSessionPrompt } from '@/lib/sessionExpiry';
+import { closeSessionPrompt, openSessionPrompt } from '@sjolystinnovation/app-kit/session';
 
 const push = vi.fn();
 let pathname = '/no/admin/builds';

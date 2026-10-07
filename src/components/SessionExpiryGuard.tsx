@@ -13,7 +13,7 @@ import {
     isTerminalSessionError,
     openSessionPrompt,
     subscribeSessionPrompt,
-} from '@/lib/sessionExpiry';
+} from '@sjolystinnovation/app-kit/session';
 
 // The absolute session cap cannot be refreshed away, so warn while there is still time to sign
 // in again without interrupting a save.

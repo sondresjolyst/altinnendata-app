@@ -4,7 +4,7 @@ import type { Session } from 'next-auth';
 import ProtectedGate from '@/app/[locale]/(protected)/ProtectedGate';
 import AdminLayout from '@/app/[locale]/(protected)/admin/layout';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
-import { closeSessionPrompt, openSessionPrompt } from '@/lib/sessionExpiry';
+import { closeSessionPrompt, openSessionPrompt } from '@sjolystinnovation/app-kit/session';
 
 const push = vi.fn();
 let pathname = '/no/admin/builds';

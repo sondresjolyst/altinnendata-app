@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken';
 import type { NextAuthOptions, Session } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import UserService, { RefreshTokenRejectedError } from '@/services/userService';
-import { SESSION_ERRORS, isTerminalSessionError } from '@/lib/sessionExpiry';
+import { resolveJwtSecret } from '@sjolystinnovation/app-kit';
+import { SESSION_ERRORS, isTerminalSessionError } from '@sjolystinnovation/app-kit/session';
+import { sessionConfig } from '@/lib/session';
 
 type DecodedToken = {
     sub: string;
@@ -38,11 +40,7 @@ const MAX_REFRESH_SKEW_MS = 5 * 60 * 1000;
 const MIN_REFRESH_GAP_MS = 30 * 1000;
 
 function parseApiToken(token: string): DecodedToken {
-    const secret = process.env.ALTINNENDATA_API_JWT_SECRET;
-    if (!secret) {
-        throw new Error('ALTINNENDATA_API_JWT_SECRET is not configured. Refusing to accept unverified API tokens.');
-    }
-    return jwt.verify(token, secret) as DecodedToken;
+    return jwt.verify(token, resolveJwtSecret(sessionConfig, process.env)) as DecodedToken;
 }
 
 function rolesOf(decoded: DecodedToken): string[] {
@@ -177,7 +175,7 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     pages: {
-        signIn: '/login',
+        signIn: sessionConfig.loginRoute,
     },
     session: {
         maxAge: ABSOLUTE_SESSION_MAX_AGE / 1000,
