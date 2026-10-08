@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import TextInput from './TextInput';
+import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import ContactService from '@/services/contactService';
 import { contactSchema, fieldErrors, budgetRanges, ContactInput } from '@/lib/validation';
 import { useDictionary } from '@/i18n/DictionaryProvider';

@@ -7,11 +7,12 @@ import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { closeSessionPrompt, openSessionPrompt } from '@sjolystinnovation/app-kit/session';
 
 const push = vi.fn();
+const replace = vi.fn();
 let pathname = '/no/admin/builds';
 let sessionState: { data: Session | null; status: 'loading' | 'authenticated' | 'unauthenticated' };
 
 vi.mock('next/navigation', () => ({
-    useRouter: () => ({ push }),
+    useRouter: () => ({ push, replace }),
     usePathname: () => pathname,
 }));
 
@@ -40,6 +41,7 @@ const tree = () => (
 describe('the admin layout inside the gate', () => {
     beforeEach(() => {
         push.mockClear();
+        replace.mockClear();
         pathname = '/no/admin/builds';
         sessionState = { data: session(), status: 'authenticated' };
         closeSessionPrompt();
@@ -65,6 +67,7 @@ describe('the admin layout inside the gate', () => {
 
         expect(screen.getByText('admin work')).toBeInTheDocument();
         expect(push).not.toHaveBeenCalled();
+        expect(replace).not.toHaveBeenCalled();
     });
 
     it('still keeps a non-admin out of the admin page', () => {

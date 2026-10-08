@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import LegalService, { LEGAL_KEYS, LegalKey, LegalPage } from '@/services/legalService';
 import LocaleTabs from '@/components/LocaleTabs';
-import TextInput from '@/components/TextInput';
+import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 

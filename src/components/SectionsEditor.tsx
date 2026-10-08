@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ImageService, { imagePath } from '@/services/imageService';
 import { Section, SectionType, createSection, cloneSection, StatItem, ImageSection, FeedAvailability } from '@/types/content';
-import TextInput from '@/components/TextInput';
+import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 const ALL_TYPES: SectionType[] = ['hero', 'feature', 'text', 'feed', 'contact', 'cta', 'stats', 'image'];

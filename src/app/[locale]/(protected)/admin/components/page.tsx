@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { CheckIcon, PencilSquareIcon, PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import ComponentService, { CategoryTree, ComponentCategory, ComponentManufacturer, ComponentPart } from '@/services/componentService';
 import TextArea from '@/components/TextArea';
-import TextInput from '@/components/TextInput';
+import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import { DEFAULT_LOCALE, LOCALES } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 

@@ -1,10 +1,9 @@
 "use client";
-
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import TextInput from '@/components/TextInput';
-import { Alert, PasswordInput } from '@sjolystinnovation/app-kit/ui';
+
+import { Alert, PasswordInput, TextInput } from '@sjolystinnovation/app-kit/ui';
 import UserService from '@/services/userService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
