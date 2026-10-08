@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { request } from '@/lib/apiRequest';
+import { request } from '@sjolystinnovation/app-kit/api';
 
 export interface AdminStats {
     totalUsers: number;

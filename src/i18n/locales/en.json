@@ -117,6 +117,7 @@
     "signingIn": "Signing in…",
     "forgotPassword": "Forgot your password?",
     "invalidCredentials": "Wrong email or password.",
+    "signInUnavailable": "Sign-in is unavailable right now. Try again shortly.",
     "resetTitle": "Set a new password",
     "resetIntro": "Enter your email address and we'll send you a code.",
     "resetCode": "Code from the email",

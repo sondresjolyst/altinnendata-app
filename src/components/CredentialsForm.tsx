@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import TextInput from './TextInput';
+import { SIGN_IN_ERRORS } from '@sjolystinnovation/app-kit/session';
 import { Alert, PasswordInput } from '@sjolystinnovation/app-kit/ui';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
@@ -31,7 +32,7 @@ export default function CredentialsForm({ initialEmail = '', onSignedIn, childre
         try {
             const result = await signIn('credentials', { email, password, redirect: false });
             if (result?.error) {
-                setError(dict.auth.invalidCredentials);
+                setError(result.error === SIGN_IN_ERRORS.unavailable ? dict.auth.signInUnavailable : dict.auth.invalidCredentials);
                 return;
             }
             await onSignedIn();
