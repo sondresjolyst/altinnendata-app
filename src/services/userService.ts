@@ -2,12 +2,7 @@ import axios from 'axios';
 import { getSession } from 'next-auth/react';
 import axiosInstance from './axiosInstance';
 import { formatApiError } from '@sjolystinnovation/app-kit';
-import { request } from '@/lib/apiRequest';
-
-export interface LoginData {
-    email: string;
-    password: string;
-}
+import { request } from '@sjolystinnovation/app-kit/api';
 
 export interface UserProfile {
     id: string;
@@ -26,55 +21,14 @@ export interface RegisterData {
     password: string;
 }
 
-export interface TokenResponse {
-    token: string;
-    refreshToken: string;
-}
-
 const apiClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
-/**
- * The API refused the refresh token itself: it is expired, revoked, or outside the reuse
- * grace window. Only this warrants ending the session. Every other failure is transient
- * and worth retrying with the same refresh token.
- */
-export class RefreshTokenRejectedError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'RefreshTokenRejectedError';
-    }
-}
-
 const UserService = {
-    async login(data: LoginData): Promise<TokenResponse> {
-        try {
-            const response = await apiClient.post<TokenResponse>('/auth/login', data);
-            return response.data;
-        } catch (error: unknown) {
-            throw new Error(formatApiError(error, 'Failed to login'));
-        }
-    },
-
     async register(data: RegisterData): Promise<void> {
         try {
             await apiClient.post('/auth/register', data);
         } catch (error: unknown) {
             throw new Error(formatApiError(error, 'Failed to register'));
-        }
-    },
-
-    async refreshToken(data: TokenResponse): Promise<TokenResponse> {
-        try {
-            // Bounded on purpose: session reads queue behind this one request, so a connection
-            // that blackholes would otherwise freeze the whole admin UI.
-            const response = await apiClient.post<TokenResponse>('/auth/refresh-token', data, { timeout: 10_000 });
-            return response.data;
-        } catch (error: unknown) {
-            const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-            if (status === 400 || status === 401) {
-                throw new RefreshTokenRejectedError(formatApiError(error, 'Refresh token was rejected'));
-            }
-            throw error;
         }
     },
 

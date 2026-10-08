@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { request } from '@/lib/apiRequest';
+import { request } from '@sjolystinnovation/app-kit/api';
 import { publicGetOptional } from '@/lib/publicApi';
 
 export interface UploadedImage {

@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { request } from '@/lib/apiRequest';
+import { request } from '@sjolystinnovation/app-kit/api';
 import type { Locale } from '@/i18n/config';
 
 export interface BuildClassTranslation {
