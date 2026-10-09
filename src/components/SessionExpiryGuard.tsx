@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import { SessionExpiryGuard as Guard } from '@sjolystinnovation/app-kit/session/react';
 import { useCredentialsFormStrings } from './CredentialsForm';
 import { useDictionary } from '@/i18n/DictionaryProvider';

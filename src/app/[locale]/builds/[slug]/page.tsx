@@ -6,6 +6,7 @@ import BuildGallery from '@/components/BuildGallery';
 import Markdown from '@/components/Markdown';
 import { BuildDetail, coverImageSrc } from '@/services/buildService';
 import { publicGet } from '@/lib/publicApi';
+import { slugSegment } from '@/lib/slug';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { formatDate, formatPrice } from '@/lib/format';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
@@ -19,7 +20,7 @@ import { absoluteLocaleUrl, localePath } from '@/lib/seo/urls';
 export const revalidate = 60;
 
 const fetchBuild = (slug: string, locale: Locale) =>
-    publicGet<BuildDetail>(`/builds/${slug}?locale=${locale}`, { tags: [REVALIDATE_TARGETS.builds] });
+    publicGet<BuildDetail>(`/builds/${slugSegment(slug)}?locale=${locale}`, { tags: [REVALIDATE_TARGETS.builds] });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
     const { locale, slug } = await params;

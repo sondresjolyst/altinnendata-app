@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import ContentService from '@/services/contentService';
 import SectionsEditor from '@/components/SectionsEditor';
 import LocaleTabs from '@/components/LocaleTabs';

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import AdminService, { AdminStats, DailyStat, EmailStats } from '@/services/adminService';
 import StatHistoryChart from '@/components/StatHistoryChart';
 import { formatPrice } from '@/lib/format';
