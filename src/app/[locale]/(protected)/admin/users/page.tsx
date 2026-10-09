@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import AdminService, { AdminUser } from '@/services/adminService';
 import Toggle from '@/components/Toggle';
-import TextInput from '@/components/TextInput';
+import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function AdminUsersPage() {
