@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { BuildSummary } from '@/services/buildService';
-import ContentImage from '@/components/ContentImage';
+import { ContentImage } from '@sjolystinnovation/app-kit/ui';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { formatPrice } from '@/lib/format';

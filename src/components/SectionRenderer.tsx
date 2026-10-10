@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Markdown from '@/components/Markdown';
-import ContentImage from '@/components/ContentImage';
+import { ContentImage } from '@sjolystinnovation/app-kit/ui';
 import type { ImageDimensionsMap } from '@/services/imageService';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { Section } from '@/types/content';

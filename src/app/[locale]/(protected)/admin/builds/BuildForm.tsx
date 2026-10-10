@@ -9,7 +9,8 @@ import BuildClassService, { BuildClass } from '@/services/buildClassService';
 import ComponentConditionService, { ComponentCondition } from '@/services/componentConditionService';
 import ComponentService, { CategoryTree } from '@/services/componentService';
 import FinnService from '@/services/finnService';
-import ImageService, { imagePath } from '@/services/imageService';
+import { contentImagePath } from '@sjolystinnovation/app-kit/ui';
+import ImageService from '@/services/imageService';
 import TranslationService, { TranslatableFields } from '@/services/translationService';
 import { ImagePicker } from '@/components/SectionsEditor';
 import LocaleTabs from '@/components/LocaleTabs';
@@ -389,7 +390,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                         {imageIds.map((id, index) => (
                             <li key={id} className="relative">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={`${imagePath(id)}?w=384`} alt="" className="h-24 w-32 rounded-lg border border-gray-200 object-cover" />
+                                <img src={`${contentImagePath(id)}?w=384`} alt="" className="h-24 w-32 rounded-lg border border-gray-200 object-cover" />
                                 <div className="mt-1 flex items-center justify-between gap-1">
                                     <div className="flex gap-1">
                                         <button type="button" onClick={() => moveImage(index, -1)} disabled={index === 0} className="rounded px-1.5 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-30">←</button>
