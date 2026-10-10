@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Alert, TextInput } from '@sjolystinnovation/app-kit/ui';
+import { Alert, TextArea, TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import BuildClassService, { BuildClass } from '@/services/buildClassService';
 import ComponentConditionService, { ComponentCondition } from '@/services/componentConditionService';
@@ -13,9 +13,7 @@ import ImageService, { imagePath } from '@/services/imageService';
 import TranslationService, { TranslatableFields } from '@/services/translationService';
 import { ImagePicker } from '@/components/SectionsEditor';
 import LocaleTabs from '@/components/LocaleTabs';
-import TextArea from '@/components/TextArea';
 
-import Toggle from '@/components/Toggle';
 import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { useFormDraft } from '@sjolystinnovation/app-kit/forms';
