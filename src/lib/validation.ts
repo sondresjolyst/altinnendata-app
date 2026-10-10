@@ -16,13 +16,6 @@ export const contactSchema = z.object({
 
 export type ContactInput = z.infer<typeof contactSchema>;
 
-export const passwordSchema = z
-    .string()
-    .min(8)
-    .regex(/[a-z]/)
-    .regex(/[A-Z]/)
-    .regex(/[0-9]/);
-
 export function issueMessage(issue: z.core.$ZodIssue, dict: Dictionary): string {
     if (issue.code === 'invalid_format' && issue.format === 'email') return dict.validation.email;
     if (issue.code === 'too_big') return dict.validation.tooLong;

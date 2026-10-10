@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { contactSchema, fieldErrors, passwordSchema } from '@/lib/validation';
+import { contactSchema, fieldErrors } from '@/lib/validation';
 import { getDictionary } from '@/i18n/dictionaries';
 
 const dict = getDictionary('no');
@@ -50,14 +50,5 @@ describe('fieldErrors', () => {
         expect(errors.email).toBe(dict.validation.email);
         expect(errors.message).toBe(dict.validation.required);
         expect(errors.name).toBeUndefined();
-    });
-});
-
-describe('passwordSchema', () => {
-    it('requires length, case mix and a digit', () => {
-        expect(passwordSchema.safeParse('Passord1').success).toBe(true);
-        expect(passwordSchema.safeParse('passord1').success).toBe(false);
-        expect(passwordSchema.safeParse('Passord').success).toBe(false);
-        expect(passwordSchema.safeParse('Pass1').success).toBe(false);
     });
 });

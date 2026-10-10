@@ -107,7 +107,7 @@
     "required": "Feltet må fylles ut",
     "email": "Skriv inn en gyldig e-postadresse",
     "tooLong": "Teksten er for lang",
-    "password": "Minst 8 tegn, med stor bokstav, liten bokstav og tall"
+    "password": "Minst 8 tegn, med en stor og en liten bokstav fra A til Z og et tall fra 0 til 9"
   },
   "auth": {
     "signInTitle": "Logg inn",
