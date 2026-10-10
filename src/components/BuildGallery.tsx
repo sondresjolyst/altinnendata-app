@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import ContentImage from '@/components/ContentImage';
+import { ContentImage } from '@sjolystinnovation/app-kit/ui';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function BuildGallery({ imageIds, alt }: { imageIds: string[]; alt: string }) {
