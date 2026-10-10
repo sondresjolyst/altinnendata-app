@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.10.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.8...v1.10.0) (2026-10-10)
+
+
+### Features
+
+* sign in through app-kit and say when sign-in is unavailable ([#133](https://github.com/sondresjolyst/altinnendata-app/issues/133)) ([97676af](https://github.com/sondresjolyst/altinnendata-app/commit/97676afb1fc595d47ed6a6427314c0cea150269b))
+
+
+### Bug Fixes
+
+* **docker:** treat an unset SITE_ENV as production like the app does ([#138](https://github.com/sondresjolyst/altinnendata-app/issues/138)) ([4670f90](https://github.com/sondresjolyst/altinnendata-app/commit/4670f90c8527c918dfcac82ec1a8f50c83a91c88))
+* keep admin work when the session expires ([#123](https://github.com/sondresjolyst/altinnendata-app/issues/123)) ([72bb0fb](https://github.com/sondresjolyst/altinnendata-app/commit/72bb0fb887a367f58d7c7d636e95af739b9bd366))
+* keep the admin user list in step with the show deleted toggle ([#131](https://github.com/sondresjolyst/altinnendata-app/issues/131)) ([62165cc](https://github.com/sondresjolyst/altinnendata-app/commit/62165cc431ee9e32279344430f82363f2b261bde))
+* use app-kit for admin access, public fetches, session renewal, quiet error toasts and password rules ([#136](https://github.com/sondresjolyst/altinnendata-app/issues/136)) ([4519805](https://github.com/sondresjolyst/altinnendata-app/commit/451980582e85a19041132755f8d79863d0dd692d))
+
+
+### Dependencies
+
+* **npm:** bump `next` from 16.3.7 to 16.4.0 ([#134](https://github.com/sondresjolyst/altinnendata-app/issues/134)) ([e295bbd](https://github.com/sondresjolyst/altinnendata-app/commit/e295bbd6b9fbe652d9d9d54bb3d0445e3b5f5124))
+* **npm:** bump `sharp` from 0.35.4 to 0.35.5 ([#129](https://github.com/sondresjolyst/altinnendata-app/issues/129)) ([f5d7e63](https://github.com/sondresjolyst/altinnendata-app/commit/f5d7e6310b22b412d3f755c166bcf991d7ca8eb8))
+* **npm:** bump `source-map-js` from 1.2.1 to 1.2.2 ([#130](https://github.com/sondresjolyst/altinnendata-app/issues/130)) ([190d071](https://github.com/sondresjolyst/altinnendata-app/commit/190d07199567e7a1e8c7de65de60f2f52f299f77))
+* **npm:** bump the next group with 2 updates ([#126](https://github.com/sondresjolyst/altinnendata-app/issues/126)) ([547dc1a](https://github.com/sondresjolyst/altinnendata-app/commit/547dc1a38fb2896cc211d4a76b45800586e80f9b))
+
 ## [1.9.8](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.7...v1.9.8) (2026-10-04)
 
 
