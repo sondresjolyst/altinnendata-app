@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import ContactService from '@/services/contactService';
 import { contactSchema, fieldErrors, budgetRanges, ContactInput } from '@/lib/validation';

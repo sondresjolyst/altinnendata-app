@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import {
     ArrowUpIcon, ArrowDownIcon, TrashIcon, PlusIcon, EyeIcon, EyeSlashIcon, DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';

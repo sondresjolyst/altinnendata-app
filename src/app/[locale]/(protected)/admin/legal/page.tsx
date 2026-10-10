@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import LegalService, { LEGAL_KEYS, LegalKey, LegalPage } from '@/services/legalService';
 import LocaleTabs from '@/components/LocaleTabs';
 import { TextInput } from '@sjolystinnovation/app-kit/ui';

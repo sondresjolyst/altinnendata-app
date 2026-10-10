@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import { TrashIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import BrandingService, { toDataUrl } from '@/services/brandingService';
 import { useBranding } from '@/components/BrandingProvider';

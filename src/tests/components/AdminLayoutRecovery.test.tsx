@@ -79,6 +79,6 @@ describe('the admin layout inside the gate', () => {
         render(tree());
 
         expect(screen.queryByText('admin work')).not.toBeInTheDocument();
-        expect(push).toHaveBeenCalledWith('/no');
+        expect(replace).toHaveBeenCalledWith('/no');
     });
 });

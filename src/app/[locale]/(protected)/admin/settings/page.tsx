@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@sjolystinnovation/app-kit/toast';
 import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import Toggle from '@/components/Toggle';
 import SettingsService, { Settings } from '@/services/settingsService';
