@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import TextArea from '@/components/TextArea';
-import { PasswordInput, TextInput } from '@sjolystinnovation/app-kit/ui';
+import { PasswordInput, TextArea, TextInput } from '@sjolystinnovation/app-kit/ui';
 // Every long admin form passes a label and nothing else, so the components have to associate
 // the two themselves or the field is unidentifiable to a screen reader.
 describe('the shared inputs', () => {

@@ -4,8 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { CheckIcon, PencilSquareIcon, PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import BuildClassService, { BuildClass, BuildClassTranslation } from '@/services/buildClassService';
-import TextArea from '@/components/TextArea';
-import { TextInput } from '@sjolystinnovation/app-kit/ui';
+import { TextArea, TextInput } from '@sjolystinnovation/app-kit/ui';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 

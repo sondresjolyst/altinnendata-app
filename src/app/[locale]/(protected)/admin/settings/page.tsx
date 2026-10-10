@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
-import { TextInput } from '@sjolystinnovation/app-kit/ui';
-import Toggle from '@/components/Toggle';
+import { TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
 import SettingsService, { Settings } from '@/services/settingsService';
 import BrandingManager from '@/components/BrandingManager';
 import { useDictionary } from '@/i18n/DictionaryProvider';
