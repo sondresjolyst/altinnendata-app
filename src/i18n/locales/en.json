@@ -107,7 +107,7 @@
     "required": "This field is required",
     "email": "Enter a valid email address",
     "tooLong": "This text is too long",
-    "password": "At least 8 characters, with an upper-case letter, a lower-case letter and a number"
+    "password": "At least 8 characters, with an upper-case and a lower-case letter from A to Z and a number from 0 to 9"
   },
   "auth": {
     "signInTitle": "Sign in",

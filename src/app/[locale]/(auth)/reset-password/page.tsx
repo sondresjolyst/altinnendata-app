@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 import { Alert, PasswordInput, TextInput } from '@sjolystinnovation/app-kit/ui';
+import { passwordSchema } from '@sjolystinnovation/app-kit/validation';
 import UserService from '@/services/userService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
@@ -50,6 +51,10 @@ function ResetPasswordForm() {
     const reset = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        if (!passwordSchema().safeParse(newPassword).success) {
+            setError(dict.validation.password);
+            return;
+        }
         setLoading(true);
         try {
             await UserService.resetPassword({ email, code, newPassword });
