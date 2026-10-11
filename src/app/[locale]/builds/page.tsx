@@ -6,10 +6,8 @@ import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { isLocale, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-import { pageMetadata } from '@/lib/seo/metadata';
-import JsonLd from '@/components/JsonLd';
-import { breadcrumbNode, itemListNode } from '@/lib/seo/schema/navigation';
-import { absoluteLocaleUrl, localePath } from '@/lib/seo/urls';
+import { pageMetadata, breadcrumbNode, itemListNode, absoluteLocaleUrl, localePath } from '@/lib/seo/site';
+import { JsonLd } from '@sjolystinnovation/app-kit/seo';
 
 export const revalidate = 60;
 

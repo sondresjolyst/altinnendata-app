@@ -1,8 +1,8 @@
 import type { Availability, BuildDetail } from '@/services/buildService';
 import { contentImagePath } from '@sjolystinnovation/app-kit/ui';
-import { absoluteUrl } from '../urls';
+import { absoluteUrl, SCHEMA_IDS } from '@/lib/seo/site';
 import { LOCALE_TAGS, type Locale } from '@/i18n/config';
-import { ref, SCHEMA_IDS, type SchemaNode } from './graph';
+import { ref, type SchemaNode } from '@sjolystinnovation/app-kit/seo';
 
 /** schema.org has no "held for a buyer" state; a reserved machine maps to LimitedAvailability. */
 const AVAILABILITY: Record<Availability, string> = {

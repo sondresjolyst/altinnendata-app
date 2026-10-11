@@ -11,11 +11,9 @@ import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { formatDate, formatPrice } from '@/lib/format';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-import { pageMetadata } from '@/lib/seo/metadata';
-import JsonLd from '@/components/JsonLd';
-import { breadcrumbNode } from '@/lib/seo/schema/navigation';
+import { pageMetadata, breadcrumbNode, absoluteLocaleUrl, localePath } from '@/lib/seo/site';
+import { JsonLd } from '@sjolystinnovation/app-kit/seo';
 import { productNode } from '@/lib/seo/schema/product';
-import { absoluteLocaleUrl, localePath } from '@/lib/seo/urls';
 
 export const revalidate = 60;
 

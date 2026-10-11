@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { NOINDEX } from '@/lib/seo/metadata';
+import { NOINDEX } from '@sjolystinnovation/app-kit/seo';
 import SessionExpiryGuard from '@/components/SessionExpiryGuard';
 import ProtectedGate from './ProtectedGate';
 

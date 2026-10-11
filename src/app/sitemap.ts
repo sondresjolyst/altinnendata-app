@@ -5,7 +5,8 @@ import { BuildSummary } from '@/services/buildService';
 import { Section } from '@/types/content';
 import { LegalPage } from '@/services/legalService';
 import { LOCALES, type Locale } from '@/i18n/config';
-import { latest, localeEntries, parseTimestamp } from '@/lib/seo/sitemap';
+import { latest, parseTimestamp } from '@sjolystinnovation/app-kit/seo';
+import { localeEntries } from '@/lib/seo/site';
 
 export const revalidate = 3600;
 
