@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { ArrowRightStartOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useBranding } from '@/components/BrandingProvider';
+import { useBranding } from '@sjolystinnovation/app-kit/branding';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
 import { ADMIN_ROLE } from '@/lib/roles';
 import { COMPANY } from '@/lib/company';

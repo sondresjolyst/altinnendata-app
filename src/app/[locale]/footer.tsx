@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { useBranding } from '@/components/BrandingProvider';
+import { useBranding } from '@sjolystinnovation/app-kit/branding';
 import { formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';

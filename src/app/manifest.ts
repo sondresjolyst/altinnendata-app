@@ -1,7 +1,7 @@
-import { createHash } from 'crypto';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import type { MetadataRoute } from 'next';
+import { iconVersion as version } from '@sjolystinnovation/app-kit/branding/server';
 import { publicGetOptional } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import type { Branding } from '@/services/brandingService';
@@ -11,9 +11,6 @@ import { getDictionary } from '@/i18n/dictionaries';
 
 // Read per request: the icon comes from admin settings, and a prerendered copy would pin the build-time one.
 export const dynamic = 'force-dynamic';
-
-/** Short digest of the icon bytes, so the icon URL changes when the icon does. */
-const version = (data: string | Buffer) => createHash('sha256').update(data).digest('hex').slice(0, 12);
 
 /**
  * The installed-app manifest. The icon entry points at the `/icon` route, versioned by content:
