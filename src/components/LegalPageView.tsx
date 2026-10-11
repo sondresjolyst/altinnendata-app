@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Markdown from '@/components/Markdown';
+import { Markdown } from '@sjolystinnovation/app-kit/markdown';
 import { LegalPage } from '@/services/legalService';
 import { formatDate } from '@/lib/format';
 import { getDictionary } from '@/i18n/dictionaries';

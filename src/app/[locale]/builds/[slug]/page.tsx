@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import BuildGallery from '@/components/BuildGallery';
-import Markdown from '@/components/Markdown';
+import { Markdown } from '@sjolystinnovation/app-kit/markdown';
 import { BuildDetail, coverImageSrc } from '@/services/buildService';
 import { publicGet } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
