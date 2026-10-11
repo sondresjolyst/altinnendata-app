@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import Markdown from '@/components/Markdown';
+import { Markdown } from '@sjolystinnovation/app-kit/markdown';
 import { ContentImage } from '@sjolystinnovation/app-kit/ui';
 import type { ImageDimensionsMap } from '@/services/imageService';
 import { CheckIcon } from '@heroicons/react/24/outline';
