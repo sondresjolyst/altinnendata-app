@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Metadata } from 'next';
-import { pageMetadata, siteMetadata } from '@/lib/seo/metadata';
+import { pageMetadata, siteMetadata } from '@/lib/seo/site';
 import { DEFAULT_LOCALE, LOCALES, LOCALE_TAGS } from '@/i18n/config';
 
 /** Next types the alternates map by locale tag; tests look entries up by string key. */

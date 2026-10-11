@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import robots from '@/app/robots';
 import { LOCALES } from '@/i18n/config';
 import { PRIVATE_PATHS } from '@/lib/seo/routes';
-import { absoluteUrl } from '@/lib/seo/urls';
+import { absoluteUrl } from '@/lib/seo/site';
 
 describe('robots.txt', () => {
     const disallow = [robots().rules].flat()[0].disallow as string[];

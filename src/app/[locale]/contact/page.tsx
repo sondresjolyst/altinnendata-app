@@ -4,7 +4,7 @@ import ContactForm from '@/components/ContactForm';
 import { COMPANY } from '@/lib/company';
 import { isLocale, Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-import { pageMetadata } from '@/lib/seo/metadata';
+import { pageMetadata } from '@/lib/seo/site';
 import { publicGetOptional } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { BuildDetail } from '@/services/buildService';

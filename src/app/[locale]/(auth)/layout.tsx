@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { NOINDEX } from '@/lib/seo/metadata';
+import { NOINDEX } from '@sjolystinnovation/app-kit/seo';
 
 // Removing this returns these pages to the index: robots.txt alone will not deindex a page.
 export const metadata: Metadata = { robots: NOINDEX };

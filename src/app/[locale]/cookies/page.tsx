@@ -6,7 +6,7 @@ import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-import { pageMetadata } from '@/lib/seo/metadata';
+import { pageMetadata } from '@/lib/seo/site';
 
 export const revalidate = 3600;
 

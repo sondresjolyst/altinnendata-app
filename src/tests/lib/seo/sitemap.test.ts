@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { latest, localeEntries, parseTimestamp } from '@/lib/seo/sitemap';
+import { latest, parseTimestamp } from '@sjolystinnovation/app-kit/seo';
+import { localeEntries } from '@/lib/seo/site';
 import { COMPANY } from '@/lib/company';
 
 describe('localeEntries', () => {
