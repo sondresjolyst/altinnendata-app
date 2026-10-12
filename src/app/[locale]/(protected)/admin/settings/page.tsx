@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
 import SettingsService, { Settings } from '@/services/settingsService';
-import BrandingManager from '@/components/BrandingManager';
+import { BrandingManager } from '@sjolystinnovation/app-kit/branding';
+import BrandingService from '@/services/brandingService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 const EMPTY: Settings = {
@@ -142,7 +143,7 @@ export default function AdminSettingsPage() {
                 </button>
             </form>
 
-            <BrandingManager />
+            <BrandingManager save={BrandingService.update} />
         </div>
     );
 }

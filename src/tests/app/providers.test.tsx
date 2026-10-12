@@ -12,7 +12,7 @@ vi.mock('next-auth/react', () => ({
     useSession: () => ({ data: null, status: 'unauthenticated' }),
 }));
 
-vi.mock('sonner', () => ({ Toaster: () => null }));
+vi.mock('sonner', () => ({ Toaster: () => null, toast: Object.assign(() => {}, { error: () => {}, success: () => {} }) }));
 
 describe('Providers', () => {
     it('polls the session so an open tab renews its token before a save needs it', () => {
