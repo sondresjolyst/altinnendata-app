@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import ContactService from '@/services/contactService';
-import { contactSchema, fieldErrors, budgetRanges, ContactInput } from '@/lib/validation';
+import { zodFieldErrors } from '@sjolystinnovation/app-kit/validation';
+import { contactSchema, issueMessage, budgetRanges, ContactInput } from '@/lib/validation';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function ContactForm({ build }: { build?: { slug: string; title: string } | null }) {
@@ -34,7 +35,7 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
         e.preventDefault();
         const parsed = contactSchema.safeParse(form);
         if (!parsed.success) {
-            setErrors(fieldErrors(parsed.error, dict));
+            setErrors(zodFieldErrors(parsed.error, { message: (issue) => issueMessage(issue, dict) }));
             return;
         }
         setErrors({});
