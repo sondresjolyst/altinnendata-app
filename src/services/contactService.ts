@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { formatApiError } from '@sjolystinnovation/app-kit';
+import { formatApiError } from '@sjolystinnovation/app-kit/api';
 
 export interface ContactRequest {
     name: string;

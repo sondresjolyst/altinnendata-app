@@ -1,6 +1,6 @@
 "use client";
 
-import type { CredentialsFormStrings } from '@sjolystinnovation/app-kit/ui';
+import type { CredentialsFormStrings } from '@sjolystinnovation/app-kit/session/react';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 /** The sign-in form's text from the app's dictionary. */
