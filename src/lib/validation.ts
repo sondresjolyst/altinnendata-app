@@ -22,14 +22,3 @@ export function issueMessage(issue: z.core.$ZodIssue, dict: Dictionary): string 
     return dict.validation.required;
 }
 
-export function fieldErrors<T extends Record<string, unknown>>(
-    error: z.ZodError<T>,
-    dict: Dictionary,
-): Partial<Record<keyof T, string>> {
-    const errors: Partial<Record<keyof T, string>> = {};
-    for (const issue of error.issues) {
-        const key = issue.path[0] as keyof T;
-        if (key != null && errors[key] === undefined) errors[key] = issueMessage(issue, dict);
-    }
-    return errors;
-}

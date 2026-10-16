@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { contactSchema, fieldErrors } from '@/lib/validation';
+import { zodFieldErrors } from '@sjolystinnovation/app-kit/validation';
+import { contactSchema, issueMessage } from '@/lib/validation';
 import { getDictionary } from '@/i18n/dictionaries';
 
 const dict = getDictionary('no');
@@ -40,13 +41,13 @@ describe('contactSchema', () => {
     });
 });
 
-describe('fieldErrors', () => {
+describe('issueMessage', () => {
     it('returns messages in the visitor language, one per field', () => {
         const result = contactSchema.safeParse({ ...valid, email: 'nope', message: '' });
         expect(result.success).toBe(false);
         if (result.success) return;
 
-        const errors = fieldErrors(result.error, dict);
+        const errors = zodFieldErrors(result.error, { message: (issue) => issueMessage(issue, dict) });
         expect(errors.email).toBe(dict.validation.email);
         expect(errors.message).toBe(dict.validation.required);
         expect(errors.name).toBeUndefined();
