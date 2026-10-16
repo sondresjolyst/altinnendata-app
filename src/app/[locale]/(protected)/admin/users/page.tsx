@@ -1,220 +1,48 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { toast } from '@sjolystinnovation/app-kit/toast';
-import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import AdminService, { AdminUser } from '@/services/adminService';
-import { TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
+import { AdminUsersPanel } from '@sjolystinnovation/app-kit/admin';
+import AdminService from '@/services/adminService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function AdminUsersPage() {
     const { dict } = useDictionary();
-    const [users, setUsers] = useState<AdminUser[]>([]);
-    const [allRoles, setAllRoles] = useState<string[]>([]);
-    const [includeDeleted, setIncludeDeleted] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [addRoleFor, setAddRoleFor] = useState<string | null>(null);
-    const [selectedRole, setSelectedRole] = useState('');
-    const [roleLoading, setRoleLoading] = useState(false);
-
-    const [invite, setInvite] = useState({ email: '', firstName: '', lastName: '', role: 'Admin' });
-    const [inviting, setInviting] = useState(false);
-
-    // Bumped to fetch the list again after a change, through the same effect as every other load.
-    const [reloads, setReloads] = useState(0);
-
-    // Callers set `loading` before changing what to fetch, so the effect only sets state once the
-    // request settles. A request replaced by a newer one is ignored, so a slow answer to an earlier
-    // toggle cannot overwrite the list the toggle now shows.
-    useEffect(() => {
-        let replaced = false;
-        AdminService.getUsers(includeDeleted)
-            .then(list => { if (!replaced) setUsers(list); })
-            .catch(err => { if (!replaced) toast.error(err instanceof Error ? err.message : dict.admin.usersLoadFailed); })
-            .finally(() => { if (!replaced) setLoading(false); });
-        return () => { replaced = true; };
-    }, [includeDeleted, reloads, dict.admin.usersLoadFailed]);
-
-    const reload = () => {
-        setLoading(true);
-        setReloads(n => n + 1);
-    };
-
-    const toggleDeleted = (deleted: boolean) => {
-        setLoading(true);
-        setIncludeDeleted(deleted);
-    };
-    useEffect(() => { AdminService.getRoles().then(setAllRoles).catch(() => toast.error(dict.admin.rolesLoadFailed)); }, [dict.admin.rolesLoadFailed]);
-
-    const setRoles = (id: string, roles: string[]) =>
-        setUsers(prev => prev.map(u => (u.id === id ? { ...u, roles } : u)));
-
-    const assignRole = async (user: AdminUser) => {
-        if (!selectedRole) return;
-        setRoleLoading(true);
-        try {
-            await AdminService.addRole(user.id, selectedRole);
-            setRoles(user.id, [...user.roles, selectedRole]);
-            toast.success(dict.admin.roleAssigned.replace("{name}", user.firstName).replace("{role}", selectedRole));
-            setAddRoleFor(null);
-            setSelectedRole('');
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : dict.admin.roleAssignFailed);
-        } finally {
-            setRoleLoading(false);
-        }
-    };
-
-    const removeRole = async (user: AdminUser, role: string) => {
-        try {
-            await AdminService.removeRole(user.id, role);
-            setRoles(user.id, user.roles.filter(r => r !== role));
-            toast.success(dict.admin.roleRemoved.replace("{role}", role).replace("{name}", user.firstName));
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : dict.admin.roleRemoveFailed);
-        }
-    };
-
-    const deleteUser = async (user: AdminUser) => {
-        const label = `${user.firstName} ${user.lastName}`.trim() || user.email;
-        if (!confirm(dict.admin.confirmDeleteUser.replace('{name}', label))) return;
-        try {
-            await AdminService.deleteUser(user.id);
-            toast.success(dict.admin.userDeleted);
-            reload();
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : dict.admin.userDeleteFailed);
-        }
-    };
-
-    const sendInvite = async () => {
-        if (!invite.email.trim() || !invite.firstName.trim() || !invite.lastName.trim()) {
-            toast.error(dict.admin.inviteIncomplete);
-            return;
-        }
-        setInviting(true);
-        try {
-            await AdminService.invite(invite.email.trim(), invite.firstName.trim(), invite.lastName.trim(), invite.role);
-            toast.success(dict.admin.inviteSentLong);
-            setInvite({ email: '', firstName: '', lastName: '', role: invite.role });
-            reload();
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : dict.admin.inviteFailed);
-        } finally {
-            setInviting(false);
-        }
-    };
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">{dict.admin.users}</h2>
-                <Toggle label={dict.admin.showDeleted} checked={includeDeleted} onChange={toggleDeleted} />
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 p-4 space-y-3">
-                <h3 className="text-sm font-semibold text-gray-900">{dict.admin.inviteUser}</h3>
-                <div className="flex flex-wrap items-end gap-2">
-                    <div className="w-40">
-                        <TextInput label={dict.admin.firstName} value={invite.firstName} onChange={e => setInvite({ ...invite, firstName: e.target.value })} />
-                    </div>
-                    <div className="w-40">
-                        <TextInput label={dict.admin.lastName} value={invite.lastName} onChange={e => setInvite({ ...invite, lastName: e.target.value })} />
-                    </div>
-                    <div className="flex-1 min-w-[14rem]">
-                        <TextInput label={dict.auth.email} type="email" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} />
-                    </div>
-                    <label className="text-xs text-gray-600">
-                        {dict.admin.role}
-                        <select
-                            value={invite.role}
-                            onChange={e => setInvite({ ...invite, role: e.target.value })}
-                            className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                        >
-                            {allRoles.map(role => <option key={role} value={role}>{role}</option>)}
-                        </select>
-                    </label>
-                    <button
-                        onClick={sendInvite}
-                        disabled={inviting}
-                        className="rounded-lg bg-primary text-primary-foreground font-semibold px-4 py-2 text-sm hover:brightness-95 disabled:opacity-60 transition"
-                    >
-                        {inviting ? dict.admin.sending : dict.admin.sendInvite}
-                    </button>
-                </div>
-                <p className="text-xs text-gray-500">
-                    {dict.admin.inviteHint}
-                </p>
-            </div>
-
-            {loading ? (
-                <p className="text-gray-500">{dict.common.loading}</p>
-            ) : (
-                <ul className="divide-y divide-gray-100 rounded-2xl border border-gray-200">
-                    {users.map(user => {
-                        const isAddingRole = addRoleFor === user.id;
-                        const available = allRoles.filter(r => !user.roles.includes(r));
-                        return (
-                            <li key={user.id} className="p-4 space-y-2">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className={user.isDeleted ? 'text-gray-400' : 'text-gray-800'}>
-                                        <span className="font-medium">{user.firstName} {user.lastName}</span>
-                                        <span className="ml-2 text-xs text-gray-500">{user.email}</span>
-                                        {user.isDeleted && <span className="ml-2 text-xs text-gray-400">({dict.admin.deletedTag})</span>}
-                                    </div>
-                                    {!user.isDeleted && (
-                                        <button
-                                            onClick={() => deleteUser(user)}
-                                            title={dict.common.delete}
-                                            className="shrink-0 p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                        >
-                                            <TrashIcon className="h-4 w-4" />
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                    {user.roles.map(role => (
-                                        <span key={role} className="flex items-center gap-1 pl-2 pr-1 py-0.5 bg-gray-100 border border-gray-200 rounded-lg text-xs text-gray-700">
-                                            {role}
-                                            <button onClick={() => removeRole(user, role)} className="hover:text-red-600 transition-colors" title={`${dict.common.remove} ${role}`}>
-                                                <XMarkIcon className="h-3 w-3" />
-                                            </button>
-                                        </span>
-                                    ))}
-                                    {user.roles.length === 0 && <span className="text-xs text-gray-400">{dict.admin.noRoles}</span>}
-                                    {!isAddingRole && !user.isDeleted && available.length > 0 && (
-                                        <button
-                                            onClick={() => { setAddRoleFor(user.id); setSelectedRole(available[0]); }}
-                                            className="flex items-center gap-1 px-2 py-0.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-xs text-gray-500 hover:text-gray-800 transition"
-                                        >
-                                            <PlusIcon className="h-3 w-3" /> {dict.admin.addRole}
-                                        </button>
-                                    )}
-                                </div>
-
-                                {isAddingRole && (
-                                    <div className="flex items-center gap-2">
-                                        <select
-                                            value={selectedRole}
-                                            onChange={e => setSelectedRole(e.target.value)}
-                                            className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
-                                        >
-                                            {available.map(r => <option key={r} value={r}>{r}</option>)}
-                                        </select>
-                                        <button onClick={() => assignRole(user)} disabled={roleLoading} className="rounded-lg bg-gray-900 text-white text-xs px-3 py-1.5 hover:bg-gray-800 disabled:opacity-50 transition">
-                                            {roleLoading ? '…' : dict.common.add}
-                                        </button>
-                                        <button onClick={() => setAddRoleFor(null)} className="rounded-lg border border-gray-300 text-gray-700 text-xs px-3 py-1.5 hover:bg-gray-50 transition">
-                                            Cancel
-                                        </button>
-                                    </div>
-                                )}
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
-        </div>
+        <AdminUsersPanel
+            service={AdminService}
+            getRoles={AdminService.getRoles}
+            strings={{
+                users: dict.admin.users,
+                showDeleted: dict.admin.showDeleted,
+                inviteUser: dict.admin.inviteUser,
+                firstName: dict.admin.firstName,
+                lastName: dict.admin.lastName,
+                email: dict.auth.email,
+                role: dict.admin.role,
+                sendInvite: dict.admin.sendInvite,
+                sending: dict.admin.sending,
+                inviteHint: dict.admin.inviteHint,
+                loading: dict.common.loading,
+                deleted: dict.admin.deletedTag,
+                delete: dict.common.delete,
+                remove: dict.common.remove,
+                noRoles: dict.admin.noRoles,
+                addRole: dict.admin.addRole,
+                add: dict.common.add,
+                cancel: dict.common.cancel,
+                usersLoadFailed: dict.admin.usersLoadFailed,
+                rolesLoadFailed: dict.admin.rolesLoadFailed,
+                roleAssigned: dict.admin.roleAssigned,
+                roleAssignFailed: dict.admin.roleAssignFailed,
+                roleRemoved: dict.admin.roleRemoved,
+                roleRemoveFailed: dict.admin.roleRemoveFailed,
+                confirmDelete: dict.admin.confirmDeleteUser,
+                userDeleted: dict.admin.userDeleted,
+                userDeleteFailed: dict.admin.userDeleteFailed,
+                inviteIncomplete: dict.admin.inviteIncomplete,
+                inviteSent: dict.admin.inviteSentLong,
+                inviteFailed: dict.admin.inviteFailed,
+            }}
+        />
     );
 }
