@@ -6,32 +6,22 @@ import { Section } from '@/types/content';
 import { LegalPage } from '@/services/legalService';
 import { LOCALES, type Locale } from '@/i18n/config';
 import { latest, parseTimestamp } from '@sjolystinnovation/app-kit/seo';
-import { localeEntries } from '@/lib/seo/site';
+import { localeEntries, site } from '@/lib/seo/site';
 
 export const revalidate = 3600;
 
-const LEGAL_KEYS = ['terms', 'privacy', 'cookies'] as const;
-
-type ByLocale<T> = Partial<Record<Locale, T>>;
-
-async function forEachLocale<T>(load: (locale: Locale) => Promise<T>): Promise<ByLocale<T>> {
-    const loaded = await Promise.all(LOCALES.map(async locale => [locale, await load(locale)] as const));
-    return Object.fromEntries(loaded) as ByLocale<T>;
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const builds = await forEachLocale(locale =>
+    const builds = await site.forEachLocale(locale =>
         publicGet<BuildSummary[]>(`/builds?locale=${locale}`, { tags: [REVALIDATE_TARGETS.builds] })
             .then(list => list ?? []));
 
-    const legal = await forEachLocale(async locale =>
-        Object.fromEntries(await Promise.all(LEGAL_KEYS.map(async key => [
-            key,
-            parseTimestamp((await publicGet<LegalPage>(`/content/legal/${key}?locale=${locale}`, { tags: [REVALIDATE_TARGETS.legal] }))?.updatedAt),
-        ] as const))) as Partial<Record<typeof LEGAL_KEYS[number], Date>>);
+    const legal = await site.legalEntries({
+        updatedAt: async (key, locale) =>
+            (await publicGet<LegalPage>(`/content/legal/${key}?locale=${locale}`, { tags: [REVALIDATE_TARGETS.legal] }))?.updatedAt,
+    });
 
     // The sections carry no timestamp of their own; the API reports it in the response header.
-    const home = await forEachLocale(locale =>
+    const home = await site.forEachLocale(locale =>
         publicGetWithMeta<Section[]>(`/content/home?locale=${locale}`, { tags: [REVALIDATE_TARGETS.home] })
             .then(response => response?.lastModified ?? undefined));
 
@@ -48,9 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...localeEntries('', { lastModified: locale => home[locale] }),
         ...localeEntries('/builds', { lastModified: buildsUpdatedAt }),
         ...localeEntries('/contact'),
-        ...LEGAL_KEYS.flatMap(key => localeEntries(`/${key}`, {
-            lastModified: locale => legal[locale]?.[key],
-        })),
+        ...legal,
         ...slugs.flatMap(slug => localeEntries(`/builds/${slug}`, {
             locales: localesWithSlug(slug),
             lastModified: locale =>

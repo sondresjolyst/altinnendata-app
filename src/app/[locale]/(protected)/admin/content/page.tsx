@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import ContentService from '@/services/contentService';
 import SectionsEditor from '@/components/SectionsEditor';
-import LocaleTabs from '@/components/LocaleTabs';
+import { LocaleTabs } from '@sjolystinnovation/app-kit/admin';
 import { Section } from '@/types/content';
 import { defaultSections } from '@/lib/defaultSections';
-import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config';
+import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 type SectionsByLocale = Record<Locale, Section[]>;
@@ -67,7 +67,7 @@ export default function AdminContentPage() {
                 </div>
             </div>
 
-            <LocaleTabs active={active} onChange={setActive} />
+            <LocaleTabs locales={LOCALES} labels={LOCALE_LABELS} active={active} onChange={setActive} notFilled={dict.admin.notFilled} />
 
             <p className="text-xs text-gray-500">{dict.admin.perLanguageHint}</p>
 

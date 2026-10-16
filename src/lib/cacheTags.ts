@@ -1,23 +1,24 @@
+import { defineRevalidateTargets } from '@sjolystinnovation/app-kit/api';
 import { LOCALES } from '@/i18n/config';
 
 // Sent to POST /api/revalidate, which maps each to the ISR paths it affects.
-export const REVALIDATE_TARGETS = {
-    home: 'home',
-    builds: 'builds',
-    legal: 'legal',
-    branding: 'branding',
-} as const;
+const revalidateTargets = defineRevalidateTargets({
+    locales: LOCALES,
+    targets: {
+        home: { pages: [''] },
+        // Builds appear on the front page too, through featured builds and the stats band.
+        builds: { pages: ['', '/builds', '/builds/[slug]'], root: ['/sitemap.xml'] },
+        legal: { pages: ['/terms', '/privacy', '/cookies'], root: ['/sitemap.xml'] },
+        // Every page renders branding through the layout, and so does /icon: the tag reaches them all.
+        branding: {},
+    },
+});
 
-export type RevalidateTarget = (typeof REVALIDATE_TARGETS)[keyof typeof REVALIDATE_TARGETS];
+export const REVALIDATE_TARGETS = revalidateTargets.targets;
 
-const perLocale = (paths: string[]): string[] =>
-    LOCALES.flatMap(locale => paths.map(path => `/${locale}${path}`));
+export type RevalidateTarget = keyof typeof REVALIDATE_TARGETS;
 
-// Builds appear on the front page too, through featured builds and the stats band.
-export const TARGET_PATHS: Record<RevalidateTarget, string[]> = {
-    home: perLocale(['']),
-    builds: [...perLocale(['', '/builds', '/builds/[slug]']), '/sitemap.xml'],
-    legal: perLocale(['/terms', '/privacy', '/cookies']),
-    // Every page renders branding through the layout, and so does /icon: the tag reaches them all.
-    branding: [],
-};
+export const TARGET_PATHS = revalidateTargets.paths;
+
+/** Purges the pages behind `target` after an admin edit. Best effort, see requestRevalidate. */
+export const revalidateTarget = revalidateTargets.revalidate;

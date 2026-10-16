@@ -1,21 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Login from '@/app/[locale]/(auth)/login/page';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
+import { auth, navigation, resetTestMocks } from '@sjolystinnovation/app-kit/testing';
 
 const dict = getDictionary('no');
-const signIn = vi.fn();
-const push = vi.fn();
 
-vi.mock('next-auth/react', () => ({
-    signIn: (...args: unknown[]) => signIn(...args),
-}));
-
-vi.mock('next/navigation', () => ({
-    useRouter: () => ({ push, refresh: vi.fn() }),
-}));
+vi.mock('next-auth/react', async () => (await import('@sjolystinnovation/app-kit/testing')).nextAuthMock());
+vi.mock('next/navigation', async () => (await import('@sjolystinnovation/app-kit/testing')).nextNavigationMock());
 
 function renderLogin() {
     render(
@@ -26,7 +20,7 @@ function renderLogin() {
 }
 
 async function submitWith(result: { error?: string; ok?: boolean; url?: string }) {
-    signIn.mockResolvedValue(result);
+    auth.signIn.mockResolvedValue(result);
     renderLogin();
     await userEvent.type(screen.getByLabelText(new RegExp(`^${dict.auth.email}`)), 'a@b.no');
     await userEvent.type(screen.getByLabelText(new RegExp(`^${dict.auth.password}`)), 'pw');
@@ -34,6 +28,8 @@ async function submitWith(result: { error?: string; ok?: boolean; url?: string }
 }
 
 describe('Login page', () => {
+    beforeEach(resetTestMocks);
+
     it('is in Norwegian, with a link to reset the password', () => {
         renderLogin();
 
@@ -44,7 +40,7 @@ describe('Login page', () => {
     it('goes to admin after signing in', async () => {
         await submitWith({ ok: true, url: 'http://localhost/no/admin' });
 
-        await vi.waitFor(() => expect(push).toHaveBeenCalledWith('/no/admin'));
+        await vi.waitFor(() => expect(navigation.router.push).toHaveBeenCalledWith('/no/admin'));
     });
 
     it('says the API is unavailable when it is', async () => {

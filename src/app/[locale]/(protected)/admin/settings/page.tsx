@@ -1,149 +1,42 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { toast } from '@sjolystinnovation/app-kit/toast';
-import { TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
-import SettingsService, { Settings } from '@/services/settingsService';
+import { CompanySettingsForm } from '@sjolystinnovation/app-kit/admin';
+import SettingsService from '@/services/settingsService';
 import { BrandingManager } from '@sjolystinnovation/app-kit/branding';
 import BrandingService from '@/services/brandingService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
-const EMPTY: Settings = {
-    contactRecipientEmail: '',
-    companyName: '',
-    companyLegalName: '',
-    orgNumber: '',
-    vatRegistered: false,
-    streetAddress: '',
-    postalCode: '',
-    addressLocality: '',
-    addressRegion: '',
-    publicEmail: '',
-    publicPhone: '',
-};
-
 export default function AdminSettingsPage() {
     const { dict } = useDictionary();
-    const [settings, setSettings] = useState<Settings>(EMPTY);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-
-    useEffect(() => {
-        SettingsService.get()
-            .then(setSettings)
-            .catch(() => toast.error(dict.admin.settingsLoadFailed))
-            .finally(() => setLoading(false));
-    }, [dict.admin.settingsLoadFailed]);
-
-    const patch = (changes: Partial<Settings>) => setSettings(prev => ({ ...prev, ...changes }));
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            setSettings(await SettingsService.update(settings));
-            toast.success(dict.admin.settingsSaved);
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : dict.admin.settingsSaveFailed);
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    if (loading) return <p className="text-gray-500">{dict.common.loading}</p>;
 
     return (
-        <div className="space-y-8">
-            <form onSubmit={handleSubmit} className="max-w-md space-y-4">
-                <TextInput
-                    label={dict.admin.contactRecipient}
-                    name="contactRecipientEmail"
-                    type="email"
-                    value={settings.contactRecipientEmail}
-                    onChange={e => patch({ contactRecipientEmail: e.target.value })}
-                    required
-                />
-                <p className="text-xs text-gray-500">{dict.admin.contactRecipientHint}</p>
-
-                <TextInput
-                    label={dict.admin.companyName}
-                    name="companyName"
-                    value={settings.companyName}
-                    onChange={e => patch({ companyName: e.target.value })}
-                    required
-                />
-                <TextInput
-                    label={dict.admin.legalName}
-                    name="companyLegalName"
-                    value={settings.companyLegalName}
-                    onChange={e => patch({ companyLegalName: e.target.value })}
-                />
-                <p className="text-xs text-gray-500">{dict.admin.legalNameHint}</p>
-
-                <TextInput
-                    label={dict.admin.orgNumber}
-                    name="orgNumber"
-                    value={settings.orgNumber}
-                    onChange={e => patch({ orgNumber: e.target.value })}
-                />
-                <Toggle label={dict.admin.vatRegistered} checked={settings.vatRegistered} onChange={v => patch({ vatRegistered: v })} />
-                <p className="text-xs text-gray-500">{dict.admin.vatHint}</p>
-
-                <TextInput
-                    label={dict.admin.streetAddress}
-                    name="streetAddress"
-                    value={settings.streetAddress}
-                    onChange={e => patch({ streetAddress: e.target.value })}
-                    required
-                />
-                <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
-                    <TextInput
-                        label={dict.admin.postalCode}
-                        name="postalCode"
-                        inputMode="numeric"
-                        value={settings.postalCode}
-                        onChange={e => patch({ postalCode: e.target.value })}
-                    />
-                    <TextInput
-                        label={dict.admin.addressLocality}
-                        name="addressLocality"
-                        value={settings.addressLocality}
-                        onChange={e => patch({ addressLocality: e.target.value })}
-                    />
-                </div>
-                <TextInput
-                    label={dict.admin.addressRegion}
-                    name="addressRegion"
-                    value={settings.addressRegion}
-                    onChange={e => patch({ addressRegion: e.target.value })}
-                />
-                <p className="text-xs text-gray-500">{dict.admin.addressHint}</p>
-                <TextInput
-                    label={dict.admin.publicEmail}
-                    name="publicEmail"
-                    type="email"
-                    value={settings.publicEmail}
-                    onChange={e => patch({ publicEmail: e.target.value })}
-                    required
-                />
-                <TextInput
-                    label={dict.admin.publicPhone}
-                    name="publicPhone"
-                    value={settings.publicPhone}
-                    onChange={e => patch({ publicPhone: e.target.value })}
-                    required
-                />
-
-                <button
-                    type="submit"
-                    disabled={saving}
-                    className="rounded-lg bg-primary text-primary-foreground font-semibold px-5 py-2.5 hover:brightness-95 disabled:opacity-60 transition"
-                >
-                    {saving ? dict.common.saving : dict.common.save}
-                </button>
-            </form>
-
+        <CompanySettingsForm
+            service={SettingsService}
+            strings={{
+                contactRecipient: dict.admin.contactRecipient,
+                contactRecipientHint: dict.admin.contactRecipientHint,
+                companyName: dict.admin.companyName,
+                legalName: dict.admin.legalName,
+                legalNameHint: dict.admin.legalNameHint,
+                orgNumber: dict.admin.orgNumber,
+                vatRegistered: dict.admin.vatRegistered,
+                vatHint: dict.admin.vatHint,
+                streetAddress: dict.admin.streetAddress,
+                postalCode: dict.admin.postalCode,
+                addressLocality: dict.admin.addressLocality,
+                addressRegion: dict.admin.addressRegion,
+                addressHint: dict.admin.addressHint,
+                publicEmail: dict.admin.publicEmail,
+                publicPhone: dict.admin.publicPhone,
+                loading: dict.common.loading,
+                save: dict.common.save,
+                saving: dict.common.saving,
+                loadFailed: dict.admin.settingsLoadFailed,
+                saved: dict.admin.settingsSaved,
+                saveFailed: dict.admin.settingsSaveFailed,
+            }}
+        >
             <BrandingManager save={BrandingService.update} />
-        </div>
+        </CompanySettingsForm>
     );
 }

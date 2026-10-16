@@ -2,8 +2,7 @@ import { createBrandingService } from '@sjolystinnovation/app-kit/api';
 import type { Branding } from '@sjolystinnovation/app-kit/branding';
 import axiosInstance from './axiosInstance';
 import publicClient from './publicClient';
-import { revalidateTarget } from '@/lib/revalidate';
-import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
+import { REVALIDATE_TARGETS, revalidateTarget } from '@/lib/cacheTags';
 
 export type { Branding };
 

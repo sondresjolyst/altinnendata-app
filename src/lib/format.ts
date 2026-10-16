@@ -5,6 +5,9 @@ const INTL_LOCALES: Record<Locale, string> = {
     en: 'en-GB',
 };
 
+/** The BCP 47 tag numbers and dates are written in for `locale`. */
+export const intlLocale = (locale: Locale): string => INTL_LOCALES[locale];
+
 export function formatPrice(amountNok: number, locale: Locale): string {
     return new Intl.NumberFormat(INTL_LOCALES[locale], {
         style: 'currency',

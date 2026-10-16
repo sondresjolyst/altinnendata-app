@@ -1,30 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
-import type { Session } from 'next-auth';
 import ProtectedGate from '@/app/[locale]/(protected)/ProtectedGate';
 import AdminLayout from '@/app/[locale]/(protected)/admin/layout';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { closeSessionPrompt, openSessionPrompt } from '@sjolystinnovation/app-kit/session';
+import { makeSession, navigation, resetTestMocks, setSession } from '@sjolystinnovation/app-kit/testing';
 
-const push = vi.fn();
-const replace = vi.fn();
-let pathname = '/no/admin/builds';
-let sessionState: { data: Session | null; status: 'loading' | 'authenticated' | 'unauthenticated' };
-
-vi.mock('next/navigation', () => ({
-    useRouter: () => ({ push, replace }),
-    usePathname: () => pathname,
-}));
-
-vi.mock('next-auth/react', () => ({
-    useSession: () => sessionState,
-}));
-
-const session = (): Session => ({
-    user: { id: '1', name: 'admin', email: 'a@b.no', roles: ['Admin'] },
-    accessToken: 'token',
-    expires: '',
-});
+vi.mock('next/navigation', async () => (await import('@sjolystinnovation/app-kit/testing')).nextNavigationMock());
+vi.mock('next-auth/react', async () => (await import('@sjolystinnovation/app-kit/testing')).nextAuthMock());
 
 // The real nesting: the gate wraps the admin layout, which wraps the form. Testing the gate on
 // its own hid the fact that the layout below it made its own decision to blank the page.
@@ -40,10 +23,9 @@ const tree = () => (
 
 describe('the admin layout inside the gate', () => {
     beforeEach(() => {
-        push.mockClear();
-        replace.mockClear();
-        pathname = '/no/admin/builds';
-        sessionState = { data: session(), status: 'authenticated' };
+        resetTestMocks();
+        navigation.pathname = '/no/admin/builds';
+        setSession(makeSession({ roles: ['Admin'] }));
         closeSessionPrompt();
     });
 
@@ -61,24 +43,21 @@ describe('the admin layout inside the gate', () => {
 
         // The cookie is gone and the 401 handler has raised the prompt. The gate declines to
         // redirect, so the layout must not blank the page either, or the form is lost anyway.
-        sessionState = { data: null, status: 'unauthenticated' };
+        setSession(null);
         act(() => openSessionPrompt());
         view.rerender(tree());
 
         expect(screen.getByText('admin work')).toBeInTheDocument();
-        expect(push).not.toHaveBeenCalled();
-        expect(replace).not.toHaveBeenCalled();
+        expect(navigation.router.push).not.toHaveBeenCalled();
+        expect(navigation.router.replace).not.toHaveBeenCalled();
     });
 
     it('still keeps a non-admin out of the admin page', () => {
-        sessionState = {
-            data: { ...session(), user: { ...session().user, roles: [] } },
-            status: 'authenticated',
-        };
+        setSession(makeSession({ roles: [] }));
 
         render(tree());
 
         expect(screen.queryByText('admin work')).not.toBeInTheDocument();
-        expect(replace).toHaveBeenCalledWith('/no');
+        expect(navigation.router.replace).toHaveBeenCalledWith('/no');
     });
 });
