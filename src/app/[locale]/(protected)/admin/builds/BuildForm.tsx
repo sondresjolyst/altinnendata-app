@@ -13,7 +13,7 @@ import { contentImagePath } from '@sjolystinnovation/app-kit/ui';
 import ImageService from '@/services/imageService';
 import TranslationService, { TranslatableFields } from '@/services/translationService';
 import { ImagePicker } from '@/components/SectionsEditor';
-import LocaleTabs from '@/components/LocaleTabs';
+import { LocaleTabs } from '@sjolystinnovation/app-kit/admin';
 
 import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
@@ -409,9 +409,12 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <LocaleTabs
+                        locales={LOCALES}
+                        labels={LOCALE_LABELS}
                         active={activeLocale}
                         onChange={setActiveLocale}
                         filled={Object.fromEntries(LOCALES.map(l => [l, translations[l].title.trim() !== ''])) as Record<Locale, boolean>}
+                        notFilled={dict.admin.notFilled}
                     />
                     <button
                         type="button"

@@ -1,8 +1,7 @@
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
 import { request } from '@sjolystinnovation/app-kit/api';
-import { revalidateTarget } from '@/lib/revalidate';
-import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
+import { REVALIDATE_TARGETS, revalidateTarget } from '@/lib/cacheTags';
 import { contentImagePath } from '@sjolystinnovation/app-kit/ui';
 import type { Locale } from '@/i18n/config';
 

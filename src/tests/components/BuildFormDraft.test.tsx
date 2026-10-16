@@ -5,6 +5,7 @@ import BuildForm from '@/app/[locale]/(protected)/admin/builds/BuildForm';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { BuildTranslation } from '@/services/buildService';
+import { makeSession, resetTestMocks, setSession } from '@sjolystinnovation/app-kit/testing';
 
 const dict = getDictionary('no');
 const USER_ID = 'user-1';
@@ -13,21 +14,8 @@ const KEY = `altinnendata:draft:${USER_ID}:build:new`;
 const onSaved = vi.fn();
 const onCancel = vi.fn();
 
-let sessionState: { data: unknown; status: string } = {
-    data: { user: { id: USER_ID, name: 'admin', email: 'a@b.no', roles: ['Admin'] }, accessToken: 't', expires: '' },
-    status: 'authenticated',
-};
-
-vi.mock('next-auth/react', () => ({
-    useSession: () => sessionState,
-}));
-
-const authenticated = () => ({
-    data: { user: { id: USER_ID, name: 'admin', email: 'a@b.no', roles: ['Admin'] }, accessToken: 't', expires: '' },
-    status: 'authenticated',
-});
-
-vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock('next-auth/react', async () => (await import('@sjolystinnovation/app-kit/testing')).nextAuthMock());
+vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 
 vi.mock('@/services/buildClassService', () => ({
     default: { list: async () => [] },
@@ -85,7 +73,8 @@ const form = () => (
 describe('the build form draft bar', () => {
     beforeEach(() => {
         window.localStorage.clear();
-        sessionState = authenticated();
+        resetTestMocks();
+        setSession(makeSession({ user: { id: USER_ID, name: 'admin', email: 'a@b.no', roles: ['Admin'] }, accessToken: 't' }));
         onSaved.mockClear();
         onCancel.mockClear();
         createBuild.mockReset().mockResolvedValue(undefined);
@@ -148,7 +137,7 @@ describe('the build form draft bar', () => {
 
         // The cookie is gone, so useSession reports nobody on the form already on screen. This
         // is the incident the draft exists for, and the worst possible moment to stop storing.
-        sessionState = { data: null, status: 'unauthenticated' };
+        setSession(null);
         view.rerender(form());
         await userEvent.type(titleInput(), '-maskin');
 
@@ -157,7 +146,7 @@ describe('the build form draft bar', () => {
     });
 
     it('stores nothing on a form opened with no session at all', async () => {
-        sessionState = { data: null, status: 'unauthenticated' };
+        setSession(null);
         render(form());
 
         await userEvent.type(titleInput(), 'Ryzen-maskin');

@@ -4,13 +4,12 @@ import userEvent from '@testing-library/user-event';
 import ResetPasswordPage from '@/app/[locale]/(auth)/reset-password/page';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
+import { navigation, resetTestMocks } from '@sjolystinnovation/app-kit/testing';
 
 const dict = getDictionary('no');
 const resetPassword = vi.fn();
 
-vi.mock('next/navigation', () => ({
-    useSearchParams: () => new URLSearchParams('email=ola@kunde.no&code=123456'),
-}));
+vi.mock('next/navigation', async () => (await import('@sjolystinnovation/app-kit/testing')).nextNavigationMock());
 vi.mock('@/services/userService', () => ({
     default: { resetPassword: (...args: unknown[]) => resetPassword(...args), requestPasswordReset: vi.fn() },
 }));
@@ -27,7 +26,11 @@ const submitPassword = async (password: string) => {
 };
 
 describe('reset password page', () => {
-    beforeEach(() => resetPassword.mockReset().mockResolvedValue({ message: 'ok' }));
+    beforeEach(() => {
+        resetTestMocks();
+        navigation.searchParams = new URLSearchParams('email=ola@kunde.no&code=123456');
+        resetPassword.mockReset().mockResolvedValue({ message: 'ok' });
+    });
 
     it('does not send a password the API would refuse', async () => {
         render(page());
