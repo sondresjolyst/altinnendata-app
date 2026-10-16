@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginPage } from '@sjolystinnovation/app-kit/ui';
+import { LoginPage } from '@sjolystinnovation/app-kit/session/react';
 import { useCredentialsFormStrings } from '@/components/CredentialsForm';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';

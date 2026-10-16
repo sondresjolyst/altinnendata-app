@@ -20,5 +20,5 @@ export type RevalidateTarget = keyof typeof REVALIDATE_TARGETS;
 
 export const TARGET_PATHS = revalidateTargets.paths;
 
-/** Purges the pages behind `target` after an admin edit. Best effort, see requestRevalidate. */
+/** Purges the pages behind `target` after an admin edit. Best effort, it never throws. */
 export const revalidateTarget = revalidateTargets.revalidate;
