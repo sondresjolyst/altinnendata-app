@@ -76,7 +76,7 @@ describe('the admin settings page', () => {
     });
 
     it.each([
-        ['no', 'Høyst 100 tegn'],
+        ['no', 'Bruk 100 eller færre tegn'],
         ['en', 'At most 100 characters'],
     ] as const)('shows the API field errors from the %s dictionary', async (locale, limitText) => {
         const dict = getDictionary(locale);
