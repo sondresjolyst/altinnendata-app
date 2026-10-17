@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.10.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.8...v1.10.0) (2026-10-17)
+
+
+### Features
+
+* sign in through app-kit and say when sign-in is unavailable ([#133](https://github.com/sondresjolyst/altinnendata-app/issues/133)) ([97676af](https://github.com/sondresjolyst/altinnendata-app/commit/97676afb1fc595d47ed6a6427314c0cea150269b))
+
+
+### Bug Fixes
+
+* **admin:** show the branding section in the app's language ([#159](https://github.com/sondresjolyst/altinnendata-app/issues/159)) ([9f882f0](https://github.com/sondresjolyst/altinnendata-app/commit/9f882f01ec3cfaa56750c964aa0ede7365b35257)), closes [#156](https://github.com/sondresjolyst/altinnendata-app/issues/156)
+* **csp:** stop zod from trying eval, which the content security policy blocks ([#149](https://github.com/sondresjolyst/altinnendata-app/issues/149)) ([5e0c4c1](https://github.com/sondresjolyst/altinnendata-app/commit/5e0c4c18da4fbfffea2686247ec4e09850fc0463))
+* **docker:** default SITE_ENV to dev so a build without it is not crawled ([#158](https://github.com/sondresjolyst/altinnendata-app/issues/158)) ([23da86b](https://github.com/sondresjolyst/altinnendata-app/commit/23da86b04fbf517402674db3cf8cdad283f29105))
+* **docker:** treat an unset SITE_ENV as production like the app does ([#138](https://github.com/sondresjolyst/altinnendata-app/issues/138)) ([4670f90](https://github.com/sondresjolyst/altinnendata-app/commit/4670f90c8527c918dfcac82ec1a8f50c83a91c88))
+* keep admin work when the session expires ([#123](https://github.com/sondresjolyst/altinnendata-app/issues/123)) ([72bb0fb](https://github.com/sondresjolyst/altinnendata-app/commit/72bb0fb887a367f58d7c7d636e95af739b9bd366))
+* keep the admin user list in step with the show deleted toggle ([#131](https://github.com/sondresjolyst/altinnendata-app/issues/131)) ([62165cc](https://github.com/sondresjolyst/altinnendata-app/commit/62165cc431ee9e32279344430f82363f2b261bde))
+* use app-kit for admin access, public fetches, session renewal, quiet error toasts and password rules ([#136](https://github.com/sondresjolyst/altinnendata-app/issues/136)) ([4519805](https://github.com/sondresjolyst/altinnendata-app/commit/451980582e85a19041132755f8d79863d0dd692d))
+
+
+### Dependencies
+
+* **app-kit:** update @sjolystinnovation/app-kit to 0.16.0 ([#150](https://github.com/sondresjolyst/altinnendata-app/issues/150)) ([50b445b](https://github.com/sondresjolyst/altinnendata-app/commit/50b445b4b2707fa97e2db9f6e2d18d7adc4c6f5a))
+* **npm:** bump `@types/node` from 26.6.3 to 26.6.4 ([#145](https://github.com/sondresjolyst/altinnendata-app/issues/145)) ([9e5fafa](https://github.com/sondresjolyst/altinnendata-app/commit/9e5fafaf0032aca53a98c90be48c03b87f90a99f))
+* **npm:** bump `next` from 16.3.7 to 16.4.0 ([#134](https://github.com/sondresjolyst/altinnendata-app/issues/134)) ([e295bbd](https://github.com/sondresjolyst/altinnendata-app/commit/e295bbd6b9fbe652d9d9d54bb3d0445e3b5f5124))
+* **npm:** bump `sharp` from 0.35.4 to 0.35.5 ([#129](https://github.com/sondresjolyst/altinnendata-app/issues/129)) ([f5d7e63](https://github.com/sondresjolyst/altinnendata-app/commit/f5d7e6310b22b412d3f755c166bcf991d7ca8eb8))
+* **npm:** bump `source-map-js` from 1.2.1 to 1.2.2 ([#130](https://github.com/sondresjolyst/altinnendata-app/issues/130)) ([190d071](https://github.com/sondresjolyst/altinnendata-app/commit/190d07199567e7a1e8c7de65de60f2f52f299f77))
+* **npm:** bump eslint-config-next from 16.3.7 to 16.3.8 in the next group ([#142](https://github.com/sondresjolyst/altinnendata-app/issues/142)) ([dd97060](https://github.com/sondresjolyst/altinnendata-app/commit/dd97060cc7ad8f9446417bbe66cba661d1608190))
+* **npm:** bump the next group with 2 updates ([#126](https://github.com/sondresjolyst/altinnendata-app/issues/126)) ([547dc1a](https://github.com/sondresjolyst/altinnendata-app/commit/547dc1a38fb2896cc211d4a76b45800586e80f9b))
+* **npm:** bump vitest from 5.0.2 to 5.0.3 in the testing group ([#144](https://github.com/sondresjolyst/altinnendata-app/issues/144)) ([314987f](https://github.com/sondresjolyst/altinnendata-app/commit/314987f0caf7b779571721950dac21c2f95a726f))
+
 ## [1.9.8](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.7...v1.9.8) (2026-10-04)
 
 
