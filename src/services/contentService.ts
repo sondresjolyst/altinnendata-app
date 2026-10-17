@@ -1,11 +1,9 @@
-import axios from 'axios';
 import axiosInstance from './axiosInstance';
+import publicClient from './publicClient';
 import { formatApiError } from '@sjolystinnovation/app-kit/api';
 import { REVALIDATE_TARGETS, revalidateTarget } from '@/lib/cacheTags';
 import { Section } from '@/types/content';
 import type { Locale } from '@/i18n/config';
-
-const publicClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
 const ContentService = {
     async getHome(locale: Locale): Promise<Section[]> {
