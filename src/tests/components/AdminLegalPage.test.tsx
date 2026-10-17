@@ -11,7 +11,6 @@ import type { Locale } from '@/i18n/config';
 const save = vi.fn();
 
 vi.mock('@/services/legalService', () => ({
-    LEGAL_KEYS: ['terms', 'privacy', 'cookies'],
     default: {
         listAll: () => Promise.resolve([{ key: 'terms', locale: 'no', title: 'Vilkår', bodyMarkdown: '# Vilkår', updatedAt: '2026-10-01' }]),
         save: (...args: unknown[]) => save(...args),
@@ -47,6 +46,18 @@ const renderPage = (locale: Locale) =>
 
 describe('admin legal page', () => {
     beforeEach(() => save.mockReset());
+
+    it.each([
+        ['no', ['Vilkår', 'Personvern', 'Informasjonskapsler']],
+        ['en', ['Terms', 'Privacy', 'Cookies']],
+    ] as const)('offers the three legal pages in order (%s)', async (locale, labels) => {
+        renderPage(locale);
+        await screen.findByRole('button', { name: labels[0], pressed: true });
+
+        const [first, second, third] = labels.map(label => screen.getByRole('button', { name: label }));
+        expect(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(second.compareDocumentPosition(third) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
 
     it.each([
         ['no', 'Bruk 200 eller færre tegn.'],
