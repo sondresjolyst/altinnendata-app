@@ -301,6 +301,8 @@
     "brandingSave": "Save logo and icon",
     "brandingSaved": "Logo and icon saved",
     "brandingSaveFailed": "Could not save the logo and icon",
+    "brandingInvalidImage": "Invalid file format. Upload an image file.",
+    "brandingImageTooLarge": "The file is too large. Upload a file of 2 MB or less.",
     "contactRecipient": "Enquiry recipient",
     "contactRecipientHint": "Contact form messages are sent here.",
     "companyName": "Company name",

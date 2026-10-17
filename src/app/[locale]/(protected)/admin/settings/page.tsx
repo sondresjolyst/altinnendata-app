@@ -60,6 +60,10 @@ export default function AdminSettingsPage() {
                     saving: dict.common.saving,
                     saved: dict.admin.brandingSaved,
                     saveFailed: dict.admin.brandingSaveFailed,
+                    validation: {
+                        invalidImage: dict.admin.brandingInvalidImage,
+                        imageTooLarge: dict.admin.brandingImageTooLarge,
+                    },
                 }}
             />
         </CompanySettingsForm>

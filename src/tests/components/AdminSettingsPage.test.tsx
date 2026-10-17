@@ -7,6 +7,7 @@ import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { Locale } from '@/i18n/config';
 
+const updateBranding = vi.fn();
 const update = vi.fn();
 const saved = {
     contactRecipientEmail: 'post@altinnendata.no',
@@ -26,8 +27,28 @@ vi.mock('@/services/settingsService', () => ({
     default: { get: () => Promise.resolve(saved), update: (...args: unknown[]) => update(...args) },
 }));
 vi.mock('@/services/brandingService', () => ({
-    default: { update: vi.fn() },
+    default: { update: (...args: unknown[]) => updateBranding(...args) },
 }));
+
+// The Error that the branding service throws when the API refuses a file.
+const refusedLogo = (code: string) =>
+    request(
+        () =>
+            Promise.reject(
+                Object.assign(new Error('Request failed with status code 400'), {
+                    isAxiosError: true,
+                    response: {
+                        status: 400,
+                        data: {
+                            errors: { Logo: ['The image must be a PNG, JPEG, WebP, GIF or ICO file of at most 2 MB.'] },
+                            codes: { Logo: [code] },
+                            limits: {},
+                        },
+                    },
+                }),
+            ),
+        'Failed',
+    ).catch((e: unknown) => e);
 
 const renderPage = (locale: Locale) =>
     render(
@@ -37,7 +58,7 @@ const renderPage = (locale: Locale) =>
     );
 
 // The Error that the settings service throws for the API's validation problem.
-const refused = () =>
+const refusedSettings = () =>
     request(
         () =>
             Promise.reject(
@@ -57,7 +78,10 @@ const refused = () =>
     ).catch((e: unknown) => e);
 
 describe('the admin settings page', () => {
-    beforeEach(() => update.mockReset());
+    beforeEach(() => {
+        update.mockReset();
+        updateBranding.mockReset();
+    });
 
     it('shows the branding form in Norwegian', async () => {
         renderPage('no');
@@ -80,7 +104,7 @@ describe('the admin settings page', () => {
         ['en', 'At most 100 characters'],
     ] as const)('shows the API field errors from the %s dictionary', async (locale, limitText) => {
         const dict = getDictionary(locale);
-        update.mockRejectedValueOnce(await refused());
+        update.mockRejectedValueOnce(await refusedSettings());
         renderPage(locale);
         const org = await screen.findByLabelText(new RegExp(`^${dict.admin.orgNumber}`));
 
@@ -88,5 +112,21 @@ describe('the admin settings page', () => {
 
         await waitFor(() => expect(org).toHaveAccessibleDescription(dict.validation.orgNumber));
         expect(screen.getByLabelText(new RegExp(`^${dict.admin.companyName}`))).toHaveAccessibleDescription(limitText);
+    });
+
+    it.each([
+        ['no', 'Lagre logo og ikon', 'Ugyldig filformat. Last opp en bildefil.', 'Filen er for stor. Last opp en fil på 2 MB eller mindre.'],
+        ['en', 'Save logo and icon', 'Invalid file format. Upload an image file.', 'The file is too large. Upload a file of 2 MB or less.'],
+    ] as const)('shows a refused logo in the page language (%s)', async (locale, saveLabel, invalid, tooLarge) => {
+        updateBranding.mockRejectedValueOnce(await refusedLogo('invalidImage')).mockRejectedValueOnce(await refusedLogo('imageTooLarge'));
+        renderPage(locale);
+        const logo = await screen.findByLabelText('Logo');
+        await userEvent.upload(logo, new File(['x'], 'logo.png', { type: 'image/png' }));
+
+        await userEvent.click(screen.getByRole('button', { name: saveLabel }));
+        await waitFor(() => expect(logo).toHaveAccessibleDescription(invalid));
+
+        await userEvent.click(screen.getByRole('button', { name: saveLabel }));
+        await waitFor(() => expect(logo).toHaveAccessibleDescription(tooLarge));
     });
 });

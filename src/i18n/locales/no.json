@@ -301,6 +301,8 @@
     "brandingSave": "Lagre logo og ikon",
     "brandingSaved": "Logo og ikon er lagret",
     "brandingSaveFailed": "Kunne ikke lagre logo og ikon",
+    "brandingInvalidImage": "Ugyldig filformat. Last opp en bildefil.",
+    "brandingImageTooLarge": "Filen er for stor. Last opp en fil på 2 MB eller mindre.",
     "contactRecipient": "Mottaker for henvendelser",
     "contactRecipientHint": "Meldinger fra kontaktskjemaet sendes hit.",
     "companyName": "Firmanavn",

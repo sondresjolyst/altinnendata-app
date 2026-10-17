@@ -27,6 +27,10 @@ export default function AdminLegalPage() {
                 required: dict.admin.legalRequired,
                 saved: dict.admin.legalSaved,
                 saveFailed: dict.admin.legalSaveFailed,
+                validation: {
+                    required: dict.validation.required,
+                    tooLong: dict.validation.maxLength,
+                },
             }}
         />
     );
