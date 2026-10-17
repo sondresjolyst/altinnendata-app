@@ -27,7 +27,6 @@
     "back": "Tilbake",
     "yes": "Ja",
     "no": "Nei",
-    "notFound": "Fant ikke siden",
     "actionFailed": "Handlingen feilet"
   },
   "builds": {
@@ -110,7 +109,6 @@
     "rights": "Alle rettigheter reservert.",
     "createdBy": "Laget av"
   },
-  "legal": {},
   "admin": {
     "title": "Admin",
     "dashboard": "Oversikt",
@@ -184,8 +182,6 @@
     "manufacturer": "Produsent",
     "manufacturers": "Produsenter",
     "parts": "Deler",
-    "inviteSent": "Invitasjon sendt.",
-    "confirmDelete": "Er du sikker?",
     "cardContent": "Sett sammen forsiden av seksjoner, per språk.",
     "cardBuilds": "Opprett, rediger og publiser datamaskiner.",
     "cardComponents": "Kategorier, produsenter og deler.",

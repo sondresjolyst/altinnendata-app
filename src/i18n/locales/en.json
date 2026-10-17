@@ -27,7 +27,6 @@
     "back": "Back",
     "yes": "Yes",
     "no": "No",
-    "notFound": "Page not found",
     "actionFailed": "That did not work"
   },
   "builds": {
@@ -110,7 +109,6 @@
     "rights": "All rights reserved.",
     "createdBy": "Created by"
   },
-  "legal": {},
   "admin": {
     "title": "Admin",
     "dashboard": "Overview",
@@ -184,8 +182,6 @@
     "manufacturer": "Manufacturer",
     "manufacturers": "Manufacturers",
     "parts": "Parts",
-    "inviteSent": "Invitation sent.",
-    "confirmDelete": "Are you sure?",
     "cardContent": "Build the front page from sections, per language.",
     "cardBuilds": "Create, edit and publish computers.",
     "cardComponents": "Categories, manufacturers and parts.",
