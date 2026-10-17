@@ -36,7 +36,23 @@ export default function AdminSettingsPage() {
                 saveFailed: dict.admin.settingsSaveFailed,
             }}
         >
-            <BrandingManager save={BrandingService.update} />
+            <BrandingManager
+                save={BrandingService.update}
+                strings={{
+                    title: dict.admin.brandingTitle,
+                    logo: dict.admin.brandingLogo,
+                    logoHint: dict.admin.brandingLogoHint,
+                    icon: dict.admin.brandingIcon,
+                    iconHint: dict.admin.brandingIconHint,
+                    none: dict.admin.brandingNone,
+                    choose: dict.admin.brandingChoose,
+                    remove: dict.common.remove,
+                    save: dict.admin.brandingSave,
+                    saving: dict.common.saving,
+                    saved: dict.admin.brandingSaved,
+                    saveFailed: dict.admin.brandingSaveFailed,
+                }}
+            />
         </CompanySettingsForm>
     );
 }
