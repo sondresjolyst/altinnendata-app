@@ -107,6 +107,11 @@
     "required": "Feltet må fylles ut",
     "email": "Skriv inn en gyldig e-postadresse",
     "tooLong": "Teksten er for lang",
+    "maxLength": "Høyst {max} tegn",
+    "orgNumberRequiredForVat": "Organisasjonsnummer må fylles ut når firmaet er registrert i Merverdiavgiftsregisteret",
+    "orgNumber": "Ikke et gyldig organisasjonsnummer. Det har ni sifre og slutter med et kontrollsiffer",
+    "postalCode": "Et norsk postnummer har fire sifre",
+    "placeRequired": "Poststed må fylles ut når postnummer er fylt ut",
     "password": "Minst 8 tegn, med en stor og en liten bokstav fra A til Z og et tall fra 0 til 9"
   },
   "auth": {

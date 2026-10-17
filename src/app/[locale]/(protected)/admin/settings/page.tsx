@@ -34,6 +34,15 @@ export default function AdminSettingsPage() {
                 loadFailed: dict.admin.settingsLoadFailed,
                 saved: dict.admin.settingsSaved,
                 saveFailed: dict.admin.settingsSaveFailed,
+                validation: {
+                    required: dict.validation.required,
+                    tooLong: dict.validation.maxLength,
+                    invalidEmail: dict.validation.email,
+                    orgNumberRequiredForVat: dict.validation.orgNumberRequiredForVat,
+                    invalidOrgNumber: dict.validation.orgNumber,
+                    invalidPostalCode: dict.validation.postalCode,
+                    placeRequired: dict.validation.placeRequired,
+                },
             }}
         >
             <BrandingManager
