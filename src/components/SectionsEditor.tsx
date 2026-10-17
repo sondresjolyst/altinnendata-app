@@ -15,21 +15,14 @@ import {
 import { nbSectionTypeLabels, nbSectionsEditorStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import ImageService from '@/services/imageService';
 import type { Locale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { createSection, type FeedAvailability, type FeedSection, type HeroSection, type Section, type SectionType, type StatSource, type StatsSection } from '@/types/content';
 
 export const sectionImages: SectionImages = { upload: file => ImageService.upload(file) };
 
-/**
- * The editor's labels: app-kit's Norwegian set, or its English defaults. Removing a section says Delete, so
- * in English it is not named like the Remove button of an image.
- */
+/** The editor's labels: app-kit's Norwegian set, or its English defaults. */
 export function sectionsEditorStrings(locale: Locale): SectionsEditorStrings {
-    return {
-        ...(locale === 'no' ? nbSectionsEditorStrings : defaultSectionsEditorStrings),
-        remove: getDictionary(locale).common.delete,
-    };
+    return locale === 'no' ? nbSectionsEditorStrings : defaultSectionsEditorStrings;
 }
 
 function HeroEditor(props: SectionEditorProps<HeroSection>) {

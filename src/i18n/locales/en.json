@@ -96,12 +96,9 @@
   "validation": {
     "required": "This field is required",
     "email": "Enter a valid email address",
-    "tooLong": "This text is too long",
-    "password": "At least 8 characters, with an upper-case and a lower-case letter from A to Z and a number from 0 to 9"
+    "tooLong": "This text is too long"
   },
   "auth": {
-    "resetIntro": "Enter your email address and we'll send you a code.",
-    "resetDone": "Your password has been changed. You can sign in now.",
     "sessionRestored": "You're signed in again. Try saving again."
   },
   "footer": {
@@ -225,13 +222,6 @@
     "noParts": "No parts.",
     "categoryKey": "Key",
     "newManufacturer": "New manufacturer",
-    "brandingTitle": "Logo and icon",
-    "brandingSave": "Save logo and icon",
-    "brandingSaved": "Logo and icon saved",
-    "brandingSaveFailed": "Could not save the logo and icon",
-    "brandingInvalidImage": "Invalid file format. Upload an image file.",
-    "brandingImageTooLarge": "The file is too large. Upload a file of 2 MB or less.",
-    "addressHint": "The postal code and place name are kept apart so search engines can read the address. County is optional.",
     "statsLoadFailed": "Could not load the statistics",
     "overTime": "Over time",
     "sales": "Sales",

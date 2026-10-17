@@ -19,7 +19,7 @@ export default function ResetPasswordPage() {
 // The emailed link carries the email and code, so the flow opens on its last step.
 function ResetPassword() {
     const params = useSearchParams();
-    const { locale, dict } = useDictionary();
+    const { locale } = useDictionary();
     return (
         <ResetPasswordFlow
             requestReset={UserService.requestPasswordReset}
@@ -31,11 +31,6 @@ function ResetPassword() {
                 ...(locale === 'no' ? nbResetPasswordFlowStrings : undefined),
                 signInPrompt: null,
                 codeSent: null,
-                // app-kit's English set has no intro, hint or confirmation, so these stay the app's own.
-                intro: dict.auth.resetIntro,
-                passwordHint: dict.validation.password,
-                done: dict.auth.resetDone,
-                passwordInvalid: dict.validation.password,
             }}
         />
     );

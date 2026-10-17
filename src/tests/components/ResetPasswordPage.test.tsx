@@ -6,11 +6,9 @@ import { nbResetPasswordFlowStrings as nb } from '@sjolystinnovation/app-kit/loc
 import { defaultResetPasswordFlowStrings } from '@sjolystinnovation/app-kit/ui';
 import ResetPasswordPage from '@/app/[locale]/(auth)/reset-password/page';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
-import { getDictionary } from '@/i18n/dictionaries';
 import type { Locale } from '@/i18n/config';
 import { navigation, resetTestMocks } from '@sjolystinnovation/app-kit/testing';
 
-const dict = getDictionary('no');
 const resetPassword = vi.fn();
 
 vi.mock('next/navigation', async () => (await import('@sjolystinnovation/app-kit/testing')).nextNavigationMock());
@@ -51,7 +49,7 @@ describe('reset password page', () => {
         await submitPassword('passord1');
 
         expect(resetPassword).not.toHaveBeenCalled();
-        expect(screen.getByLabelText(new RegExp(`^${nb.newPassword}`))).toHaveAccessibleDescription(dict.validation.password);
+        expect(screen.getByLabelText(new RegExp(`^${nb.newPassword}`))).toHaveAccessibleDescription(nb.passwordInvalid!);
     });
 
     it('does not count Å as an uppercase letter, as the API does not', async () => {
@@ -103,11 +101,20 @@ describe('reset password page', () => {
         expect(screen.getByLabelText(new RegExp(`^${nb.newPassword}`))).toHaveAccessibleDescription('Passordet er for kort. Bruk minst 10 tegn.');
     });
 
-    it('keeps the app intro and leaves out the sign-in prompt in English', () => {
+    it.each(['no', 'en'] as const)('shows the intro and the password rules of app-kit and leaves out the sign-in prompt (%s)', locale => {
         navigation.searchParams = new URLSearchParams('');
-        render(page('en'));
+        render(page(locale));
 
-        expect(screen.getByText(getDictionary('en').auth.resetIntro)).toBeInTheDocument();
-        expect(screen.queryByText(defaultResetPasswordFlowStrings.signInPrompt!)).not.toBeInTheDocument();
+        expect(screen.getByText(text(locale).intro!)).toBeInTheDocument();
+        expect(screen.queryByText(text(locale).signInPrompt!)).not.toBeInTheDocument();
+    });
+
+    it.each(['no', 'en'] as const)('shows the password rules and the confirmation of app-kit (%s)', async locale => {
+        render(page(locale));
+        expect(screen.getByText(text(locale).passwordHint!)).toBeInTheDocument();
+
+        await submitPassword('Ålesund1A', locale);
+
+        expect(await screen.findByText(text(locale).done!)).toBeInTheDocument();
     });
 });

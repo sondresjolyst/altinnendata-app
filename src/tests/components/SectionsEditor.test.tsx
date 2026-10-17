@@ -42,7 +42,7 @@ describe('SectionsEditor', () => {
 
     it('labels the toolbar and the add list with the English defaults', () => {
         render(<Harness initial={[feed]} />);
-        expect(screen.getByTitle('Delete')).toBeInTheDocument();
+        expect(screen.getByTitle('Delete section')).toBeInTheDocument();
         expect(screen.getByTitle('Move up')).toBeInTheDocument();
         expect(screen.getByRole('option', { name: 'Feature' })).toBeInTheDocument();
         expect(screen.getByRole('option', { name: 'Computers' })).toBeInTheDocument();
@@ -81,9 +81,11 @@ describe('SectionsEditor', () => {
         expect(screen.getByRole('option', { name: 'Parts in catalog (live)' })).toBeInTheDocument();
     });
 
-    it('takes the Norwegian set for no and the English defaults for en, with Delete for a section', () => {
-        expect(sectionsEditorStrings('no')).toEqual({ ...nbSectionsEditorStrings, remove: 'Slett' });
-        expect(sectionsEditorStrings('en')).toEqual({ ...defaultSectionsEditorStrings, remove: 'Delete' });
+    it('takes the Norwegian set for no and the English defaults for en', () => {
+        expect(sectionsEditorStrings('no')).toEqual(nbSectionsEditorStrings);
+        expect(sectionsEditorStrings('no').remove).toBe('Slett');
+        expect(sectionsEditorStrings('en')).toEqual(defaultSectionsEditorStrings);
+        expect(sectionsEditorStrings('en').remove).toBe('Delete section');
         expect(sectionsEditorStrings('en').removeImage).toBe('Remove');
     });
 });

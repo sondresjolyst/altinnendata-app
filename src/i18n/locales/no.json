@@ -96,12 +96,9 @@
   "validation": {
     "required": "Feltet må fylles ut",
     "email": "Skriv inn en gyldig e-postadresse",
-    "tooLong": "Teksten er for lang",
-    "password": "Minst 8 tegn, med en stor og en liten bokstav fra A til Z og et tall fra 0 til 9"
+    "tooLong": "Teksten er for lang"
   },
   "auth": {
-    "resetIntro": "Skriv inn e-postadressen din, så sender vi en kode.",
-    "resetDone": "Passordet er endret. Du kan logge inn.",
     "sessionRestored": "Du er logget inn igjen. Prøv å lagre på nytt."
   },
   "footer": {
@@ -225,13 +222,6 @@
     "noParts": "Ingen deler.",
     "categoryKey": "Nøkkel",
     "newManufacturer": "Ny produsent",
-    "brandingTitle": "Logo og ikon",
-    "brandingSave": "Lagre logo og ikon",
-    "brandingSaved": "Logo og ikon er lagret",
-    "brandingSaveFailed": "Kunne ikke lagre logo og ikon",
-    "brandingInvalidImage": "Ugyldig filformat. Last opp en bildefil.",
-    "brandingImageTooLarge": "Filen er for stor. Last opp en fil på 2 MB eller mindre.",
-    "addressHint": "Postnummer og poststed holdes atskilt slik at søkemotorer kan lese adressen. Fylke er valgfritt.",
     "statsLoadFailed": "Kunne ikke laste statistikk",
     "overTime": "Over tid",
     "sales": "Salg",

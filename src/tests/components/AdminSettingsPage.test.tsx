@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
 import AdminSettingsPage from '@/app/[locale]/(protected)/admin/settings/page';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
-import { getDictionary } from '@/i18n/dictionaries';
 import { nbCompanySettingsFormStrings as nb } from '@sjolystinnovation/app-kit/locales/nb';
 import { defaultCompanySettingsFormStrings } from '@sjolystinnovation/app-kit/admin';
 import type { Locale } from '@/i18n/config';
@@ -115,15 +114,19 @@ describe('the admin settings page', () => {
         expect(screen.getByLabelText(new RegExp(`^${text.companyName}`))).toHaveAccessibleDescription(limitText);
     });
 
-    it.each(['no', 'en'] as const)('keeps the address hint of the app (%s)', async locale => {
+    it.each([
+        ['no', nb.addressHint],
+        ['en', 'The postal code and place name are kept apart so search engines can read the address. County is optional.'],
+    ] as const)('shows the long address hint (%s)', async (locale, hint) => {
         renderPage(locale);
 
-        expect(await screen.findByText(getDictionary(locale).admin.addressHint)).toBeInTheDocument();
+        expect(await screen.findByText(hint)).toBeInTheDocument();
+        expect(screen.queryByText(defaultCompanySettingsFormStrings.addressHint)).not.toBeInTheDocument();
     });
 
     it.each([
         ['no', 'Lagre logo og ikon', 'Ugyldig filformat. Last opp en bildefil.', 'Filen er for stor. Last opp en fil på 2 MB eller mindre.'],
-        ['en', 'Save logo and icon', 'Invalid file format. Upload an image file.', 'The file is too large. Upload a file of 2 MB or less.'],
+        ['en', 'Save logo and icon', 'Invalid file format. Upload a PNG, JPEG, WebP, GIF or ICO image.', 'The file is too large. Upload a file of 2 MB or less.'],
     ] as const)('shows a refused logo in the page language (%s)', async (locale, saveLabel, invalid, tooLarge) => {
         updateBranding.mockRejectedValueOnce(await refusedLogo('invalidImage')).mockRejectedValueOnce(await refusedLogo('imageTooLarge'));
         renderPage(locale);
