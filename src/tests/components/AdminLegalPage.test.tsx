@@ -5,6 +5,7 @@ import { request } from '@sjolystinnovation/app-kit/api';
 import AdminLegalPage from '@/app/[locale]/(protected)/admin/legal/page';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
+import { nbLegalPagesEditorStrings as nb } from '@sjolystinnovation/app-kit/locales/nb';
 import type { Locale } from '@/i18n/config';
 
 const save = vi.fn();
@@ -48,8 +49,8 @@ describe('admin legal page', () => {
     beforeEach(() => save.mockReset());
 
     it.each([
-        ['no', 'Bruk 200 eller færre tegn'],
-        ['en', 'At most 200 characters'],
+        ['no', 'Bruk 200 eller færre tegn.'],
+        ['en', 'At most 200 characters.'],
     ] as const)('shows a too long title in the page language (%s) with the limit', async (locale, text) => {
         const dict = getDictionary(locale);
         save.mockRejectedValueOnce(await refused());
@@ -65,12 +66,12 @@ describe('admin legal page', () => {
     it('marks a blank content field in Norwegian without calling the API', async () => {
         const dict = getDictionary('no');
         renderPage('no');
-        const body = await screen.findByLabelText(dict.admin.bodyMarkdown);
+        const body = await screen.findByLabelText(nb.bodyMarkdown);
         await userEvent.clear(body);
 
         await userEvent.click(screen.getByRole('button', { name: dict.common.save }));
 
-        expect(body).toHaveAccessibleDescription('Feltet må fylles ut');
+        expect(body).toHaveAccessibleDescription('Du må fylle ut dette feltet.');
         expect(save).not.toHaveBeenCalled();
     });
 });

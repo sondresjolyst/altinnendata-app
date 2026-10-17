@@ -53,7 +53,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     onSaved: () => void;
     onCancel: () => void;
 }) {
-    const { dict } = useDictionary();
+    const { dict, locale } = useDictionary();
     const { data: session } = useSession();
     const [activeLocale, setActiveLocale] = useState<Locale>(DEFAULT_LOCALE);
     const [translations, setTranslations] = useState<Record<Locale, BuildTranslation>>(() =>
@@ -374,7 +374,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 </p>
             </div>
 
-            <ImagePicker imageId={coverImageId} onChange={setCoverImageId} label={dict.admin.coverImage} images={sectionImages} strings={sectionsEditorStrings(dict)} />
+            <ImagePicker imageId={coverImageId} onChange={setCoverImageId} label={dict.admin.coverImage} images={sectionImages} strings={sectionsEditorStrings(locale)} />
 
             <div>
                 <div className="flex items-center justify-between mb-2">

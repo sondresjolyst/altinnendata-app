@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { LegalPageView } from '@sjolystinnovation/app-kit/legal';
+import { nbLegalPageViewStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import { LegalPage } from '@/services/legalService';
 import { publicGet } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
@@ -34,7 +35,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             title={dict.footer.privacy}
             homeHref={localeHref(locale, '/')}
             dateLocale={intlLocale(locale)}
-            strings={{ updated: dict.legal.updated, missing: dict.legal.missing, toFrontPage: dict.common.toFrontPage }}
+            strings={locale === 'no' ? nbLegalPageViewStrings : undefined}
         />
     );
 }

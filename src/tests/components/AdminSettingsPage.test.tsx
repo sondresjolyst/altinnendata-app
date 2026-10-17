@@ -5,6 +5,8 @@ import { request } from '@sjolystinnovation/app-kit/api';
 import AdminSettingsPage from '@/app/[locale]/(protected)/admin/settings/page';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
+import { nbCompanySettingsFormStrings as nb } from '@sjolystinnovation/app-kit/locales/nb';
+import { defaultCompanySettingsFormStrings } from '@sjolystinnovation/app-kit/admin';
 import type { Locale } from '@/i18n/config';
 
 const updateBranding = vi.fn();
@@ -100,18 +102,23 @@ describe('the admin settings page', () => {
     });
 
     it.each([
-        ['no', 'Bruk 100 eller færre tegn'],
-        ['en', 'At most 100 characters'],
-    ] as const)('shows the API field errors from the %s dictionary', async (locale, limitText) => {
-        const dict = getDictionary(locale);
+        ['no', nb, 'Bruk 100 eller færre tegn.'],
+        ['en', defaultCompanySettingsFormStrings, 'At most 100 characters.'],
+    ] as const)('shows the API field errors in the page language (%s)', async (locale, text, limitText) => {
         update.mockRejectedValueOnce(await refusedSettings());
         renderPage(locale);
-        const org = await screen.findByLabelText(new RegExp(`^${dict.admin.orgNumber}`));
+        const org = await screen.findByLabelText(new RegExp(`^${text.orgNumber}`));
 
-        await userEvent.click(screen.getByRole('button', { name: dict.common.save }));
+        await userEvent.click(screen.getByRole('button', { name: text.save }));
 
-        await waitFor(() => expect(org).toHaveAccessibleDescription(dict.validation.orgNumber));
-        expect(screen.getByLabelText(new RegExp(`^${dict.admin.companyName}`))).toHaveAccessibleDescription(limitText);
+        await waitFor(() => expect(org).toHaveAccessibleDescription(text.validation.invalidOrgNumber));
+        expect(screen.getByLabelText(new RegExp(`^${text.companyName}`))).toHaveAccessibleDescription(limitText);
+    });
+
+    it.each(['no', 'en'] as const)('keeps the address hint of the app (%s)', async locale => {
+        renderPage(locale);
+
+        expect(await screen.findByText(getDictionary(locale).admin.addressHint)).toBeInTheDocument();
     });
 
     it.each([

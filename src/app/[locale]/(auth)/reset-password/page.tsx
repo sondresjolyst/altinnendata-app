@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { ResetPasswordFlow } from '@sjolystinnovation/app-kit/ui';
+import { nbResetPasswordFlowStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import UserService from '@/services/userService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
@@ -27,23 +28,14 @@ function ResetPassword() {
             initialEmail={params.get('email') ?? ''}
             initialCode={params.get('code') ?? ''}
             strings={{
-                title: dict.auth.resetTitle,
+                ...(locale === 'no' ? nbResetPasswordFlowStrings : undefined),
                 signInPrompt: null,
-                signIn: dict.auth.signIn,
-                backToSignIn: `${dict.auth.signIn} →`,
-                intro: dict.auth.resetIntro,
                 codeSent: null,
-                email: dict.auth.email,
-                code: dict.auth.resetCode,
-                newPassword: dict.auth.newPassword,
+                // app-kit's English set has no intro, hint or confirmation, so these stay the app's own.
+                intro: dict.auth.resetIntro,
                 passwordHint: dict.validation.password,
-                requestCode: dict.auth.requestCode,
-                requestingCode: dict.common.saving,
-                setPassword: dict.auth.setPassword,
-                settingPassword: dict.common.saving,
                 done: dict.auth.resetDone,
                 passwordInvalid: dict.validation.password,
-                somethingWentWrong: dict.common.somethingWentWrong,
             }}
         />
     );

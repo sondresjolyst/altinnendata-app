@@ -10,60 +10,25 @@ import {
     type SectionEditors,
     type SectionImages,
     type SectionsEditorStrings,
+    defaultSectionsEditorStrings,
 } from '@sjolystinnovation/app-kit/sections';
+import { nbSectionTypeLabels, nbSectionsEditorStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import ImageService from '@/services/imageService';
-import type { Dictionary } from '@/i18n/dictionaries';
+import type { Locale } from '@/i18n/config';
+import { getDictionary } from '@/i18n/dictionaries';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { createSection, type FeedAvailability, type FeedSection, type HeroSection, type Section, type SectionType, type StatSource, type StatsSection } from '@/types/content';
 
 export const sectionImages: SectionImages = { upload: file => ImageService.upload(file) };
 
-/** The editor's labels in the dictionary's language. */
-export function sectionsEditorStrings(dict: Dictionary): SectionsEditorStrings {
-    const s = dict.sections;
+/**
+ * The editor's labels: app-kit's Norwegian set, or its English defaults. Removing a section says Delete, so
+ * in English it is not named like the Remove button of an image.
+ */
+export function sectionsEditorStrings(locale: Locale): SectionsEditorStrings {
     return {
-        hide: dict.common.hide,
-        show: dict.common.show,
-        moveUp: s.moveUp,
-        moveDown: s.moveDown,
-        duplicate: s.duplicate,
-        remove: dict.common.delete,
-        addSection: s.add,
-        heading: s.heading,
-        headingOptional: s.headingOptional,
-        subheading: s.subheading,
-        text: s.text,
-        body: s.body,
-        primaryButtonLabel: s.button1Label,
-        primaryButtonHref: s.button1Href,
-        secondaryButtonLabel: s.button2Label,
-        secondaryButtonHref: s.button2Href,
-        buttonLabel: s.buttonLabel,
-        buttonHref: s.buttonHref,
-        bullets: s.bullets,
-        addBullet: s.addBullet,
-        count: s.count,
-        stats: s.numbers,
-        source: s.source,
-        sourceStatic: s.sourceStatic,
-        value: s.value,
-        label: s.label,
-        addStat: s.addNumber,
-        layout: s.layout,
-        layoutStandard: s.layoutStandard,
-        layoutFull: s.layoutFull,
-        layoutLeft: s.layoutLeft,
-        layoutRight: s.layoutRight,
-        layoutOverlay: s.layoutOverlay,
-        layoutOverlayFull: s.layoutOverlayFull,
-        altText: s.altText,
-        caption: s.caption,
-        image: s.image,
-        uploadImage: s.uploadImage,
-        replaceImage: s.replaceImage,
-        uploading: dict.admin.uploading,
-        removeImage: dict.common.remove,
-        uploadFailed: s.uploadFailed,
+        ...(locale === 'no' ? nbSectionsEditorStrings : defaultSectionsEditorStrings),
+        remove: getDictionary(locale).common.delete,
     };
 }
 
@@ -135,7 +100,7 @@ export default function SectionsEditor({
     onChange: (sections: Section[]) => void;
     types?: SectionType[];
 }) {
-    const { dict } = useDictionary();
+    const { locale, dict } = useDictionary();
     return (
         <BaseSectionsEditor
             sections={sections}
@@ -144,8 +109,9 @@ export default function SectionsEditor({
             createSection={createSection}
             editors={editors}
             images={sectionImages}
-            strings={sectionsEditorStrings(dict)}
-            typeLabels={dict.sectionTypes}
+            strings={sectionsEditorStrings(locale)}
+            // The feed lists this app's computers.
+            typeLabels={{ ...(locale === 'no' ? nbSectionTypeLabels : undefined), feed: dict.sectionTypes.feed }}
         />
     );
 }

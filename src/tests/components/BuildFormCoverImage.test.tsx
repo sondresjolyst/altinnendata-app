@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import BuildForm from '@/app/[locale]/(protected)/admin/builds/BuildForm';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
+import { nbSectionsEditorStrings as nb } from '@sjolystinnovation/app-kit/locales/nb';
 import { makeSession, resetTestMocks, setSession } from '@sjolystinnovation/app-kit/testing';
 
 const dict = getDictionary('no');
@@ -34,14 +35,14 @@ describe('the build form cover image', () => {
             </DictionaryProvider>,
         );
         await screen.findByText(dict.admin.coverImage);
-        expect(coverPicker()).toHaveTextContent(dict.sections.uploadImage);
+        expect(coverPicker()).toHaveTextContent(nb.uploadImage);
 
         const file = new File(['x'], 'cover.png', { type: 'image/png' });
         fireEvent.change(coverPicker().querySelector('input[type="file"]')!, { target: { files: [file] } });
 
         await waitFor(() => expect(coverPicker().querySelector('img')?.getAttribute('src')).toContain('cover-1'));
         expect(upload).toHaveBeenCalledWith(file);
-        expect(coverPicker()).toHaveTextContent(dict.sections.replaceImage);
-        expect(screen.getByRole('button', { name: dict.common.remove })).toBeInTheDocument();
+        expect(coverPicker()).toHaveTextContent(nb.replaceImage);
+        expect(screen.getByRole('button', { name: nb.removeImage })).toBeInTheDocument();
     });
 });

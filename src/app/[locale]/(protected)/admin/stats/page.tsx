@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
-import AdminService, { AdminStats, DailyStat, EmailStats } from '@/services/adminService';
-import { StatHistoryChart } from '@sjolystinnovation/app-kit/admin';
+import AdminService, { AdminStats, DailyStat, EmailStatsService } from '@/services/adminService';
+import { EmailStatsPanel, StatHistoryChart } from '@sjolystinnovation/app-kit/admin';
+import { nbEmailStatsPanelStrings, nbStatHistoryChartStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import { formatPrice } from '@/lib/format';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
@@ -18,12 +19,10 @@ export default function AdminStatsPage() {
     const { dict, locale } = useDictionary();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [history, setHistory] = useState<DailyStat[]>([]);
-    const [email, setEmail] = useState<EmailStats | null>(null);
 
     useEffect(() => {
         AdminService.getStats().then(setStats).catch(err => toast.error(err instanceof Error ? err.message : dict.admin.statsLoadFailed));
         AdminService.getStatsHistory().then(setHistory).catch(() => { });
-        AdminService.getEmailStats().then(setEmail).catch(() => { });
     }, [dict.admin.statsLoadFailed]);
 
     // An API that predates the sales fields sends none of them; show a dash rather than NaN.
@@ -66,7 +65,7 @@ export default function AdminStatsPage() {
                         { key: 'soldBuilds', label: dict.builds.availability.sold },
                         { key: 'contentImages', label: dict.stats.images },
                     ]}
-                    strings={{ empty: dict.admin.noHistory, chart: dict.admin.overTime }}
+                    strings={locale === 'no' ? nbStatHistoryChartStrings : undefined}
                 />
             </div>
 
@@ -116,17 +115,7 @@ export default function AdminStatsPage() {
                     ) : <p className="text-sm text-gray-500">{dict.common.loading}</p>}
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 p-5">
-                    <h2 className="font-bold text-gray-900 mb-3">{dict.admin.emailLast.replace('{days}', String(email?.days ?? 30))}</h2>
-                    {email ? (
-                        <div className="space-y-1.5 text-sm text-gray-700">
-                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailSent}</span><span className="tabular-nums">{email.requests}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailDelivered}</span><span className="tabular-nums">{email.delivered}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailBounces}</span><span className="tabular-nums">{email.hardBounces + email.softBounces}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">{dict.admin.emailBlocked}</span><span className="tabular-nums">{email.blocked + email.spamReports}</span></div>
-                        </div>
-                    ) : <p className="text-sm text-gray-500">{dict.admin.unavailable}</p>}
-                </div>
+                <EmailStatsPanel service={EmailStatsService} strings={locale === 'no' ? nbEmailStatsPanelStrings : undefined} />
             </div>
         </div>
     );

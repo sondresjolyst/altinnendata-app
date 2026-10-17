@@ -4,6 +4,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import SectionsEditor, { sectionsEditorStrings } from '@/components/SectionsEditor';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
+import { nbSectionTypeLabels, nbSectionsEditorStrings } from '@sjolystinnovation/app-kit/locales/nb';
+import { defaultSectionsEditorStrings } from '@sjolystinnovation/app-kit/sections';
+import type { Locale } from '@/i18n/config';
 import type { Section } from '@/types/content';
 
 const upload = vi.hoisted(() => vi.fn());
@@ -16,10 +19,10 @@ const stats: Section = { ...base, id: 's3', type: 'stats', heading: '', items: [
 
 let latest: Section[] = [];
 
-function Harness({ initial }: { initial: Section[] }) {
+function Harness({ initial, locale = 'en' }: { initial: Section[]; locale?: Locale }) {
     const [sections, setSections] = useState(initial);
     return (
-        <DictionaryProvider locale="en">
+        <DictionaryProvider locale={locale}>
             <SectionsEditor
                 sections={sections}
                 onChange={next => {
@@ -37,12 +40,22 @@ describe('SectionsEditor', () => {
         latest = [];
     });
 
-    it('labels the toolbar and the add list from the dictionary', () => {
+    it('labels the toolbar and the add list with the English defaults', () => {
         render(<Harness initial={[feed]} />);
         expect(screen.getByTitle('Delete')).toBeInTheDocument();
         expect(screen.getByTitle('Move up')).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: 'Bullet list' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Feature' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Computers' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /Add section/ })).toBeInTheDocument();
+    });
+
+    it('labels the toolbar and the add list in Norwegian, with the feed named after the computers', () => {
+        render(<Harness initial={[feed]} locale="no" />);
+        expect(screen.getByTitle(nbSectionsEditorStrings.remove)).toBeInTheDocument();
+        expect(screen.getByTitle(nbSectionsEditorStrings.moveUp)).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: nbSectionTypeLabels.hero })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: getDictionary('no').sectionTypes.feed })).toBeInTheDocument();
+        expect(screen.queryByRole('option', { name: nbSectionTypeLabels.feed })).not.toBeInTheDocument();
     });
 
     it('uploads a hero background through the image service', async () => {
@@ -68,11 +81,9 @@ describe('SectionsEditor', () => {
         expect(screen.getByRole('option', { name: 'Parts in catalog (live)' })).toBeInTheDocument();
     });
 
-    it('maps remove to delete and the image remove to remove', () => {
-        const dict = getDictionary('no');
-        const strings = sectionsEditorStrings(dict);
-        expect(strings.remove).toBe(dict.common.delete);
-        expect(strings.removeImage).toBe(dict.common.remove);
-        expect(strings.uploading).toBe(dict.admin.uploading);
+    it('takes the Norwegian set for no and the English defaults for en, with Delete for a section', () => {
+        expect(sectionsEditorStrings('no')).toEqual({ ...nbSectionsEditorStrings, remove: 'Slett' });
+        expect(sectionsEditorStrings('en')).toEqual({ ...defaultSectionsEditorStrings, remove: 'Delete' });
+        expect(sectionsEditorStrings('en').removeImage).toBe('Remove');
     });
 });
