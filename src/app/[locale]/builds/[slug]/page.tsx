@@ -164,7 +164,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
             {build.description && build.description !== build.summary && (
                 <section className="mt-12 max-w-3xl">
                     <h2 className="text-lg font-bold text-gray-900">{dict.builds.description}</h2>
-                    <div className="mt-3 space-y-4 text-sm text-gray-700">
+                    <div className="mt-3 space-y-4 text-sm text-gray-700 break-words">
                         <Markdown>{build.description}</Markdown>
                     </div>
                 </section>
