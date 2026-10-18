@@ -1,20 +1,22 @@
 "use client";
 
-import { use, useEffect, useState, type ReactNode } from 'react';
+import { use, useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { apiErrorCode } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
-import { formatNok } from '@sjolystinnovation/app-kit/payments';
 import { Alert, TextInput } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type AdminOrder } from '@/services/shopService';
 import ConfirmDialog from '@/components/shop/ConfirmDialog';
 import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { formatOre } from '@/lib/format';
 import { formatAddress, invoiceDetails, osloDate } from '@/lib/shop';
 
 type Action = 'capture' | 'cancel' | 'refund';
 
+// The API caps the invoice number at this many characters.
+const MAX_INVOICE_NUMBER = 50;
 const BUTTON = 'rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50';
 const PRIMARY = 'bg-gray-900 text-white hover:bg-gray-800';
 const SECONDARY = 'border border-gray-300 text-gray-900 hover:bg-gray-50';
@@ -30,6 +32,13 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
     const [busy, setBusy] = useState(false);
     const [invoiceNumber, setInvoiceNumber] = useState('');
     const [savingInvoice, setSavingInvoice] = useState(false);
+    const [acted, setActed] = useState(0);
+    const heading = useRef<HTMLHeadingElement>(null);
+
+    // The action buttons change with the status, so the one that opened the dialog may be gone.
+    useEffect(() => {
+        if (acted > 0) heading.current?.focus();
+    }, [acted]);
 
     useEffect(() => {
         let current = true;
@@ -65,6 +74,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             const updated = await ShopService[action](order.id);
             setOrder(updated);
             setConfirming(null);
+            setActed(n => n + 1);
             toast.success({ capture: text.captureDone, cancel: text.cancelDone, refund: text.refundDone }[action]);
         } catch (err) {
             setConfirming(null);
@@ -114,14 +124,14 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         [text.email, order.buyerEmail],
         [text.phone, order.buyerPhone],
         [text.address, address || null],
-        [text.deliveryLabel, `${order.deliveryLabel} (${formatNok(order.deliveryPriceInOre)})`],
+        [text.deliveryLabel, `${order.deliveryLabel} (${formatOre(order.deliveryPriceInOre, locale)})`],
         [text.withinDistance, order.deliveryMethod === 'HomeDelivery' ? (order.withinDistanceConfirmed ? dict.common.yes : dict.common.no) : null],
         [text.pickupNote, order.pickupNote],
         [text.columns.build, order.buildTitle],
-        [text.buildPrice, formatNok(order.buildPriceInOre)],
-        [text.columns.total, formatNok(order.totalInOre)],
-        [text.captured, order.capturedInOre > 0 ? formatNok(order.capturedInOre) : null],
-        [text.refunded, order.refundedInOre > 0 ? formatNok(order.refundedInOre) : null],
+        [text.buildPrice, formatOre(order.buildPriceInOre, locale)],
+        [text.columns.total, formatOre(order.totalInOre, locale)],
+        [text.captured, order.capturedInOre > 0 ? formatOre(order.capturedInOre, locale) : null],
+        [text.refunded, order.refundedInOre > 0 ? formatOre(order.refundedInOre, locale) : null],
         [text.columns.deadline, date(order.captureGuaranteedUntil) ?? text.unknown],
         [text.created, date(order.createdAt)],
         [text.termsAccepted, date(order.termsAcceptedAt)],
@@ -145,7 +155,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             </div>
 
             <section aria-labelledby="order-heading" className="space-y-4 rounded-2xl border border-gray-200 p-5">
-                <h2 id="order-heading" className="font-bold text-gray-900">{text.order}</h2>
+                <h2 id="order-heading" ref={heading} tabIndex={-1} className="font-bold text-gray-900 outline-none">{text.order}</h2>
                 <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                     {fields.filter(([, value]) => value !== null && value !== '').map(([label, value]) => (
                         <div key={label}>
@@ -181,7 +191,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                     }}
                 >
                     <div className="min-w-48 flex-1">
-                        <TextInput label={text.invoiceNumber} value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                        <TextInput label={text.invoiceNumber} maxLength={MAX_INVOICE_NUMBER} value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                     </div>
                     <button type="submit" disabled={savingInvoice} className={`${BUTTON} ${PRIMARY}`}>
                         {savingInvoice ? dict.common.saving : dict.common.save}

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
-import { publicGet, publicGetOptional, publicGetWithMeta, PublicApiError } from '@/lib/publicApi';
+import { publicGet, publicGetLive, publicGetOptional, publicGetLiveOptional, publicGetWithMeta, PublicApiError } from '@/lib/publicApi';
 
 const respond = (body: unknown, init: { status?: number; headers?: Record<string, string> } = {}) =>
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
@@ -106,5 +106,23 @@ describe('during next build', () => {
         vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('ECONNREFUSED'));
 
         await expect(publicGet('/content/legal/terms')).rejects.toThrow(PublicApiError);
+    });
+});
+
+describe('the live reads', () => {
+    it('ask Next for no cache, where the normal reads cache for a minute', async () => {
+        const fetched = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => Response.json({ ok: true }));
+
+        await publicGet('/shop/config');
+        await publicGetLive('/shop/config');
+
+        expect(fetched.mock.calls[0]![1]).toEqual({ next: { revalidate: 60 } });
+        expect(fetched.mock.calls[1]![1]).toEqual({ next: { revalidate: 0 } });
+    });
+
+    it('give null for a failing API when optional', async () => {
+        respond({}, { status: 500 });
+
+        expect(await publicGetLiveOptional('/shop/config')).toBeNull();
     });
 });

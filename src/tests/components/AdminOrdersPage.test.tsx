@@ -55,7 +55,7 @@ describe('the admin orders page', () => {
         expect(newest.getByText('Ola Test')).toBeInTheDocument();
         expect(newest.getByText('Test')).toBeInTheDocument();
         expect(newest.getByText('Reservert')).toBeInTheDocument();
-        expect(newest.getByText('NOK 12990,00')).toBeInTheDocument();
+        expect(newest.getByText(/^(kr\s)?12\s990(\skr)?$/)).toBeInTheDocument();
         expect(newest.getByText('Under 2 dager igjen')).toBeInTheDocument();
         expect(newest.getByRole('link', { name: 'Åpne ordre' })).toHaveAttribute('href', '/no/admin/shop/orders/2');
 

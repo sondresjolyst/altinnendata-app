@@ -11,15 +11,17 @@ import type { BuyButtonMode } from '@/services/shopService';
 interface BuyButtonProps {
     build: BuildDetail;
     mode: BuyButtonMode | undefined;
+    /** Whether the shop offers at least one delivery option. Without one the checkout cannot be completed. */
+    hasDelivery: boolean;
     locale: Locale;
 }
 
 /** The link to the checkout page. It shows only when the build can be sold and the shop is open to this visitor. */
-export default function BuyButton({ build, mode, locale }: BuyButtonProps) {
+export default function BuyButton({ build, mode, hasDelivery, locale }: BuyButtonProps) {
     const { data: session } = useSession();
     const roles = session?.user?.roles ?? [];
 
-    if (!isBuyable(build) || !canBuy(mode, roles)) return null;
+    if (!hasDelivery || !isBuyable(build) || !canBuy(mode, roles)) return null;
 
     return (
         <Link

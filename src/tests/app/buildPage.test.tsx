@@ -6,7 +6,7 @@ import type { BuildComponent, BuildDetail } from '@/services/buildService';
 
 vi.mock('@/lib/publicApi', () => ({ publicGet: vi.fn(), publicGetOptional: vi.fn() }));
 vi.mock('@/components/shop/BuyButton', () => ({
-    default: ({ mode }: { mode: string | undefined }) => <span data-testid="buy-button">{String(mode)}</span>,
+    default: ({ mode, hasDelivery }: { mode: string | undefined; hasDelivery: boolean }) => <span data-testid="buy-button">{`${String(mode)} ${hasDelivery}`}</span>,
 }));
 
 const component = (id: number, overrides: Partial<BuildComponent>): BuildComponent => ({
@@ -77,20 +77,31 @@ describe('build page spec table', () => {
 describe('build page buy button', () => {
     it('keeps the contact link first and hands the shop mode to the buy button', async () => {
         vi.mocked(publicGet).mockResolvedValue(build([]));
-        vi.mocked(publicGetOptional).mockResolvedValue({ buyButton: 'Everyone', delivery: [] });
+        vi.mocked(publicGetOptional).mockResolvedValue({
+            buyButton: 'Everyone',
+            delivery: [{ method: 'Pickup', priceNok: 0, label: 'Henting', description: null, maxDistanceKm: null }],
+        });
         render(await BuildPage({ params: Promise.resolve({ locale: 'no', slug: 'gaming-pc' }) }));
 
         const contact = screen.getByRole('link', { name: 'Ta kontakt om maskinen' });
         expect(contact).toHaveAttribute('href', '/no/contact?build=gaming-pc');
-        expect(screen.getByTestId('buy-button')).toHaveTextContent('Everyone');
+        expect(screen.getByTestId('buy-button')).toHaveTextContent('Everyone true');
         expect(contact.compareDocumentPosition(screen.getByTestId('buy-button')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         expect(publicGetOptional).toHaveBeenCalledWith('/shop/config?locale=no', { tags: ['shop'] });
+    });
+
+    it('tells the buy button when no delivery option is offered', async () => {
+        vi.mocked(publicGet).mockResolvedValue(build([]));
+        vi.mocked(publicGetOptional).mockResolvedValue({ buyButton: 'Everyone', delivery: [] });
+        render(await BuildPage({ params: Promise.resolve({ locale: 'no', slug: 'gaming-pc' }) }));
+
+        expect(screen.getByTestId('buy-button')).toHaveTextContent('Everyone false');
     });
 
     it('passes no mode when the config cannot be fetched', async () => {
         vi.mocked(publicGet).mockResolvedValue(build([]));
         render(await BuildPage({ params: Promise.resolve({ locale: 'no', slug: 'gaming-pc' }) }));
 
-        expect(screen.getByTestId('buy-button')).toHaveTextContent('undefined');
+        expect(screen.getByTestId('buy-button')).toHaveTextContent('undefined false');
     });
 });

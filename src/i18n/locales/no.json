@@ -141,6 +141,12 @@
       "paymentProviderUnavailable": "Vipps svarer ikke. Prøv igjen om litt."
     },
     "return": {
+      "title": "Betaling",
+      "paid": {
+        "title": "Betalingen er gjennomført",
+        "body": "Vi har tatt {total} i Vipps for {build}. Vi tar kontakt om levering eller henting.",
+        "note": "Ordrenummer {reference}."
+      },
       "success": {
         "title": "Betalingen er reservert",
         "body": "Vi har reservert {total} i Vipps for {build}. Beløpet trekkes når du får maskinen. Vi tar kontakt om levering eller henting.",

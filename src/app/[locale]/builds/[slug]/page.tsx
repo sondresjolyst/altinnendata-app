@@ -49,7 +49,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
     const shop = await publicGetOptional<ShopConfig>(`/shop/config?locale=${locale}`, { tags: [REVALIDATE_TARGETS.shop] });
 
     const dict = getDictionary(locale);
-    const status =build.availability.toLowerCase() as 'available' | 'reserved' | 'sold';
+    const status = build.availability.toLowerCase() as 'available' | 'reserved' | 'sold';
     const statusTone = {
         available: 'bg-emerald-100 text-emerald-800',
         reserved: 'bg-amber-100 text-amber-800',
@@ -123,7 +123,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                         >
                             {status === 'sold' ? dict.builds.askSimilar : dict.builds.askAbout}
                         </Link>
-                        <BuyButton build={build} mode={shop?.buyButton} locale={locale} />
+                        <BuyButton build={build} mode={shop?.buyButton} hasDelivery={(shop?.delivery.length ?? 0) > 0} locale={locale} />
                         {build.finnUrl && (
                             <a
                                 href={build.finnUrl}

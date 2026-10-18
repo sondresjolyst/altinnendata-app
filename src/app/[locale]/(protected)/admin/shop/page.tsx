@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { toast } from '@sjolystinnovation/app-kit/toast';
-import { formatNok } from '@sjolystinnovation/app-kit/payments';
 import { Alert } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type AdminOrderSummary } from '@/services/shopService';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { formatOre } from '@/lib/format';
 import { captureWarning, osloDate } from '@/lib/shop';
 
 export default function AdminOrdersPage() {
@@ -72,7 +72,7 @@ export default function AdminOrdersPage() {
                                 <td className={cell}>{order.buyerName}</td>
                                 <td className={cell}>{order.buildTitle}</td>
                                 <td className={cell}>{text.methods[order.deliveryMethod]}</td>
-                                <td className={cell}>{formatNok(order.totalInOre)}</td>
+                                <td className={cell}>{formatOre(order.totalInOre, locale)}</td>
                                 <td className={cell}>
                                     {order.captureGuaranteedUntil === null ? text.unknown : osloDate(order.captureGuaranteedUntil)}
                                     {order.status === 'Reserved' && warning === 'soon' && (

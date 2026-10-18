@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     if (!isLocale(locale)) return {};
 
     return {
-        ...pageMetadata({ locale, path: '/shop/return', title: getDictionary(locale).shop.return.pending.title }),
+        ...pageMetadata({ locale, path: '/shop/return', title: getDictionary(locale).shop.return.title }),
         robots: { index: false },
     };
 }

@@ -199,7 +199,7 @@ describe('the admin order page', () => {
         renderPage();
 
         expect(await screen.findByText('Pris for datamaskinen')).toBeInTheDocument();
-        expect(screen.getByText('NOK 9990,00')).toBeInTheDocument();
+        expect(screen.getByText(/^(kr\s)?9\s990(\skr)?$/)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kopier Linje 1' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kopier Linje 1, beløp' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kopier Linje 2, beløp' })).toBeInTheDocument();
@@ -224,5 +224,78 @@ describe('the admin order page', () => {
 
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Ordren har endret status. Last siden på nytt.'));
         expect(screen.getByRole('button', { name: 'Ta betalt' })).toBeInTheDocument();
+    });
+
+    it('limits the invoice number to 50 characters', async () => {
+        service.getOrder.mockResolvedValue(paid);
+        renderPage();
+
+        expect(await screen.findByLabelText('Fakturanummer')).toHaveAttribute('maxlength', '50');
+    });
+
+    it('moves focus to the order heading after an action, since the button is gone', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        service.capture.mockResolvedValue(paid);
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+
+        await screen.findByRole('button', { name: 'Betal tilbake' });
+        expect(screen.getByRole('heading', { name: 'Ordre' })).toHaveFocus();
+    });
+
+    it('cancels after confirming and shows the cancelled status', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        service.cancel.mockResolvedValue({ ...reserved, status: 'Cancelled', cancelledAt: '2026-10-19T08:00:00Z' });
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Kanseller' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Kanseller' }));
+
+        await waitFor(() => expect(service.cancel).toHaveBeenCalledWith(7));
+        await waitFor(() => expect(toastSpies.success).toHaveBeenCalledWith('Ordren er kansellert'));
+        expect(screen.queryByRole('button', { name: 'Ta betalt' })).not.toBeInTheDocument();
+        expect(screen.getAllByText('Kansellert').length).toBeGreaterThan(0);
+    });
+
+    it('refunds after confirming and shows the refunded status', async () => {
+        service.getOrder.mockResolvedValue(paid);
+        service.refund.mockResolvedValue({ ...paid, status: 'Refunded', refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' });
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Betal tilbake' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Betal tilbake' }));
+
+        await waitFor(() => expect(service.refund).toHaveBeenCalledWith(7));
+        await waitFor(() => expect(toastSpies.success).toHaveBeenCalledWith('Beløpet er betalt tilbake'));
+        expect(screen.queryByRole('button', { name: 'Betal tilbake' })).not.toBeInTheDocument();
+    });
+
+    it('shows the captureIncomplete text when Vipps did not confirm the full amount', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        service.capture.mockRejectedValue(await refused(502, { message: 'Partial', code: 'captureIncomplete' }));
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+
+        await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke hele beløpet.'));
+    });
+
+    it('shows the refundIncomplete text when Vipps did not confirm the full refund', async () => {
+        service.getOrder.mockResolvedValue(paid);
+        service.refund.mockRejectedValue(await refused(502, { message: 'Partial', code: 'refundIncomplete' }));
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Betal tilbake' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Betal tilbake' }));
+
+        await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke hele tilbakebetalingen.'));
     });
 });

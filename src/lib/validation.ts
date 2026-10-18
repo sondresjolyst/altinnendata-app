@@ -73,6 +73,39 @@ export function checkoutIssueMessage(issue: z.core.$ZodIssue, field: string, dic
     return text.required.replace('{field}', field);
 }
 
+/** The form fields the checkout API reports errors for, in the form's own names. */
+export type CheckoutField = 'name' | 'email' | 'phone' | 'streetAddress' | 'postalCode' | 'city' | 'pickupNote' | 'withinDistance' | 'acceptTerms';
+
+const CHECKOUT_FIELD_BY_API_KEY = new Map<string, CheckoutField>(
+    (['name', 'email', 'phone', 'streetAddress', 'postalCode', 'city', 'pickupNote', 'withinDistance', 'acceptTerms'] as const).map(field => [field.toLowerCase(), field]),
+);
+
+/** The form field behind a key of the API's field errors, or undefined for a key the form has no field for. */
+export function checkoutFieldOfApiKey(key: string): CheckoutField | undefined {
+    return CHECKOUT_FIELD_BY_API_KEY.get(key.toLowerCase());
+}
+
+const CHECKOUT_MAX_LENGTH: Partial<Record<CheckoutField, number>> = { name: 120, email: 200, streetAddress: 200, city: 100, pickupNote: 500 };
+
+/**
+ * The Norwegian text for a field the API refused. The API words its messages in English, so the rule is
+ * read from the field and its value, the way `checkoutSchema` words it. `value` is what the buyer typed.
+ */
+export function checkoutApiFieldMessage(field: CheckoutField, value: string, name: string, dict: Dictionary, km = 0): string {
+    const text = dict.shop.validation;
+    switch (field) {
+        case 'phone': return value.trim() === '' ? text.required.replace('{field}', name) : text.phone;
+        case 'acceptTerms': return text.terms;
+        case 'withinDistance': return text.distance.replace('{km}', String(km));
+        case 'email': if (value.trim() !== '' && value.trim().length <= CHECKOUT_MAX_LENGTH.email!) return text.email; break;
+        case 'postalCode': if (value.trim() !== '') return text.postalCode; break;
+    }
+
+    const max = CHECKOUT_MAX_LENGTH[field];
+    if (value.trim() !== '' && max !== undefined) return text.tooLong.replace('{max}', String(max));
+    return text.required.replace('{field}', name);
+}
+
 export function issueMessage(issue: z.core.$ZodIssue, dict: Dictionary): string {
     if (issue.code === 'invalid_format' && issue.format === 'email') return dict.validation.email;
     if (issue.code === 'too_big') return dict.validation.tooLong;

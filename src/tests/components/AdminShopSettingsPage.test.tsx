@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
 import { navigation, resetTestMocks, toastSpies } from '@sjolystinnovation/app-kit/testing';
@@ -91,6 +91,33 @@ describe('the admin shop settings page', () => {
         expect(screen.getByText(t.warning)).toBeInTheDocument();
     });
 
+    it('announces the terms warning politely, not as an alert', async () => {
+        service.getSettings.mockResolvedValue({ ...settings, termsUpdatedSinceShop: false });
+        renderPage('no');
+
+        expect(await screen.findByRole('status')).toHaveTextContent(strings.no.warning);
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('shows an error instead of Laster when the settings cannot be loaded', async () => {
+        service.getSettings.mockRejectedValue(new Error('Boom'));
+        renderPage('no');
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('Kunne ikke hente innstillingene');
+        expect(screen.queryByText('Laster…')).not.toBeInTheDocument();
+    });
+
+    it('rejects 1e2 as a price, which a number input allows', async () => {
+        renderPage('no');
+        await screen.findByRole('button', { name: 'Lagre' });
+        const price = within(group('Sending')).getByLabelText('Pris (kr)');
+        fireEvent.change(price, { target: { value: '1e2' } });
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre' }));
+
+        await waitFor(() => expect(price).toHaveAccessibleDescription('Bruk et tall fra 0 til 100000.'));
+        expect(service.updateSettings).not.toHaveBeenCalled();
+    });
+
     it('enables For alle once the terms are saved', async () => {
         renderPage('no');
 
@@ -144,8 +171,8 @@ describe('the admin shop settings page', () => {
     });
 
     it.each([
-        ['no', 'Du må fylle ut navn (norsk).', 'Navn (Norsk)', 'Lagre'],
-        ['en', 'Fill in name (english).', 'Name (English)', 'Save'],
+        ['no', 'Du må fylle ut navn (Norsk).', 'Navn (Norsk)', 'Lagre'],
+        ['en', 'Enter name (English).', 'Name (English)', 'Save'],
     ] as const)('shows the required text for an empty label (%s)', async (locale, message, labelText, save) => {
         renderPage(locale);
         await screen.findByRole('button', { name: save });

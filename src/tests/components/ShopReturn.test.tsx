@@ -37,14 +37,32 @@ describe('ShopReturn', () => {
         await settle();
 
         expect(screen.getByRole('heading', { name: 'Betalingen er reservert' })).toBeInTheDocument();
-        expect(screen.getByText(/Vi har reservert NOK 12990,00 i Vipps for Gaming PC\./)).toBeInTheDocument();
+        expect(screen.getByText(/Vi har reservert (kr\s)?12\s990(\skr)? i Vipps for Gaming PC\./)).toBeInTheDocument();
         expect(screen.getByText('Ordrenummer AD-1001. Du får en ordrebekreftelse på e-post.')).toBeInTheDocument();
         expect(screen.getByRole('link', { name: 'Til datamaskinene' })).toHaveAttribute('href', '/no/builds');
         expect(orderStatus).toHaveBeenCalledWith('abc123');
     });
 
+    it('says the money is taken, not reserved, for a paid order', async () => {
+        orderStatus.mockResolvedValue(info({ status: 'Paid' }));
+        render(<ShopReturn locale="no" />);
+        await settle();
+
+        expect(screen.getByRole('heading', { name: 'Betalingen er gjennomført' })).toBeInTheDocument();
+        expect(screen.getByText(/Vi har tatt .*12\s990.* i Vipps for Gaming PC\./)).toBeInTheDocument();
+        expect(screen.queryByText(/trekkes når du får maskinen/)).not.toBeInTheDocument();
+    });
+
+    it('writes a build title with $ patterns as typed', async () => {
+        orderStatus.mockResolvedValue(info({ buildTitle: 'PC $& $1' }));
+        render(<ShopReturn locale="no" />);
+        await settle();
+
+        expect(screen.getByText(/for PC \$& \$1\./)).toBeInTheDocument();
+    });
+
     it('keeps polling while Pending and offers Sjekk igjen', async () => {
-        orderStatus.mockResolvedValueOnce(info({ status: 'Pending' })).mockResolvedValue(info({ status: 'Paid' }));
+        orderStatus.mockResolvedValueOnce(info({ status: 'Pending' })).mockResolvedValue(info({ status: 'Reserved' }));
         render(<ShopReturn locale="no" />);
         await settle();
 
@@ -66,7 +84,7 @@ describe('ShopReturn', () => {
         await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
         expect(orderStatus).toHaveBeenCalledTimes(calls);
 
-        orderStatus.mockResolvedValue(info({ status: 'Paid' }));
+        orderStatus.mockResolvedValue(info({ status: 'Reserved' }));
         fireEvent.click(screen.getByRole('button', { name: 'Sjekk igjen' }));
         await settle();
         expect(screen.getByRole('heading', { name: 'Betalingen er reservert' })).toBeInTheDocument();
@@ -102,6 +120,9 @@ describe('ShopReturn', () => {
     it('shows the failed state without asking the API when there is no token', async () => {
         search.token = null;
         render(<ShopReturn locale="no" />);
+
+        // Not even a first frame of the pending state.
+        expect(screen.getByRole('heading', { name: 'Betalingen ble ikke fullført' })).toBeInTheDocument();
         await settle();
 
         expect(screen.getByRole('heading', { name: 'Betalingen ble ikke fullført' })).toBeInTheDocument();

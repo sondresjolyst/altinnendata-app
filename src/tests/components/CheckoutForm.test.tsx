@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
 import { resetTestMocks } from '@sjolystinnovation/app-kit/testing';
@@ -156,17 +156,105 @@ describe('CheckoutForm', () => {
         expect(await screen.findByText('Datamaskinen er ikke lenger tilgjengelig. Noen andre har kjøpt eller reservert den.')).toBeInTheDocument();
     });
 
-    it('shows the field errors of a 400 beside the fields', async () => {
-        const user = userEvent.setup();
-        service.checkout.mockRejectedValue(await refused(400, { errors: { Phone: ['Use a Norwegian mobile number.'] } }));
-        renderForm();
-
+    const submitPickup = async (user: ReturnType<typeof userEvent.setup>) => {
         await fillContact(user);
         await user.click(screen.getByRole('radio', { name: /Henting i Lye/ }));
         await user.click(screen.getByRole('checkbox', { name: /Jeg godtar salgsvilkårene/ }));
         await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
+    };
 
-        expect(await screen.findByText('Use a Norwegian mobile number.')).toBeInTheDocument();
+    it('shows the Norwegian text beside the field for a 400 field error, not the API English', async () => {
+        const user = userEvent.setup();
+        service.checkout.mockRejectedValue(await refused(400, { errors: { Phone: ['Use a Norwegian mobile number.'] } }));
+        renderForm();
+        await submitPickup(user);
+
+        expect(await screen.findByText('Skriv inn et norsk mobilnummer.')).toBeInTheDocument();
+        expect(screen.queryByText('Use a Norwegian mobile number.')).not.toBeInTheDocument();
+        expect(screen.queryByText('Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt.')).not.toBeInTheDocument();
+    });
+
+    it('says the field is too long when the API refuses a filled-in field on length', async () => {
+        const user = userEvent.setup();
+        service.checkout.mockRejectedValue(await refused(400, { errors: { Name: ['Use 120 characters or fewer.'] } }));
+        renderForm();
+        await submitPickup(user);
+
+        expect(await screen.findByText('Bruk 120 eller færre tegn.')).toBeInTheDocument();
+    });
+
+    it('says the terms must be accepted when the API refuses AcceptTerms', async () => {
+        const user = userEvent.setup();
+        service.checkout.mockRejectedValue(await refused(400, { errors: { AcceptTerms: ['Accept the terms.'] } }));
+        renderForm();
+        await submitPickup(user);
+
+        expect(await screen.findByText('Du må godta salgsvilkårene.')).toBeInTheDocument();
+    });
+
+    it.each([
+        ['BuildSlug', 'The build slug is required.'],
+        ['DeliveryMethod', 'Choose a delivery method.'],
+        ['StreetAddress', 'Enter the street address.'],
+    ])('shows the generic failed text when the only error is on %s, which has no field on screen', async (key, message) => {
+        const user = userEvent.setup();
+        service.checkout.mockRejectedValue(await refused(400, { errors: { [key]: [message] } }));
+        renderForm();
+        await submitPickup(user);
+
+        expect(await screen.findByText('Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt.')).toBeInTheDocument();
+        expect(screen.queryByText(message)).not.toBeInTheDocument();
+    });
+
+    it('shows the failed text on a 502 from the payment provider', async () => {
+        const user = userEvent.setup();
+        service.checkout.mockRejectedValue(await refused(502, { message: 'Bad gateway', code: 'paymentProviderUnavailable' }));
+        renderForm();
+        await submitPickup(user);
+
+        expect(await screen.findByText('Vipps svarer ikke. Prøv igjen om litt.')).toBeInTheDocument();
+    });
+
+    it('enables the form again when the page comes back from the bfcache after Vipps', async () => {
+        const user = userEvent.setup();
+        vi.stubGlobal('location', { ...window.location, assign: vi.fn() });
+        service.checkout.mockResolvedValue({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        renderForm();
+        await submitPickup(user);
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Går til Vipps…' })).toBeDisabled());
+
+        act(() => { window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true })); });
+
+        expect(screen.getByRole('button', { name: 'Betal med Vipps' })).toBeEnabled();
+        vi.unstubAllGlobals();
+    });
+
+    it('links the checkbox errors to their checkboxes', async () => {
+        const user = userEvent.setup();
+        renderForm();
+
+        await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
+
+        expect(screen.getByRole('checkbox', { name: /Jeg godtar salgsvilkårene/ })).toHaveAccessibleDescription('Du må godta salgsvilkårene.');
+    });
+
+    it('links the distance error to its checkbox', async () => {
+        const user = userEvent.setup();
+        renderForm();
+
+        await user.click(screen.getByRole('radio', { name: /Levering hjem/ }));
+        await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
+
+        expect(screen.getByLabelText('Adressen er innenfor 30 km fra oss')).toHaveAccessibleDescription('Du må bekrefte at adressen er innenfor 30 km.');
+    });
+
+    it('moves focus to the first field with an error after a failed submit', async () => {
+        const user = userEvent.setup();
+        renderForm();
+
+        await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
+
+        expect(screen.getByLabelText(/Navn/)).toHaveFocus();
     });
 
     it('shows that the shop is not open to a visitor in AdminsOnly mode', () => {

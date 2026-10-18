@@ -5,22 +5,22 @@ import { ContentImage } from '@sjolystinnovation/app-kit/ui';
 import CheckoutForm from '@/components/shop/CheckoutForm';
 import { BuildDetail } from '@/services/buildService';
 import type { ShopConfig } from '@/services/shopService';
-import { publicGet, publicGetOptional } from '@/lib/publicApi';
+import { publicGetLive, publicGetLiveOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
-import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
-import { formatPrice } from '@/lib/format';
+import { fillTemplate, formatPrice } from '@/lib/format';
 import { isBuyable } from '@/lib/shop';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata } from '@/lib/seo/site';
 
-// The page decides from the live build and shop settings, and a buyer must not see a stale price.
+// The page decides from the live build and shop settings, so both are read with no data cache.
+// force-dynamic alone would not do it, because Next keeps a fetch that sets its own revalidate time.
 export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ locale: string; slug: string }>;
 
 const fetchBuild = (slug: string, locale: Locale) =>
-    publicGet<BuildDetail>(`/builds/${slugSegment(slug)}?locale=${locale}`, { tags: [REVALIDATE_TARGETS.builds] });
+    publicGetLive<BuildDetail>(`/builds/${slugSegment(slug)}?locale=${locale}`);
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
     const { locale, slug } = await params;
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     if (!build) return {};
 
     return {
-        ...pageMetadata({ locale, path: `/builds/${slug}/buy`, title: getDictionary(locale).shop.checkoutTitle.replace('{title}', build.title) }),
+        ...pageMetadata({ locale, path: `/builds/${slug}/buy`, title: fillTemplate(getDictionary(locale).shop.checkoutTitle, { title: build.title }) }),
         robots: { index: false },
     };
 }
@@ -42,14 +42,14 @@ export default async function BuyPage({ params }: { params: Params }) {
     const build = await fetchBuild(slug, locale);
     if (!build) notFound();
 
-    const shop = await publicGetOptional<ShopConfig>(`/shop/config?locale=${locale}`, { tags: [REVALIDATE_TARGETS.shop] });
+    const shop = await publicGetLiveOptional<ShopConfig>(`/shop/config?locale=${locale}`);
     const text = getDictionary(locale).shop;
     const buildHref = localeHref(locale, `/builds/${build.slug}`);
 
-    if (!isBuyable(build) || !shop || shop.buyButton === 'Off') {
+    if (!isBuyable(build) || !shop || shop.buyButton === 'Off' || shop.delivery.length === 0) {
         return (
             <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
-                <p className="text-lg font-semibold text-gray-900">{text.unavailable}</p>
+                <h1 className="text-lg font-semibold text-gray-900">{text.unavailable}</h1>
                 <div className="mt-6 flex flex-wrap gap-3">
                     <Link href={buildHref} className="rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-900 hover:bg-gray-50 transition">
                         {text.toBuild}
@@ -67,7 +67,7 @@ export default async function BuyPage({ params }: { params: Params }) {
             <Link href={buildHref} className="text-sm font-semibold text-gray-500 hover:text-gray-900">
                 ← {text.toBuild}
             </Link>
-            <h1 className="mt-4 text-3xl font-black text-gray-900 break-words">{text.checkoutTitle.replace('{title}', build.title)}</h1>
+            <h1 className="mt-4 text-3xl font-black text-gray-900 break-words">{fillTemplate(text.checkoutTitle, { title: build.title })}</h1>
 
             <div className="mt-6 flex items-center gap-4 rounded-2xl border border-gray-200 p-4">
                 {build.coverImageId && (

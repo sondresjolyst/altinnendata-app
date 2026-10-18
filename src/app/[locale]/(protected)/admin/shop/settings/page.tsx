@@ -42,6 +42,12 @@ const toDraft = (settings: ShopSettings): Draft => ({
     })),
 });
 
+/** Digits only. A number input also accepts 1e2 and 1.0, which the API would not read as a whole number. */
+const isWhole = (value: string) => /^\d+$/.test(value);
+
+/** A label in running text: lower case, without the unit in brackets. */
+const plain = (label: string) => label.replace(/\s*\(.*\)$/, '').toLowerCase();
+
 const orNull = (value: string) => value.trim() || null;
 
 const MAX_LABEL = 80;
@@ -69,6 +75,7 @@ export default function AdminShopSettingsPage() {
     const [saving, setSaving] = useState(false);
     const [termsRefused, setTermsRefused] = useState(false);
     const [errors, setErrors] = useState<Map<string, string>>(new Map());
+    const [loadFailed, setLoadFailed] = useState(false);
 
     useEffect(() => {
         let current = true;
@@ -78,9 +85,15 @@ export default function AdminShopSettingsPage() {
                 setSettings(loaded);
                 setDraft(toDraft(loaded));
             })
-            .catch(err => toast.error(err instanceof Error ? err.message : text.loadFailed));
+            .catch(err => {
+                if (!current) return;
+                setLoadFailed(true);
+                toast.error(err instanceof Error ? err.message : text.loadFailed);
+            });
         return () => { current = false; };
     }, [text.loadFailed]);
+
+    if (!settings && loadFailed) return <Alert variant="error">{text.loadFailed}</Alert>;
 
     if (!settings || !draft) {
         return <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>;
@@ -93,16 +106,16 @@ export default function AdminShopSettingsPage() {
 
     const fieldName = (field: FieldName) => {
         switch (field) {
-            case 'price': return text.price;
-            case 'maxDistance': return text.maxDistance;
-            case 'labelNo': return `${text.label} (${LOCALE_LABELS.no})`;
-            case 'labelEn': return `${text.label} (${LOCALE_LABELS.en})`;
-            case 'descriptionNo': return `${text.description} (${LOCALE_LABELS.no})`;
-            case 'descriptionEn': return `${text.description} (${LOCALE_LABELS.en})`;
+            case 'price': return plain(text.price);
+            case 'maxDistance': return plain(text.maxDistance);
+            case 'labelNo': return `${plain(text.label)} (${LOCALE_LABELS.no})`;
+            case 'labelEn': return `${plain(text.label)} (${LOCALE_LABELS.en})`;
+            case 'descriptionNo': return `${plain(text.description)} (${LOCALE_LABELS.no})`;
+            case 'descriptionEn': return `${plain(text.description)} (${LOCALE_LABELS.en})`;
         }
     };
 
-    const required = (field: FieldName) => text.validation.required.replace('{field}', fieldName(field).toLowerCase());
+    const required = (field: FieldName) => text.validation.required.replace('{field}', fieldName(field));
     const tooLong = (max: number) => text.validation.tooLong.replace('{max}', String(max));
     const range = (min: number, max: number) => text.validation.range.replace('{min}', String(min)).replace('{max}', String(max));
 
@@ -111,7 +124,7 @@ export default function AdminShopSettingsPage() {
         const found: Partial<Record<FieldName, string>> = {};
         const price = option.price.trim();
         if (price === '') found.price = required('price');
-        else if (!Number.isInteger(Number(price)) || Number(price) < 0 || Number(price) > MAX_PRICE) found.price = range(0, MAX_PRICE);
+        else if (!isWhole(price) || Number(price) < 0 || Number(price) > MAX_PRICE) found.price = range(0, MAX_PRICE);
 
         for (const field of ['labelNo', 'labelEn'] as const) {
             if (option[field].trim() === '') found[field] = required(field);
@@ -124,7 +137,7 @@ export default function AdminShopSettingsPage() {
         const distance = option.maxDistance.trim();
         if (option.method === 'HomeDelivery') {
             if (distance === '' && option.enabled) found.maxDistance = required('maxDistance');
-            else if (distance !== '' && (!Number.isInteger(Number(distance)) || Number(distance) < 1 || Number(distance) > MAX_DISTANCE)) {
+            else if (distance !== '' && (!isWhole(distance) || Number(distance) < 1 || Number(distance) > MAX_DISTANCE)) {
                 found.maxDistance = range(1, MAX_DISTANCE);
             }
         }
@@ -203,7 +216,7 @@ export default function AdminShopSettingsPage() {
                         {radio('buyButton', buyLabels[mode], draft.buyButton === mode, () => setDraft({ ...draft, buyButton: mode }), mode === 'Everyone' && termsMissing)}
                     </div>,
                 )}
-                {termsMissing && <Alert variant="warning">{text.termsWarning}</Alert>}
+                {termsMissing && <Alert variant="warning" role="status">{text.termsWarning}</Alert>}
             </fieldset>
 
             <fieldset className="space-y-3 rounded-2xl border border-gray-200 p-5">

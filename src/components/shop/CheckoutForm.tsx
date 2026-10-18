@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { apiErrorCode } from '@sjolystinnovation/app-kit/api';
+import { apiErrorCode, apiFieldErrors } from '@sjolystinnovation/app-kit/api';
 import { Alert, TextArea, TextInput } from '@sjolystinnovation/app-kit/ui';
 import { zodFieldErrors } from '@sjolystinnovation/app-kit/validation';
 import ShopService, { type BuyButtonMode, type DeliveryMethod, type PublicDeliveryOption } from '@/services/shopService';
 import type { BuildDetail } from '@/services/buildService';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-import { formatPrice } from '@/lib/format';
+import { fillTemplate, formatPrice } from '@/lib/format';
 import { canBuy } from '@/lib/shop';
-import { checkoutIssueMessage, checkoutSchema } from '@/lib/validation';
+import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, type CheckoutField } from '@/lib/validation';
 
 interface CheckoutFormProps {
     build: BuildDetail;
@@ -56,6 +56,22 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
     const [failure, setFailure] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [failedSubmits, setFailedSubmits] = useState(0);
+    const formRef = useRef<HTMLFormElement>(null);
+
+    // Back from the Vipps page can restore this page from the bfcache with the form still waiting.
+    useEffect(() => {
+        const reset = (event: PageTransitionEvent) => {
+            if (event.persisted) setSubmitting(false);
+        };
+        window.addEventListener('pageshow', reset);
+        return () => window.removeEventListener('pageshow', reset);
+    }, []);
+
+    // A failed submit puts the keyboard on the first field with an error.
+    useEffect(() => {
+        if (failedSubmits > 0) formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+    }, [failedSubmits]);
 
     // Until the session is known, an admin would flash the closed notice.
     if (mode === 'AdminsOnly' && status === 'loading') return null;
@@ -74,6 +90,24 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
         const code = apiErrorCode(err);
         if (code !== undefined && Object.hasOwn(text.apiErrors, code)) return text.apiErrors[code as keyof typeof text.apiErrors];
         return text.failed;
+    };
+
+    /** The Norwegian texts for the API's field errors that have a field on screen. */
+    const apiFieldMessages = (err: unknown): Partial<Record<string, string>> => {
+        const visible = new Set<CheckoutField>(['name', 'email', 'phone', 'acceptTerms']);
+        if (withAddress) ['streetAddress', 'postalCode', 'city'].forEach(field => visible.add(field as CheckoutField));
+        if (method === 'HomeDelivery') visible.add('withinDistance');
+        if (method === 'Pickup') visible.add('pickupNote');
+
+        const shown: Partial<Record<string, string>> = {};
+        for (const key of Object.keys(apiFieldErrors(err) ?? {})) {
+            const field = checkoutFieldOfApiKey(key);
+            if (field === undefined || !visible.has(field)) continue;
+            const value = typeof form[field] === 'string' ? form[field] : '';
+            const name = Object.hasOwn(text.fieldNames, field) ? text.fieldNames[field as keyof typeof text.fieldNames] : field;
+            shown[field] = checkoutApiFieldMessage(field, value, name, dict, km);
+        }
+        return shown;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -104,6 +138,7 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
                     return checkoutIssueMessage(issue, name, dict, km);
                 },
             }));
+            setFailedSubmits(n => n + 1);
             return;
         }
 
@@ -114,9 +149,10 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
             const { redirectUrl } = await ShopService.checkout(parsed.data);
             window.location.assign(redirectUrl);
         } catch (err) {
-            const fieldErrors = (err as { fieldErrors?: Record<string, string[]> }).fieldErrors;
-            if (fieldErrors) {
-                setErrors(Object.fromEntries(Object.entries(fieldErrors).map(([field, messages]) => [field, messages[0]])));
+            const shown = apiFieldMessages(err);
+            if (Object.keys(shown).length > 0) {
+                setErrors(shown);
+                setFailedSubmits(n => n + 1);
             } else {
                 setFailure(failureText(err));
             }
@@ -125,7 +161,7 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
     };
 
     return (
-        <form onSubmit={handleSubmit} noValidate>
+        <form ref={formRef} onSubmit={handleSubmit} noValidate>
             <fieldset disabled={submitting} className="min-w-0 space-y-6">
                 <fieldset className="space-y-2">
                     <legend className="mb-2 text-sm font-medium text-gray-700">{text.delivery}</legend>
@@ -175,11 +211,12 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
                                 checked={form.withinDistance}
                                 onChange={e => set('withinDistance', e.target.checked)}
                                 aria-invalid={errors.withinDistance ? true : undefined}
+                                aria-describedby={errors.withinDistance ? 'withinDistance-error' : undefined}
                                 className={CHECKBOX}
                             />
-                            {text.withinDistance.replace('{km}', String(km))}
+                            {fillTemplate(text.withinDistance, { km: String(km) })}
                         </label>
-                        {errors.withinDistance && <p className="mt-1 text-xs text-red-600">{errors.withinDistance}</p>}
+                        {errors.withinDistance && <p id="withinDistance-error" className="mt-1 text-xs text-red-600">{errors.withinDistance}</p>}
                     </div>
                 )}
 
@@ -197,6 +234,7 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
                             checked={form.acceptTerms}
                             onChange={e => set('acceptTerms', e.target.checked)}
                             aria-invalid={errors.acceptTerms ? true : undefined}
+                            aria-describedby={errors.acceptTerms ? 'acceptTerms-error' : undefined}
                             className={CHECKBOX}
                         />
                         <span>
@@ -204,7 +242,7 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
                             <Link href={localeHref(locale, '/terms')} target="_blank" className="font-semibold underline">{text.termsLink}</Link>
                         </span>
                     </label>
-                    {errors.acceptTerms && <p className="mt-1 text-xs text-red-600">{errors.acceptTerms}</p>}
+                    {errors.acceptTerms && <p id="acceptTerms-error" className="mt-1 text-xs text-red-600">{errors.acceptTerms}</p>}
                 </div>
 
                 {failure && <Alert variant="error">{failure}</Alert>}

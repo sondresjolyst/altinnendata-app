@@ -119,6 +119,13 @@ export interface AdminOrder {
 
 export type ShopSettingsInput = Omit<ShopSettings, 'termsUpdatedSinceShop' | 'shopCreatedAt'>;
 
+// Each of these changes whether the build can be sold, so the public build pages are purged.
+const act = async (id: number, action: 'capture' | 'cancel' | 'refund', fallback: string) => {
+    const order = await request(() => axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/${action}`), fallback);
+    await revalidateTarget(REVALIDATE_TARGETS.builds);
+    return order;
+};
+
 const ShopService = {
     getSettings: () =>
         request(() => axiosInstance.get<ShopSettings>('/admin/shop/settings'), 'Failed to load the shop settings'),
@@ -135,14 +142,11 @@ const ShopService = {
     getOrder: (id: number) =>
         request(() => axiosInstance.get<AdminOrder>(`/admin/shop/orders/${id}`), 'Failed to load the order'),
 
-    capture: (id: number) =>
-        request(() => axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/capture`), 'Failed to capture the payment'),
+    capture: (id: number) => act(id, 'capture', 'Failed to capture the payment'),
 
-    cancel: (id: number) =>
-        request(() => axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/cancel`), 'Failed to cancel the order'),
+    cancel: (id: number) => act(id, 'cancel', 'Failed to cancel the order'),
 
-    refund: (id: number) =>
-        request(() => axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/refund`), 'Failed to refund the order'),
+    refund: (id: number) => act(id, 'refund', 'Failed to refund the order'),
 
     setInvoiceNumber: (id: number, invoiceNumber: string | null) =>
         request(() => axiosInstance.put<AdminOrder>(`/admin/shop/orders/${id}/invoice-number`, { invoiceNumber }), 'Failed to save the invoice number'),
@@ -154,7 +158,7 @@ const ShopService = {
     /** The public status of an order by its token, or null when no order has it. */
     orderStatus: async (token: string) => {
         const response = await request(
-            () => publicClient.get<OrderStatusInfo>(`/shop/orders/${token}/status`, { validateStatus: status => status < 400 || status === 404 }).then(data => ({ data })),
+            () => publicClient.get<OrderStatusInfo>(`/shop/orders/${encodeURIComponent(token)}/status`, { validateStatus: status => status < 400 || status === 404 }).then(data => ({ data })),
             'Failed to load the order status',
         );
         return response.status === 404 ? null : response.data;
