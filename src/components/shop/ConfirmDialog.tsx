@@ -34,7 +34,10 @@ export default function ConfirmDialog({ title, message, confirmLabel, cancelLabe
                 // Escape does nothing while the request runs.
                 if (busy) e.preventDefault();
             }}
-            onClose={onClose}
+            onClose={e => {
+                // A StrictMode remount closes and reopens the dialog, and the browser raises close after the reopen.
+                if (!e.currentTarget.open) onClose();
+            }}
             className="m-auto w-full max-w-md rounded-2xl p-6 shadow-xl backdrop:bg-black/40"
         >
             <div className="space-y-4">

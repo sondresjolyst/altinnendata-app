@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/vitest';
 process.env.NEXT_PUBLIC_API_URL = 'http://api.test/api';
 
 // jsdom has no modal dialog. This stands in for the parts the code relies on: the open state, focus
-// moving in on open and back on close, the close event, and Escape raising a cancelable cancel event.
+// moving in on open and back on close, the close event raised later, and Escape raising a cancelable cancel event.
 if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.showModal) {
     const returnTo = new WeakMap<HTMLDialogElement, Element | null>();
     const escapeHandlers = new WeakMap<HTMLDialogElement, (e: KeyboardEvent) => void>();
@@ -30,6 +30,7 @@ if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.sho
         const onKeyDown = escapeHandlers.get(this);
         if (onKeyDown) document.removeEventListener('keydown', onKeyDown);
         (returnTo.get(this) as HTMLElement | null)?.focus();
-        this.dispatchEvent(new Event('close'));
+        // A browser raises close as a queued task, after the code that closed the dialog has finished.
+        queueMicrotask(() => this.dispatchEvent(new Event('close')));
     };
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Suspense } from 'react';
+import { StrictMode, Suspense } from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
@@ -61,14 +61,16 @@ const refused = (status: number, data: object) =>
 // A promise that React's use() reads without suspending.
 const settled = <T,>(value: T) => Object.assign(Promise.resolve(value), { status: 'fulfilled' as const, value });
 
-const renderPage = () =>
-    render(
+const renderPage = (strict = false) => {
+    const page = (
         <DictionaryProvider locale="no">
             <Suspense fallback={null}>
                 <AdminOrderPage params={settled({ id: '7' })} />
             </Suspense>
-        </DictionaryProvider>,
+        </DictionaryProvider>
     );
+    return render(strict ? <StrictMode>{page}</StrictMode> : page);
+};
 
 describe('the admin order page', () => {
     beforeEach(() => {
@@ -168,6 +170,17 @@ describe('the admin order page', () => {
         expect(service.cancel).not.toHaveBeenCalled();
     });
 
+    it('keeps the confirm dialog open through a StrictMode remount', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        const user = userEvent.setup();
+        renderPage(true);
+
+        await user.click(await screen.findByRole('button', { name: 'Kanseller' }));
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
     it('ignores Escape while the request runs', async () => {
         service.getOrder.mockResolvedValue(reserved);
         service.capture.mockReturnValue(new Promise(() => {}));
@@ -186,6 +199,7 @@ describe('the admin order page', () => {
         renderPage();
 
         expect(await screen.findByText('Pris for datamaskinen')).toBeInTheDocument();
+        expect(screen.getByText('NOK 9990,00')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kopier Linje 1' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kopier Linje 1, beløp' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kopier Linje 2, beløp' })).toBeInTheDocument();
