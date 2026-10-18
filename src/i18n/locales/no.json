@@ -223,6 +223,7 @@
     "buildSaved": "Datamaskinen er oppdatert",
     "buildCreated": "Datamaskinen er opprettet",
     "buildSaveFailed": "Kunne ikke lagre datamaskinen",
+    "buildChanged": "Datamaskinen ble endret etter at du åpnet skjemaet. Last siden på nytt for å se endringene.",
     "draftFound": "Du har et ulagret utkast.",
     "restoreDraft": "Gjenopprett utkastet",
     "discardDraft": "Forkast utkastet",
@@ -423,7 +424,7 @@
         "wrongStatus": "Ordren har endret status. Last siden på nytt.",
         "captureIncomplete": "Vipps bekreftet ikke hele beløpet.",
         "refundIncomplete": "Vipps bekreftet ikke hele tilbakebetalingen.",
-        "paymentProviderUnavailable": "Vipps svarer ikke. Prøv igjen om litt."
+        "paymentProviderUnavailable": "Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen."
       }
     }
   },

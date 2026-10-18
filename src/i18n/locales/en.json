@@ -223,6 +223,7 @@
     "buildSaved": "The computer has been updated",
     "buildCreated": "The computer has been created",
     "buildSaveFailed": "Could not save the computer",
+    "buildChanged": "The computer was changed after you opened the form. Reload the page to see the changes.",
     "draftFound": "You have an unsaved draft.",
     "restoreDraft": "Restore the draft",
     "discardDraft": "Discard the draft",
@@ -423,7 +424,7 @@
         "wrongStatus": "The order has changed status. Reload the page.",
         "captureIncomplete": "Vipps did not confirm the full amount.",
         "refundIncomplete": "Vipps did not confirm the full refund.",
-        "paymentProviderUnavailable": "Vipps is not responding. Try again shortly."
+        "paymentProviderUnavailable": "Vipps did not confirm the change. Check the payment in the Vipps portal before you try again."
       }
     }
   },

@@ -48,6 +48,11 @@ export function formatAddress(order: Pick<AdminOrder, 'streetAddress' | 'postalC
     return [order.streetAddress, place].filter(Boolean).join(', ');
 }
 
+/** The phone as an invoice form wants it: the stored 10 digit number without the 47 country code. */
+export function plainPhone(stored: string): string {
+    return /^47\d{8}$/.test(stored) ? stored.slice(2) : stored;
+}
+
 /** The facts to type into an invoice for the order, in the order an invoice asks for them. */
 export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDetail[] {
     const text = dict.admin.shop;
@@ -55,7 +60,7 @@ export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDeta
     const details: InvoiceDetail[] = [
         { key: 'name', label: labels.name, value: order.buyerName },
         { key: 'email', label: labels.email, value: order.buyerEmail },
-        { key: 'phone', label: labels.phone, value: order.buyerPhone },
+        { key: 'phone', label: labels.phone, value: plainPhone(order.buyerPhone) },
     ];
 
     if (order.deliveryMethod !== 'Pickup') {

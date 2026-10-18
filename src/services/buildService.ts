@@ -90,6 +90,8 @@ export interface BuildAdmin {
 }
 
 export interface BuildInput {
+    /** The updatedAt the edit form loaded. The API refuses the save when the build has changed since. */
+    expectedUpdatedAt?: string;
     category: string | null;
     availability: Availability;
     buildClassId: number | null;

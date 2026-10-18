@@ -13,7 +13,7 @@ const order: AdminOrder = {
     locale: 'no',
     buyerName: 'Kari Nordmann',
     buyerEmail: 'kari@example.no',
-    buyerPhone: '+4791234567',
+    buyerPhone: '4791234567',
     streetAddress: 'Storgata 1',
     postalCode: '0155',
     city: 'Oslo',
@@ -106,11 +106,15 @@ describe('invoiceDetails', () => {
         expect(details.find(d => d.key === 'reference')?.value).toBe('ref-7');
     });
 
-    it('takes the order date from the creation and the phone as stored', () => {
+    it('takes the order date from the creation', () => {
         const details = invoiceDetails({ ...order, authorizedAt: '2026-10-19T10:05:00Z' }, no);
         expect(details.find(d => d.key === 'orderDate')?.value).toBe('18.10.2026');
         expect(details.find(d => d.key === 'reservedDate')?.value).toBe('19.10.2026');
-        expect(details.find(d => d.key === 'phone')?.value).toBe('+4791234567');
+    });
+
+    it('copies the phone as a plain eight digit number', () => {
+        expect(invoiceDetails(order, no).find(d => d.key === 'phone')?.value).toBe('91234567');
+        expect(invoiceDetails({ ...order, buyerPhone: '91234567' }, no).find(d => d.key === 'phone')?.value).toBe('91234567');
     });
 
     it('leaves out the reserved date when the payment was never reserved', () => {

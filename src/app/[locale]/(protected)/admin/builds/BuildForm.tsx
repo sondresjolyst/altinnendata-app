@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { apiErrorCode } from '@sjolystinnovation/app-kit/api';
 import { Alert, TextArea, TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import BuildClassService, { BuildClass } from '@/services/buildClassService';
@@ -94,6 +95,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const [classes, setClasses] = useState<BuildClass[]>([]);
     const [conditions, setConditions] = useState<ComponentCondition[]>([]);
     const [saving, setSaving] = useState(false);
+    const [changedElsewhere, setChangedElsewhere] = useState(false);
 
     const values = {
         translations, category, buildClassId, availability, priceNok, builtOn, soldOn,
@@ -238,6 +240,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         }
 
         const input: BuildInput = {
+            ...(build ? { expectedUpdatedAt: build.updatedAt } : {}),
             category: category || null,
             buildClassId: buildClassId === '' ? null : Number(buildClassId),
             availability,
@@ -264,6 +267,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
         };
 
         setSaving(true);
+        setChangedElsewhere(false);
         try {
             if (build) await BuildService.update(build.id, input);
             else await BuildService.create(input);
@@ -271,7 +275,13 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             draft.clear();
             onSaved();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : dict.admin.buildSaveFailed);
+            if (apiErrorCode(err) === 'buildChanged') {
+                // The form stays as it is, so nothing typed is lost and the draft keeps it too.
+                setChangedElsewhere(true);
+                toast.error(dict.admin.buildChanged);
+            } else {
+                toast.error(err instanceof Error ? err.message : dict.admin.buildSaveFailed);
+            }
         } finally {
             setSaving(false);
         }
@@ -283,6 +293,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
     return (
         <div className="space-y-6 rounded-2xl border border-gray-200 p-5">
+            {changedElsewhere && <Alert variant="error">{dict.admin.buildChanged}</Alert>}
             {draft.pending && (
                 <Alert variant="warning">
                     <div className="flex flex-wrap items-center justify-between gap-2">

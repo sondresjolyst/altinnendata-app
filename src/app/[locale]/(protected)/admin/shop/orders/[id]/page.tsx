@@ -11,7 +11,7 @@ import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { formatOre } from '@/lib/format';
-import { formatAddress, invoiceDetails, osloDate } from '@/lib/shop';
+import { formatAddress, invoiceDetails, osloDate, plainPhone } from '@/lib/shop';
 
 type Action = 'capture' | 'cancel' | 'refund';
 
@@ -122,7 +122,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         [text.reference, order.reference],
         [text.buyerName, order.buyerName],
         [text.email, order.buyerEmail],
-        [text.phone, order.buyerPhone],
+        [text.phone, plainPhone(order.buyerPhone)],
         [text.address, address || null],
         [text.deliveryLabel, `${order.deliveryLabel} (${formatOre(order.deliveryPriceInOre, locale)})`],
         [text.withinDistance, order.deliveryMethod === 'HomeDelivery' ? (order.withinDistanceConfirmed ? dict.common.yes : dict.common.no) : null],

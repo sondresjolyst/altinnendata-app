@@ -21,7 +21,7 @@ const reserved: AdminOrder = {
     locale: 'no',
     buyerName: 'Kari Nordmann',
     buyerEmail: 'kari@example.no',
-    buyerPhone: '+4791234567',
+    buyerPhone: '4791234567',
     streetAddress: 'Storgata 1',
     postalCode: '0155',
     city: 'Oslo',
@@ -297,5 +297,25 @@ describe('the admin order page', () => {
         await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Betal tilbake' }));
 
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke hele tilbakebetalingen.'));
+    });
+
+    it('shows the Vipps did not confirm text when Vipps cannot be reached after an action', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        service.capture.mockRejectedValue(await refused(502, { message: 'x', code: 'paymentProviderUnavailable' }));
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+
+        await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen.'));
+    });
+
+    it('shows the phone as a plain eight digit number', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        renderPage();
+
+        expect(await screen.findAllByText('91234567')).toHaveLength(2);
+        expect(screen.queryByText('4791234567')).not.toBeInTheDocument();
     });
 });
