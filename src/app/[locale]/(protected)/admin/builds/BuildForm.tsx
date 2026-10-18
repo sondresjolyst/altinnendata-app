@@ -12,7 +12,8 @@ import FinnService from '@/services/finnService';
 import { contentImagePath } from '@sjolystinnovation/app-kit/ui';
 import ImageService from '@/services/imageService';
 import TranslationService, { TranslatableFields } from '@/services/translationService';
-import { ImagePicker } from '@/components/SectionsEditor';
+import { ImagePicker } from '@sjolystinnovation/app-kit/sections';
+import { sectionImages, sectionsEditorStrings } from '@/components/SectionsEditor';
 import { LocaleTabs } from '@sjolystinnovation/app-kit/admin';
 
 import { DEFAULT_LOCALE, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config';
@@ -52,7 +53,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     onSaved: () => void;
     onCancel: () => void;
 }) {
-    const { dict } = useDictionary();
+    const { dict, locale } = useDictionary();
     const { data: session } = useSession();
     const [activeLocale, setActiveLocale] = useState<Locale>(DEFAULT_LOCALE);
     const [translations, setTranslations] = useState<Record<Locale, BuildTranslation>>(() =>
@@ -373,7 +374,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 </p>
             </div>
 
-            <ImagePicker imageId={coverImageId} onChange={setCoverImageId} label={dict.admin.coverImage} />
+            <ImagePicker imageId={coverImageId} onChange={setCoverImageId} label={dict.admin.coverImage} images={sectionImages} strings={sectionsEditorStrings(locale)} />
 
             <div>
                 <div className="flex items-center justify-between mb-2">

@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import LocaleError from '@/app/[locale]/error';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
-import { getDictionary } from '@/i18n/dictionaries';
+import { nbErrorStateStrings as nb } from '@sjolystinnovation/app-kit/locales/nb';
+import { defaultErrorStateStrings } from '@sjolystinnovation/app-kit/ui';
 
 const renderError = (locale: 'no' | 'en', reset = vi.fn()) => {
     render(
@@ -17,18 +18,18 @@ const renderError = (locale: 'no' | 'en', reset = vi.fn()) => {
 describe('error boundary', () => {
     it('says the site is temporarily unavailable, in the reader\'s language', () => {
         renderError('no');
-        expect(screen.getByRole('heading')).toHaveTextContent(getDictionary('no').common.unavailable);
-        expect(screen.getByText(getDictionary('no').common.unavailableBody)).toBeInTheDocument();
+        expect(screen.getByRole('heading')).toHaveTextContent(nb.title);
+        expect(screen.getByText(nb.body)).toBeInTheDocument();
     });
 
     it('is translated', () => {
         renderError('en');
-        expect(screen.getByRole('heading')).toHaveTextContent(getDictionary('en').common.unavailable);
+        expect(screen.getByRole('heading')).toHaveTextContent(defaultErrorStateStrings.title);
     });
 
     it('lets the reader retry without a full reload', async () => {
         const reset = renderError('no');
-        await userEvent.click(screen.getByRole('button', { name: getDictionary('no').common.tryAgain }));
+        await userEvent.click(screen.getByRole('button', { name: nb.tryAgain }));
 
         expect(reset).toHaveBeenCalledOnce();
     });

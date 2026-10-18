@@ -1,18 +1,19 @@
 "use client";
 
 import { LoginPage } from '@sjolystinnovation/app-kit/session/react';
+import { nbLoginPageStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import { useCredentialsFormStrings } from '@/components/CredentialsForm';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
 export default function Login() {
-    const { locale, dict } = useDictionary();
+    const { locale } = useDictionary();
 
     return (
         <LoginPage
             redirectTo={localeHref(locale, '/admin')}
             resetHref={localeHref(locale, '/reset-password')}
-            strings={{ title: dict.auth.signInTitle, forgotPassword: dict.auth.forgotPassword }}
+            strings={locale === 'no' ? nbLoginPageStrings : undefined}
             formStrings={useCredentialsFormStrings()}
         />
     );

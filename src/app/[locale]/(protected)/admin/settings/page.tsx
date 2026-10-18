@@ -1,58 +1,32 @@
 "use client";
 
-import { CompanySettingsForm } from '@sjolystinnovation/app-kit/admin';
+import { CompanySettingsForm, type CompanySettingsFormStrings } from '@sjolystinnovation/app-kit/admin';
+import { BrandingManager, type BrandingManagerStrings } from '@sjolystinnovation/app-kit/branding';
+import { nbBrandingManagerStrings, nbCompanySettingsFormStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import SettingsService from '@/services/settingsService';
-import { BrandingManager } from '@sjolystinnovation/app-kit/branding';
 import BrandingService from '@/services/brandingService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
+// app-kit's English hint only says the county is optional.
+const enCompanySettingsStrings: Partial<CompanySettingsFormStrings> = {
+    addressHint: 'The postal code and place name are kept apart so search engines can read the address. County is optional.',
+};
+
+// app-kit's English set calls the section Branding.
+const enBrandingStrings: Partial<BrandingManagerStrings> = {
+    title: 'Logo and icon',
+    save: 'Save logo and icon',
+    saved: 'Logo and icon saved',
+    saveFailed: 'Could not save the logo and icon',
+};
+
 export default function AdminSettingsPage() {
-    const { dict } = useDictionary();
+    const { locale } = useDictionary();
+    const no = locale === 'no';
 
     return (
-        <CompanySettingsForm
-            service={SettingsService}
-            strings={{
-                contactRecipient: dict.admin.contactRecipient,
-                contactRecipientHint: dict.admin.contactRecipientHint,
-                companyName: dict.admin.companyName,
-                legalName: dict.admin.legalName,
-                legalNameHint: dict.admin.legalNameHint,
-                orgNumber: dict.admin.orgNumber,
-                vatRegistered: dict.admin.vatRegistered,
-                vatHint: dict.admin.vatHint,
-                streetAddress: dict.admin.streetAddress,
-                postalCode: dict.admin.postalCode,
-                addressLocality: dict.admin.addressLocality,
-                addressRegion: dict.admin.addressRegion,
-                addressHint: dict.admin.addressHint,
-                publicEmail: dict.admin.publicEmail,
-                publicPhone: dict.admin.publicPhone,
-                loading: dict.common.loading,
-                save: dict.common.save,
-                saving: dict.common.saving,
-                loadFailed: dict.admin.settingsLoadFailed,
-                saved: dict.admin.settingsSaved,
-                saveFailed: dict.admin.settingsSaveFailed,
-            }}
-        >
-            <BrandingManager
-                save={BrandingService.update}
-                strings={{
-                    title: dict.admin.brandingTitle,
-                    logo: dict.admin.brandingLogo,
-                    logoHint: dict.admin.brandingLogoHint,
-                    icon: dict.admin.brandingIcon,
-                    iconHint: dict.admin.brandingIconHint,
-                    none: dict.admin.brandingNone,
-                    choose: dict.admin.brandingChoose,
-                    remove: dict.common.remove,
-                    save: dict.admin.brandingSave,
-                    saving: dict.common.saving,
-                    saved: dict.admin.brandingSaved,
-                    saveFailed: dict.admin.brandingSaveFailed,
-                }}
-            />
+        <CompanySettingsForm service={SettingsService} strings={no ? nbCompanySettingsFormStrings : enCompanySettingsStrings}>
+            <BrandingManager save={BrandingService.update} strings={no ? nbBrandingManagerStrings : enBrandingStrings} />
         </CompanySettingsForm>
     );
 }

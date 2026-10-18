@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import SessionExpiryGuard from '@/components/SessionExpiryGuard';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
+import { nbCredentialsFormStrings as form, nbSessionExpiryGuardStrings as guardText } from '@sjolystinnovation/app-kit/locales/nb';
 import { closeSessionPrompt, openSessionPrompt } from '@sjolystinnovation/app-kit/session';
 import { auth, makeSession, resetTestMocks, setSession, toastSpies } from '@sjolystinnovation/app-kit/testing';
 
@@ -22,8 +23,8 @@ const guard = () => (
 );
 
 const signInWith = async (password: string) => {
-    await userEvent.type(screen.getByLabelText(new RegExp(`^${dict.auth.password}`)), password);
-    await userEvent.click(screen.getByRole('button', { name: dict.auth.signIn }));
+    await userEvent.type(screen.getByLabelText(new RegExp(`^${form.password}`)), password);
+    await userEvent.click(screen.getByRole('button', { name: form.signIn }));
 };
 
 describe('SessionExpiryGuard', () => {
@@ -40,15 +41,15 @@ describe('SessionExpiryGuard', () => {
         vi.restoreAllMocks();
     });
 
-    it('uses the dictionary wording in the banner and the prompt', () => {
+    it('uses the Norwegian wording in the banner and the prompt', () => {
         setSession(makeSession({ error: 'AbsoluteSessionExpired' }));
         render(guard());
-        expect(screen.getAllByText(dict.auth.sessionExpiredBody).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(guardText.expiredBody).length).toBeGreaterThan(0);
 
         act(() => openSessionPrompt());
 
-        expect(screen.getByRole('heading', { name: dict.auth.sessionExpiredTitle })).toBeInTheDocument();
-        expect(screen.getByLabelText(new RegExp(`^${dict.auth.email}`))).toHaveValue('a@b.no');
+        expect(screen.getByRole('heading', { name: guardText.expiredTitle })).toBeInTheDocument();
+        expect(screen.getByLabelText(new RegExp(`^${form.email}`))).toHaveValue('a@b.no');
     });
 
     it('shows the dictionary toast after a good sign-in', async () => {
@@ -75,6 +76,6 @@ describe('SessionExpiryGuard', () => {
 
         expect(auth.signOut).toHaveBeenCalled();
         expect(assign).toHaveBeenCalledWith('/no/login');
-        expect(screen.getByText(dict.auth.sessionWrongUser)).toBeInTheDocument();
+        expect(screen.getByText(guardText.wrongUser)).toBeInTheDocument();
     });
 });

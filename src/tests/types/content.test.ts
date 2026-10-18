@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createSection, cloneSection, SECTION_LABELS } from '@/types/content';
+import { createSection, cloneSection } from '@/types/content';
 
 describe('createSection', () => {
     it('creates a hero with default CTAs and a unique id', () => {
@@ -31,9 +31,13 @@ describe('createSection', () => {
         }
     });
 
-    it('has a label for every section type', () => {
+    it('creates a section of every type with the app fields', () => {
         for (const type of ['hero', 'feature', 'text', 'feed', 'contact', 'cta', 'stats', 'image'] as const) {
-            expect(SECTION_LABELS[type]).toBeTruthy();
+            expect(createSection(type).type).toBe(type);
         }
+        const hero = createSection('hero');
+        const feed = createSection('feed');
+        expect(hero.type === 'hero' && hero.backgroundImageId).toBeNull();
+        expect(feed.type === 'feed' && feed.availability).toBe('all');
     });
 });

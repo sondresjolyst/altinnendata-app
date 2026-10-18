@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { createAdminUsersService, request } from '@sjolystinnovation/app-kit/api';
+import { createAdminUsersService, createEmailStatsService, request } from '@sjolystinnovation/app-kit/api';
 
 export interface AdminStats {
     totalUsers: number;
@@ -29,17 +29,6 @@ export interface DailyStat {
     contentImages: number;
 }
 
-export interface EmailStats {
-    days: number;
-    requests: number;
-    delivered: number;
-    hardBounces: number;
-    softBounces: number;
-    spamReports: number;
-    blocked: number;
-    invalid: number;
-}
-
 export type { AdminUser } from '@sjolystinnovation/app-kit/api';
 
 const AdminService = {
@@ -49,13 +38,9 @@ const AdminService = {
     getStatsHistory: () =>
         request(() => axiosInstance.get<DailyStat[]>('/admin/stats/history'), 'Failed to load stats history'),
 
-    getEmailStats: (days = 30) =>
-        request(() => axiosInstance.get<EmailStats>('/admin/email-stats', { params: { days } }), 'Failed to load email stats'),
-
-    getRoles: () =>
-        request(() => axiosInstance.get<string[]>('/admin/roles'), 'Failed to load roles'),
-
     ...createAdminUsersService(axiosInstance),
 };
+
+export const EmailStatsService = createEmailStatsService(axiosInstance);
 
 export default AdminService;
