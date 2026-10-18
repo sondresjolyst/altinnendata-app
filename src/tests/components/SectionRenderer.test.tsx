@@ -36,6 +36,12 @@ describe('SectionRenderer', () => {
         expect(container.querySelector('img')).toHaveAttribute('src', '/hero.jpg');
     });
 
+    it('gives the hero a definite width so its minimum height cannot widen it', () => {
+        const section: Section = { ...base, type: 'hero', heading: 'H', subheading: '', primaryLabel: '', primaryHref: '', secondaryLabel: '', secondaryHref: '', backgroundImageId: null };
+        render(<SectionRenderer section={section} locale="no" />);
+        expect(screen.getByRole('heading', { level: 1 }).closest('section')).toHaveClass('w-full', 'sm:min-h-[420px]', 'xl:aspect-[16/5]');
+    });
+
     it('renders the hero background from the uploaded image', () => {
         const section: Section = { ...base, type: 'hero', heading: 'H', subheading: '', primaryLabel: '', primaryHref: '', secondaryLabel: '', secondaryHref: '', backgroundImageId: 'img-1' };
         const { container } = render(<SectionRenderer section={section} locale="no" />);
