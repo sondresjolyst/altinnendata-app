@@ -106,6 +106,13 @@ describe('invoiceDetails', () => {
         expect(details.find(d => d.key === 'reference')?.value).toBe('ref-7');
     });
 
+    it('takes the order date from the creation and the phone as stored', () => {
+        const details = invoiceDetails({ ...order, authorizedAt: '2026-10-19T10:05:00Z' }, no);
+        expect(details.find(d => d.key === 'orderDate')?.value).toBe('18.10.2026');
+        expect(details.find(d => d.key === 'reservedDate')?.value).toBe('19.10.2026');
+        expect(details.find(d => d.key === 'phone')?.value).toBe('+4791234567');
+    });
+
     it('leaves out the reserved date when the payment was never reserved', () => {
         expect(invoiceDetails({ ...order, authorizedAt: null }, no).some(d => d.key === 'reservedDate')).toBe(false);
     });

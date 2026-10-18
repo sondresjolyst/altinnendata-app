@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { zodFieldErrors } from '@sjolystinnovation/app-kit/validation';
-import { checkoutIssueMessage, checkoutSchema, contactSchema, issueMessage } from '@/lib/validation';
+import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, contactSchema, issueMessage } from '@/lib/validation';
 import { getDictionary } from '@/i18n/dictionaries';
 
 const dict = getDictionary('no');
@@ -132,6 +132,19 @@ describe('checkoutSchema', () => {
         expect(checkoutSchema.safeParse(checkout).success).toBe(true);
     });
 
+    it('trims the name and refuses a blank one', () => {
+        const parsed = checkoutSchema.safeParse({ ...checkout, name: '  Kari  ' });
+        expect(parsed.success && parsed.data.name).toBe('Kari');
+        expect(checkoutSchema.safeParse({ ...checkout, name: '   ' }).success).toBe(false);
+    });
+
+    it('limits the build slug and wants a locale', () => {
+        expect(checkoutSchema.safeParse({ ...checkout, buildSlug: 'a'.repeat(160) }).success).toBe(true);
+        expect(checkoutSchema.safeParse({ ...checkout, buildSlug: 'a'.repeat(161) }).success).toBe(false);
+        expect(checkoutSchema.safeParse({ ...checkout, buildSlug: '' }).success).toBe(false);
+        expect(checkoutSchema.safeParse({ ...checkout, locale: '' }).success).toBe(false);
+    });
+
     it('gives the English messages', () => {
         const en = getDictionary('en');
         const result = checkoutSchema.safeParse({ ...checkout, deliveryMethod: 'HomeDelivery', acceptTerms: false, phone: '1' });
@@ -141,5 +154,44 @@ describe('checkoutSchema', () => {
         expect(errors.withinDistance).toBe('You must confirm that the address is within 30 km.');
         expect(errors.acceptTerms).toBe('You must accept the terms of sale.');
         expect(errors.phone).toBe('Enter a Norwegian mobile number.');
+    });
+});
+
+describe('checkoutFieldOfApiKey', () => {
+    it('reads the API keys in any case, including the pickup note', () => {
+        expect(checkoutFieldOfApiKey('PickupNote')).toBe('pickupNote');
+        expect(checkoutFieldOfApiKey('streetAddress')).toBe('streetAddress');
+        expect(checkoutFieldOfApiKey('AcceptTerms')).toBe('acceptTerms');
+        expect(checkoutFieldOfApiKey('BuildSlug')).toBeUndefined();
+    });
+});
+
+describe('checkoutApiFieldMessage', () => {
+    const message = (field: Parameters<typeof checkoutApiFieldMessage>[0], value: string) => checkoutApiFieldMessage(field, value, 'navn', dict, 30);
+
+    it('asks for an empty field and names the rule for a filled one', () => {
+        expect(message('phone', ' ')).toBe('Du må fylle ut navn.');
+        expect(message('phone', '123')).toBe('Skriv inn et norsk mobilnummer.');
+        expect(message('postalCode', '')).toBe('Du må fylle ut navn.');
+        expect(message('postalCode', '12')).toBe('Postnummeret må ha fire siffer.');
+        expect(message('email', '')).toBe('Du må fylle ut navn.');
+        expect(message('email', 'ikke-en-adresse')).toBe('Skriv inn en gyldig e-postadresse.');
+        expect(message('name', '')).toBe('Du må fylle ut navn.');
+    });
+
+    it('says too long for an email past 200 characters', () => {
+        expect(message('email', `${'a'.repeat(201)}@x.no`)).toBe('Bruk 200 eller færre tegn.');
+    });
+
+    it('gives the limit of each text field', () => {
+        expect(message('name', 'a')).toBe('Bruk 120 eller færre tegn.');
+        expect(message('streetAddress', 'a')).toBe('Bruk 200 eller færre tegn.');
+        expect(message('city', 'a')).toBe('Bruk 100 eller færre tegn.');
+        expect(message('pickupNote', 'a')).toBe('Bruk 500 eller færre tegn.');
+    });
+
+    it('names the terms and the distance', () => {
+        expect(message('acceptTerms', '')).toBe('Du må godta salgsvilkårene.');
+        expect(message('withinDistance', '')).toBe('Du må bekrefte at adressen er innenfor 30 km.');
     });
 });
