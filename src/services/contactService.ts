@@ -1,4 +1,4 @@
-import axios from 'axios';
+import publicClient from './publicClient';
 import { formatApiError } from '@sjolystinnovation/app-kit/api';
 
 export interface ContactRequest {
@@ -10,8 +10,6 @@ export interface ContactRequest {
     buildSlug?: string;
     message: string;
 }
-
-const publicClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
 const ContactService = {
     async send(data: ContactRequest): Promise<void> {
