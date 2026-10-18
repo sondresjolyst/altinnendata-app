@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.10.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.8...v1.10.0) (2026-10-18)
+
+
+### Features
+
+* **admin:** move to app-kit 1.0.1 with its Norwegian texts, shared sections and field errors ([#170](https://github.com/sondresjolyst/altinnendata-app/issues/170)) ([c20b7b7](https://github.com/sondresjolyst/altinnendata-app/commit/c20b7b7c12b140c3a51cffc2a5db4c5352d2084f))
+* sign in through app-kit and say when sign-in is unavailable ([#133](https://github.com/sondresjolyst/altinnendata-app/issues/133)) ([97676af](https://github.com/sondresjolyst/altinnendata-app/commit/97676afb1fc595d47ed6a6427314c0cea150269b))
+
+
+### Bug Fixes
+
+* **admin:** show the branding section in the app's language ([#159](https://github.com/sondresjolyst/altinnendata-app/issues/159)) ([9f882f0](https://github.com/sondresjolyst/altinnendata-app/commit/9f882f01ec3cfaa56750c964aa0ede7365b35257)), closes [#156](https://github.com/sondresjolyst/altinnendata-app/issues/156)
+* **build:** build the public pages when the API is down and move to app-kit 1.0.2 ([#172](https://github.com/sondresjolyst/altinnendata-app/issues/172)) ([68ec630](https://github.com/sondresjolyst/altinnendata-app/commit/68ec6300b07a94731dc65c92da634547c7a00ae3))
+* **csp:** stop zod from trying eval, which the content security policy blocks ([#149](https://github.com/sondresjolyst/altinnendata-app/issues/149)) ([5e0c4c1](https://github.com/sondresjolyst/altinnendata-app/commit/5e0c4c18da4fbfffea2686247ec4e09850fc0463))
+* **docker:** default SITE_ENV to dev so a build without it is not crawled ([#158](https://github.com/sondresjolyst/altinnendata-app/issues/158)) ([23da86b](https://github.com/sondresjolyst/altinnendata-app/commit/23da86b04fbf517402674db3cf8cdad283f29105))
+* **docker:** treat an unset SITE_ENV as production like the app does ([#138](https://github.com/sondresjolyst/altinnendata-app/issues/138)) ([4670f90](https://github.com/sondresjolyst/altinnendata-app/commit/4670f90c8527c918dfcac82ec1a8f50c83a91c88))
+* **home:** stop the hero's minimum height from widening it past the viewport ([#173](https://github.com/sondresjolyst/altinnendata-app/issues/173)) ([9a24447](https://github.com/sondresjolyst/altinnendata-app/commit/9a244472b8cfc350df0301a8424028c1092af05d)), closes [#162](https://github.com/sondresjolyst/altinnendata-app/issues/162)
+* keep admin work when the session expires ([#123](https://github.com/sondresjolyst/altinnendata-app/issues/123)) ([72bb0fb](https://github.com/sondresjolyst/altinnendata-app/commit/72bb0fb887a367f58d7c7d636e95af739b9bd366))
+* keep the admin user list in step with the show deleted toggle ([#131](https://github.com/sondresjolyst/altinnendata-app/issues/131)) ([62165cc](https://github.com/sondresjolyst/altinnendata-app/commit/62165cc431ee9e32279344430f82363f2b261bde))
+* **layout:** stop hiding horizontal overflow on html and body, and wrap long words in build descriptions ([#176](https://github.com/sondresjolyst/altinnendata-app/issues/176)) ([843d1f5](https://github.com/sondresjolyst/altinnendata-app/commit/843d1f570249f178c250c6fdf60dc8c0c002b65a)), closes [#174](https://github.com/sondresjolyst/altinnendata-app/issues/174)
+* use app-kit for admin access, public fetches, session renewal, quiet error toasts and password rules ([#136](https://github.com/sondresjolyst/altinnendata-app/issues/136)) ([4519805](https://github.com/sondresjolyst/altinnendata-app/commit/451980582e85a19041132755f8d79863d0dd692d))
+
+
+### Dependencies
+
+* **app-kit:** update @sjolystinnovation/app-kit to 0.16.0 ([#150](https://github.com/sondresjolyst/altinnendata-app/issues/150)) ([50b445b](https://github.com/sondresjolyst/altinnendata-app/commit/50b445b4b2707fa97e2db9f6e2d18d7adc4c6f5a))
+* **docker:** bump `node` from 26.10.0-slim to 26.11.1-slim ([#169](https://github.com/sondresjolyst/altinnendata-app/issues/169)) ([28dcdbc](https://github.com/sondresjolyst/altinnendata-app/commit/28dcdbcd5f73c2341c915803f194371e67af97a9))
+* **npm:** bump @types/node from 26.6.4 to 26.6.5 in the types group ([#168](https://github.com/sondresjolyst/altinnendata-app/issues/168)) ([980882e](https://github.com/sondresjolyst/altinnendata-app/commit/980882e96731fcd440fbdbbef2b7d6f688978c53))
+* **npm:** bump `@types/node` from 26.6.3 to 26.6.4 ([#145](https://github.com/sondresjolyst/altinnendata-app/issues/145)) ([9e5fafa](https://github.com/sondresjolyst/altinnendata-app/commit/9e5fafaf0032aca53a98c90be48c03b87f90a99f))
+* **npm:** bump `next` from 16.3.7 to 16.4.0 ([#134](https://github.com/sondresjolyst/altinnendata-app/issues/134)) ([e295bbd](https://github.com/sondresjolyst/altinnendata-app/commit/e295bbd6b9fbe652d9d9d54bb3d0445e3b5f5124))
+* **npm:** bump `sharp` from 0.35.4 to 0.35.5 ([#129](https://github.com/sondresjolyst/altinnendata-app/issues/129)) ([f5d7e63](https://github.com/sondresjolyst/altinnendata-app/commit/f5d7e6310b22b412d3f755c166bcf991d7ca8eb8))
+* **npm:** bump `source-map-js` from 1.2.1 to 1.2.2 ([#130](https://github.com/sondresjolyst/altinnendata-app/issues/130)) ([190d071](https://github.com/sondresjolyst/altinnendata-app/commit/190d07199567e7a1e8c7de65de60f2f52f299f77))
+* **npm:** bump eslint-config-next from 16.3.7 to 16.3.8 in the next group ([#142](https://github.com/sondresjolyst/altinnendata-app/issues/142)) ([dd97060](https://github.com/sondresjolyst/altinnendata-app/commit/dd97060cc7ad8f9446417bbe66cba661d1608190))
+* **npm:** bump eslint-config-next from 16.3.8 to 16.4.0 in the next group across 1 directory ([#164](https://github.com/sondresjolyst/altinnendata-app/issues/164)) ([9097099](https://github.com/sondresjolyst/altinnendata-app/commit/90970991c576b31b3ff8cc7e83e86f077cd2dc64))
+* **npm:** bump postcss from 8.5.28 to 8.5.29 in the tailwind group ([#167](https://github.com/sondresjolyst/altinnendata-app/issues/167)) ([d855095](https://github.com/sondresjolyst/altinnendata-app/commit/d855095b1c2aa18bc1b18e8a4adad7a233602f2b))
+* **npm:** bump the next group with 2 updates ([#126](https://github.com/sondresjolyst/altinnendata-app/issues/126)) ([547dc1a](https://github.com/sondresjolyst/altinnendata-app/commit/547dc1a38fb2896cc211d4a76b45800586e80f9b))
+* **npm:** bump the testing group across 1 directory with 2 updates ([#166](https://github.com/sondresjolyst/altinnendata-app/issues/166)) ([5af4bc8](https://github.com/sondresjolyst/altinnendata-app/commit/5af4bc84ae8ac60e6d8637d50e3687e035e52e0f))
+* **npm:** bump vitest from 5.0.2 to 5.0.3 in the testing group ([#144](https://github.com/sondresjolyst/altinnendata-app/issues/144)) ([314987f](https://github.com/sondresjolyst/altinnendata-app/commit/314987f0caf7b779571721950dac21c2f95a726f))
+
 ## [1.9.8](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.7...v1.9.8) (2026-10-04)
 
 
