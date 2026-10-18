@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { apiErrorCode } from '@sjolystinnovation/app-kit/api';
+import { apiErrorCode, apiFieldErrors } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { Alert, TextArea, TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type BuyButtonMode, type DeliveryMethod, type ShopSettings } from '@/services/shopService';
@@ -44,17 +44,22 @@ const toDraft = (settings: ShopSettings): Draft => ({
 
 const orNull = (value: string) => value.trim() || null;
 
-interface FieldDetail {
-    message: string;
-    code?: string;
-    limit?: number;
-}
+const MAX_LABEL = 80;
+const MAX_DESCRIPTION = 300;
+const MAX_PRICE = 100000;
+const MAX_DISTANCE = 1000;
 
-/** The field errors that `request` keeps on the Error it throws, keyed by lower case field name. */
-function fieldDetails(error: unknown): Map<string, FieldDetail[]> {
-    const kept = (error as { fieldErrorDetails?: Record<string, FieldDetail[]> } | null)?.fieldErrorDetails;
-    return new Map(Object.entries(kept ?? {}).map(([field, list]) => [field.toLowerCase(), list]));
-}
+/** The fields of one delivery option the API checks, with the API's own name for each. */
+const FIELD_NAMES = ['price', 'labelNo', 'labelEn', 'descriptionNo', 'descriptionEn', 'maxDistance'] as const;
+type FieldName = (typeof FIELD_NAMES)[number];
+const API_FIELD: Record<FieldName, string> = {
+    price: 'priceNok',
+    labelNo: 'labelNo',
+    labelEn: 'labelEn',
+    descriptionNo: 'descriptionNo',
+    descriptionEn: 'descriptionEn',
+    maxDistance: 'maxDistanceKm',
+};
 
 export default function AdminShopSettingsPage() {
     const { dict } = useDictionary();
@@ -86,11 +91,44 @@ export default function AdminShopSettingsPage() {
     const patchOption = (index: number, changes: Partial<DeliveryDraft>) =>
         setDraft({ ...draft, delivery: draft.delivery.map((o, i) => (i === index ? { ...o, ...changes } : o)) });
 
-    const errorText = (error: FieldDetail, fieldName: string) => {
-        const template = Object.hasOwn(text.validation, error.code ?? '') ? text.validation[error.code as keyof typeof text.validation] : undefined;
-        if (template === undefined) return error.message;
-        if (!template.includes('{max}')) return template.replace('{field}', fieldName.toLowerCase());
-        return error.limit === undefined ? error.message : template.replace('{max}', String(error.limit));
+    const fieldName = (field: FieldName) => {
+        switch (field) {
+            case 'price': return text.price;
+            case 'maxDistance': return text.maxDistance;
+            case 'labelNo': return `${text.label} (${LOCALE_LABELS.no})`;
+            case 'labelEn': return `${text.label} (${LOCALE_LABELS.en})`;
+            case 'descriptionNo': return `${text.description} (${LOCALE_LABELS.no})`;
+            case 'descriptionEn': return `${text.description} (${LOCALE_LABELS.en})`;
+        }
+    };
+
+    const required = (field: FieldName) => text.validation.required.replace('{field}', fieldName(field).toLowerCase());
+    const tooLong = (max: number) => text.validation.tooLong.replace('{max}', String(max));
+    const range = (min: number, max: number) => text.validation.range.replace('{min}', String(min)).replace('{max}', String(max));
+
+    /** Mirrors the API validator, so the texts show before the request. */
+    const validate = (option: DeliveryDraft): Partial<Record<FieldName, string>> => {
+        const found: Partial<Record<FieldName, string>> = {};
+        const price = option.price.trim();
+        if (price === '') found.price = required('price');
+        else if (!Number.isInteger(Number(price)) || Number(price) < 0 || Number(price) > MAX_PRICE) found.price = range(0, MAX_PRICE);
+
+        for (const field of ['labelNo', 'labelEn'] as const) {
+            if (option[field].trim() === '') found[field] = required(field);
+            else if (option[field].trim().length > MAX_LABEL) found[field] = tooLong(MAX_LABEL);
+        }
+        for (const field of ['descriptionNo', 'descriptionEn'] as const) {
+            if (option[field].trim().length > MAX_DESCRIPTION) found[field] = tooLong(MAX_DESCRIPTION);
+        }
+
+        const distance = option.maxDistance.trim();
+        if (option.method === 'HomeDelivery') {
+            if (distance === '' && option.enabled) found.maxDistance = required('maxDistance');
+            else if (distance !== '' && (!Number.isInteger(Number(distance)) || Number(distance) < 1 || Number(distance) > MAX_DISTANCE)) {
+                found.maxDistance = range(1, MAX_DISTANCE);
+            }
+        }
+        return found;
     };
 
     const save = async () => {
@@ -105,12 +143,12 @@ export default function AdminShopSettingsPage() {
             maxDistanceKm: o.method === 'HomeDelivery' && o.maxDistance.trim() !== '' ? Number(o.maxDistance) : null,
         }));
 
-        const missing = new Map<string, string>();
+        const invalid = new Map<string, string>();
         draft.delivery.forEach((o, index) => {
-            if (o.price.trim() === '') missing.set(`${index}.price`, text.validation.required.replace('{field}', text.price.toLowerCase()));
+            for (const [field, message] of Object.entries(validate(o))) invalid.set(`${index}.${field}`, message);
         });
-        setErrors(missing);
-        if (missing.size > 0) return;
+        setErrors(invalid);
+        if (invalid.size > 0) return;
 
         setSaving(true);
         try {
@@ -125,20 +163,13 @@ export default function AdminShopSettingsPage() {
                 return;
             }
 
-            const details = fieldDetails(err);
+            // What the client cannot check comes back from the API with its own message.
+            const apiErrors = new Map(Object.entries(apiFieldErrors(err) ?? {}).map(([key, list]) => [key.toLowerCase(), list]));
             const shown = new Map<string, string>();
             draft.delivery.forEach((_, index) => {
-                const fields = [
-                    ['price', 'priceNok', text.price],
-                    ['labelNo', 'labelNo', `${text.label} (${LOCALE_LABELS.no})`],
-                    ['labelEn', 'labelEn', `${text.label} (${LOCALE_LABELS.en})`],
-                    ['descriptionNo', 'descriptionNo', `${text.description} (${LOCALE_LABELS.no})`],
-                    ['descriptionEn', 'descriptionEn', `${text.description} (${LOCALE_LABELS.en})`],
-                    ['maxDistance', 'maxDistanceKm', text.maxDistance],
-                ] as const;
-                for (const [field, apiField, name] of fields) {
-                    const list = details.get(`delivery[${index}].${apiField}`.toLowerCase());
-                    if (list?.length) shown.set(`${index}.${field}`, list.map(e => errorText(e, name)).join(' '));
+                for (const field of FIELD_NAMES) {
+                    const messages = apiErrors.get(`delivery[${index}].${API_FIELD[field]}`.toLowerCase());
+                    if (messages?.length) shown.set(`${index}.${field}`, messages.join(' '));
                 }
             });
             setErrors(shown);

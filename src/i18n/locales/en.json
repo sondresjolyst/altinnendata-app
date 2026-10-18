@@ -263,7 +263,8 @@
       "termsWarning": "The terms must be updated with sales terms before the buy button can show for everyone. Save the terms in Norwegian and English under Legal pages.",
       "validation": {
         "required": "Fill in {field}.",
-        "tooLong": "Use {max} characters or fewer."
+        "tooLong": "Use {max} characters or fewer.",
+        "range": "Use a whole number from {min} to {max}."
       }
     }
   },

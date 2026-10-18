@@ -263,7 +263,8 @@
       "termsWarning": "Vilkårene må oppdateres med salgsvilkår før kjøpsknappen kan vises for alle. Lagre vilkårene på norsk og engelsk under Juridiske sider.",
       "validation": {
         "required": "Du må fylle ut {field}.",
-        "tooLong": "Bruk {max} eller færre tegn."
+        "tooLong": "Bruk {max} eller færre tegn.",
+        "range": "Bruk et tall fra {min} til {max}."
       }
     }
   },

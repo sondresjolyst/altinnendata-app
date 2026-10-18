@@ -129,20 +129,43 @@ describe('the admin shop settings page', () => {
         await waitFor(() => expect(toastSpies.success).toHaveBeenCalledWith('Innstillingene er lagret'));
     });
 
-    it('shows Bruk 80 eller færre tegn. under the label the API refused', async () => {
+    it('shows Bruk 80 eller færre tegn. under a label that is too long, without calling the API', async () => {
+        renderPage('no');
+        await screen.findByRole('button', { name: 'Lagre' });
+        const label = within(group('Henting')).getByLabelText(/^Navn \(Norsk\)/);
+        await userEvent.clear(label);
+        await userEvent.click(label);
+        await userEvent.paste('a'.repeat(81));
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre' }));
+
+        await waitFor(() => expect(label).toHaveAccessibleDescription('Bruk 80 eller færre tegn.'));
+        expect(within(group('Sending')).getByLabelText(/^Navn \(Norsk\)/)).not.toHaveAccessibleDescription();
+        expect(service.updateSettings).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['no', 'Du må fylle ut navn (norsk).', 'Navn (Norsk)', 'Lagre'],
+        ['en', 'Fill in name (english).', 'Name (English)', 'Save'],
+    ] as const)('shows the required text for an empty label (%s)', async (locale, message, labelText, save) => {
+        renderPage(locale);
+        await screen.findByRole('button', { name: save });
+        const label = within(group(strings[locale].shipping)).getByLabelText(labelText);
+        await userEvent.clear(label);
+        await userEvent.click(screen.getByRole('button', { name: save }));
+
+        await waitFor(() => expect(label).toHaveAccessibleDescription(message));
+        expect(service.updateSettings).not.toHaveBeenCalled();
+    });
+
+    it('shows the API message under a field the client cannot check', async () => {
         service.updateSettings.mockRejectedValueOnce(
-            await refused(400, {
-                errors: { 'Delivery[2].LabelNo': ['Too long.'] },
-                codes: { 'Delivery[2].LabelNo': ['tooLong'] },
-                limits: { 'Delivery[2].LabelNo': 80 },
-            }),
+            await refused(400, { errors: { 'Delivery[2].DescriptionEn': ['Refused by the API.'] } }),
         );
         renderPage('no');
         await userEvent.click(await screen.findByRole('button', { name: 'Lagre' }));
 
-        const label = within(group('Henting')).getByLabelText(/^Navn \(Norsk\)/);
-        await waitFor(() => expect(label).toHaveAccessibleDescription('Bruk 80 eller færre tegn.'));
-        expect(within(group('Sending')).getByLabelText(/^Navn \(Norsk\)/)).not.toHaveAccessibleDescription();
+        const description = within(group('Henting')).getByLabelText(/^Beskrivelse \(English\)/);
+        await waitFor(() => expect(description).toHaveAccessibleDescription('Refused by the API.'));
     });
 });
 
