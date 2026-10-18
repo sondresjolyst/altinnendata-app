@@ -140,6 +140,24 @@
       "deliveryUnavailable": "That delivery method is no longer available. Choose another.",
       "paymentProviderUnavailable": "Vipps is not responding. Try again shortly."
     },
+    "return": {
+      "success": {
+        "title": "The payment is reserved",
+        "body": "We have reserved {total} in Vipps for {build}. The amount is taken when you receive the computer. We will be in touch about delivery or collection.",
+        "note": "Order number {reference}. You will get an order confirmation by email."
+      },
+      "pending": {
+        "title": "Waiting for Vipps",
+        "body": "We have not heard back from Vipps yet.",
+        "cta": "Contact us",
+        "refresh": "Check again"
+      },
+      "failed": {
+        "title": "The payment was not completed",
+        "body": "No money has been taken. The computer is available again unless someone else has bought it."
+      },
+      "toBuilds": "To the computers"
+    },
     "failed": "The payment could not be started. Try again, or get in touch."
   },
   "validation": {

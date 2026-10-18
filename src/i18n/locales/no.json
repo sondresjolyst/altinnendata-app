@@ -140,6 +140,24 @@
       "deliveryUnavailable": "Leveringsmåten er ikke lenger tilgjengelig. Velg en annen.",
       "paymentProviderUnavailable": "Vipps svarer ikke. Prøv igjen om litt."
     },
+    "return": {
+      "success": {
+        "title": "Betalingen er reservert",
+        "body": "Vi har reservert {total} i Vipps for {build}. Beløpet trekkes når du får maskinen. Vi tar kontakt om levering eller henting.",
+        "note": "Ordrenummer {reference}. Du får en ordrebekreftelse på e-post."
+      },
+      "pending": {
+        "title": "Venter på Vipps",
+        "body": "Vi har ikke fått svar fra Vipps ennå.",
+        "cta": "Kontakt oss",
+        "refresh": "Sjekk igjen"
+      },
+      "failed": {
+        "title": "Betalingen ble ikke fullført",
+        "body": "Ingen penger er trukket. Datamaskinen er ledig igjen hvis ingen andre har kjøpt den."
+      },
+      "toBuilds": "Til datamaskinene"
+    },
     "failed": "Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt."
   },
   "validation": {
