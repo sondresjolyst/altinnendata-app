@@ -14,8 +14,9 @@ import ContactForm from './ContactForm';
 import StatsBand from './StatsBand';
 import { localeHref, type Locale } from '@/i18n/config';
 
+// The hero needs a definite width. Without it, the minimum height widens it through the aspect ratio past the viewport.
 const hero: SectionRenderFn<HeroSection> = (section, { href, Link }) => (
-    <section className="relative isolate overflow-hidden bg-gray-900 flex items-center aspect-square sm:aspect-[3/2] sm:min-h-[420px] lg:aspect-[12/5] xl:aspect-[16/5]">
+    <section className="relative isolate overflow-hidden bg-gray-900 flex items-center w-full aspect-square sm:aspect-[3/2] sm:min-h-[420px] lg:aspect-[12/5] xl:aspect-[16/5]">
         <ContentImage
             imageId={section.backgroundImageId}
             fallbackSrc="/hero.jpg"
