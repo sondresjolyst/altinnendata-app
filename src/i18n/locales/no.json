@@ -232,7 +232,40 @@
     "diskTotal": "Total plass",
     "drafts": "Utkast",
     "partFromCatalog": "Del fra katalog",
-    "freeTextOption": "— fritekst —"
+    "freeTextOption": "— fritekst —",
+    "shop": {
+      "title": "Butikk",
+      "orders": "Ordrer",
+      "settings": "Innstillinger",
+      "card": "Ordrer, kjøpsknapp, Vipps og levering.",
+      "buyButton": "Kjøpsknapp",
+      "buyOff": "Av",
+      "buyAdmins": "Bare for administratorer",
+      "buyEveryone": "For alle",
+      "vipps": "Vipps",
+      "vippsTest": "Test (testpenger)",
+      "vippsLive": "Ekte betalinger",
+      "delivery": "Levering",
+      "methods": {
+        "Shipping": "Sending",
+        "HomeDelivery": "Levering hjem",
+        "Pickup": "Henting"
+      },
+      "offered": "Tilbys",
+      "price": "Pris (kr)",
+      "label": "Navn",
+      "description": "Beskrivelse",
+      "maxDistance": "Største avstand (km)",
+      "saved": "Innstillingene er lagret",
+      "saveFailed": "Kunne ikke lagre innstillingene",
+      "loadFailed": "Kunne ikke hente innstillingene",
+      "subNavigation": "Butikk",
+      "termsWarning": "Vilkårene må oppdateres med salgsvilkår før kjøpsknappen kan vises for alle. Lagre vilkårene på norsk og engelsk under Juridiske sider.",
+      "validation": {
+        "required": "Du må fylle ut {field}.",
+        "tooLong": "Bruk {max} eller færre tegn."
+      }
+    }
   },
   "stats": {
     "builds": "Datamaskiner publisert",

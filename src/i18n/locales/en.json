@@ -232,7 +232,40 @@
     "diskTotal": "Disk total",
     "drafts": "Drafts",
     "partFromCatalog": "Part from catalog",
-    "freeTextOption": "— free text —"
+    "freeTextOption": "— free text —",
+    "shop": {
+      "title": "Shop",
+      "orders": "Orders",
+      "settings": "Settings",
+      "card": "Orders, buy button, Vipps and delivery.",
+      "buyButton": "Buy button",
+      "buyOff": "Off",
+      "buyAdmins": "Administrators only",
+      "buyEveryone": "Everyone",
+      "vipps": "Vipps",
+      "vippsTest": "Test (test money)",
+      "vippsLive": "Real payments",
+      "delivery": "Delivery",
+      "methods": {
+        "Shipping": "Shipping",
+        "HomeDelivery": "Home delivery",
+        "Pickup": "Pickup"
+      },
+      "offered": "Offered",
+      "price": "Price (NOK)",
+      "label": "Name",
+      "description": "Description",
+      "maxDistance": "Longest distance (km)",
+      "saved": "The settings are saved",
+      "saveFailed": "Could not save the settings",
+      "loadFailed": "Could not load the settings",
+      "subNavigation": "Shop",
+      "termsWarning": "The terms must be updated with sales terms before the buy button can show for everyone. Save the terms in Norwegian and English under Legal pages.",
+      "validation": {
+        "required": "Fill in {field}.",
+        "tooLong": "Use {max} characters or fewer."
+      }
+    }
   },
   "stats": {
     "builds": "Computers published",
