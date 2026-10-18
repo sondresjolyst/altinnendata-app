@@ -92,6 +92,56 @@
     "callUs": "Ring oss",
     "emailUs": "Send e-post"
   },
+  "shop": {
+    "buy": "Kjøp med Vipps",
+    "unavailable": "Datamaskinen kan ikke kjøpes på nettet nå.",
+    "toBuild": "Tilbake til datamaskinen",
+    "contactUs": "Ta kontakt",
+    "notOpen": "Kjøp er ikke åpnet ennå.",
+    "checkoutTitle": "Kjøp {title}",
+    "price": "Pris",
+    "delivery": "Levering",
+    "free": "Gratis",
+    "name": "Navn",
+    "email": "E-post",
+    "phone": "Mobilnummer",
+    "streetAddress": "Gateadresse",
+    "postalCode": "Postnummer",
+    "city": "Sted",
+    "withinDistance": "Adressen er innenfor {km} km fra oss",
+    "pickupNote": "Når passer det å hente?",
+    "pickupHint": "Vi avtaler tidspunkt etterpå.",
+    "acceptTerms": "Jeg godtar",
+    "termsLink": "salgsvilkårene",
+    "total": "Totalt",
+    "pay": "Betal med Vipps",
+    "paying": "Går til Vipps…",
+    "fieldNames": {
+      "name": "navn",
+      "email": "e-postadresse",
+      "phone": "mobilnummer",
+      "streetAddress": "gateadresse",
+      "postalCode": "postnummer",
+      "city": "sted",
+      "pickupNote": "tidspunkt for henting"
+    },
+    "validation": {
+      "required": "Du må fylle ut {field}.",
+      "tooLong": "Bruk {max} eller færre tegn.",
+      "email": "Skriv inn en gyldig e-postadresse.",
+      "phone": "Skriv inn et norsk mobilnummer.",
+      "postalCode": "Postnummeret må ha fire siffer.",
+      "terms": "Du må godta salgsvilkårene.",
+      "distance": "Du må bekrefte at adressen er innenfor {km} km."
+    },
+    "apiErrors": {
+      "buildUnavailable": "Datamaskinen er ikke lenger tilgjengelig. Noen andre har kjøpt eller reservert den.",
+      "shopClosed": "Kjøp er ikke åpnet ennå.",
+      "deliveryUnavailable": "Leveringsmåten er ikke lenger tilgjengelig. Velg en annen.",
+      "paymentProviderUnavailable": "Vipps svarer ikke. Prøv igjen om litt."
+    },
+    "failed": "Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt."
+  },
   "validation": {
     "required": "Feltet må fylles ut",
     "email": "Skriv inn en gyldig e-postadresse",

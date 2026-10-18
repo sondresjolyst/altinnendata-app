@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { captureWarning, invoiceDetails, kroner, osloDate } from '@/lib/shop';
+import { canBuy, captureWarning, invoiceDetails, isBuyable, kroner, osloDate } from '@/lib/shop';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { AdminOrder } from '@/services/shopService';
 
@@ -113,5 +113,27 @@ describe('invoiceDetails', () => {
     it('says the seller is not VAT registered in both languages', () => {
         expect(invoiceDetails(order, no).find(d => d.key === 'vat')?.value).toBe('Ikke merverdiavgiftsregistrert, ingen mva.');
         expect(invoiceDetails(order, en).find(d => d.key === 'vat')?.value).toBe('Not VAT registered, no VAT.');
+    });
+});
+
+describe('canBuy', () => {
+    it('follows the buy button mode and the visitor roles', () => {
+        expect(canBuy('Off', ['Admin'])).toBe(false);
+        expect(canBuy('AdminsOnly', [])).toBe(false);
+        expect(canBuy('AdminsOnly', ['Admin'])).toBe(true);
+        expect(canBuy('Everyone', [])).toBe(true);
+        expect(canBuy(undefined, ['Admin'])).toBe(false);
+    });
+});
+
+describe('isBuyable', () => {
+    const build = { availability: 'Available', priceNok: 9990, published: true };
+
+    it('needs an available, priced and published build', () => {
+        expect(isBuyable(build as never)).toBe(true);
+        expect(isBuyable({ ...build, availability: 'Reserved' } as never)).toBe(false);
+        expect(isBuyable({ ...build, availability: 'Sold' } as never)).toBe(false);
+        expect(isBuyable({ ...build, priceNok: null } as never)).toBe(false);
+        expect(isBuyable({ ...build, published: false } as never)).toBe(false);
     });
 });

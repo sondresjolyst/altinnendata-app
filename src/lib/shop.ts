@@ -1,8 +1,21 @@
 import type { Dictionary } from '@/i18n/dictionaries';
-import type { AdminOrder } from '@/services/shopService';
+import { ADMIN_ROLE } from '@/lib/roles';
+import type { BuildDetail } from '@/services/buildService';
+import type { AdminOrder, BuyButtonMode } from '@/services/shopService';
 
 const HOUR = 60 * 60 * 1000;
 const SOON_HOURS = 48;
+
+/** Whether the buy button shows for a visitor with `roles`. A missing mode, such as a failed config fetch, means no. */
+export function canBuy(mode: BuyButtonMode | undefined, roles: readonly string[]): boolean {
+    if (mode === 'Everyone') return true;
+    return mode === 'AdminsOnly' && roles.includes(ADMIN_ROLE);
+}
+
+/** Whether the build can be sold now. The API checks the same again when the buyer pays. */
+export function isBuyable(build: BuildDetail): boolean {
+    return build.availability === 'Available' && build.priceNok != null && build.published;
+}
 
 /** Øre as kroner the way an accounting system takes them: no grouping and a comma decimal. */
 export function kroner(ore: number): string {

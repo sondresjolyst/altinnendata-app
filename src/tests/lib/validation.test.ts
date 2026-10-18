@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { zodFieldErrors } from '@sjolystinnovation/app-kit/validation';
-import { contactSchema, issueMessage } from '@/lib/validation';
+import { checkoutIssueMessage, checkoutSchema, contactSchema, issueMessage } from '@/lib/validation';
 import { getDictionary } from '@/i18n/dictionaries';
 
 const dict = getDictionary('no');
@@ -51,5 +51,95 @@ describe('issueMessage', () => {
         expect(errors.email).toBe(dict.validation.email);
         expect(errors.message).toBe(dict.validation.required);
         expect(errors.name).toBeUndefined();
+    });
+});
+
+describe('checkoutSchema', () => {
+    const checkout = {
+        buildSlug: 'gaming-pc',
+        deliveryMethod: 'Shipping',
+        name: 'Kari Nordmann',
+        email: 'kari@example.no',
+        phone: '912 34 567',
+        streetAddress: 'Storgata 1',
+        postalCode: '4347',
+        city: 'Lye',
+        withinDistance: false,
+        pickupNote: null,
+        acceptTerms: true,
+        locale: 'no',
+    };
+
+    const fieldNames = { name: 'navn', email: 'e-postadresse', phone: 'mobilnummer', streetAddress: 'gateadresse', postalCode: 'postnummer', city: 'sted' };
+
+    const messages = (input: object): Record<string, string | undefined> => {
+        const result = checkoutSchema.safeParse(input);
+        if (result.success) return {};
+        return zodFieldErrors(result.error, {
+            message: issue => checkoutIssueMessage(issue, fieldNames[issue.path[0] as keyof typeof fieldNames] ?? '', dict, 30),
+        });
+    };
+
+    it('accepts a complete shipping order', () => {
+        expect(checkoutSchema.safeParse(checkout).success).toBe(true);
+    });
+
+    it('accepts pickup without an address', () => {
+        const pickup = { ...checkout, deliveryMethod: 'Pickup', streetAddress: null, postalCode: null, city: null, pickupNote: 'Etter fire' };
+        expect(checkoutSchema.safeParse(pickup).success).toBe(true);
+    });
+
+    it.each(['912 34 567', '91234567', '+47 912 34 567', '47-912-34-567', '(912) 34567'])('accepts the mobile number %s', phone => {
+        expect(checkoutSchema.safeParse({ ...checkout, phone }).success).toBe(true);
+    });
+
+    it.each(['0701234567', '1234567', '+46 701 234 567', '912345678', 'abc'])('rejects the mobile number %s', phone => {
+        expect(messages({ ...checkout, phone }).phone).toBe('Skriv inn et norsk mobilnummer.');
+    });
+
+    it('asks for what is missing in the Altinn wording', () => {
+        const errors = messages({ ...checkout, name: '', email: ' ', phone: '', city: '', acceptTerms: false });
+        expect(errors.name).toBe('Du må fylle ut navn.');
+        expect(errors.email).toBe('Du må fylle ut e-postadresse.');
+        expect(errors.phone).toBe('Du må fylle ut mobilnummer.');
+        expect(errors.city).toBe('Du må fylle ut sted.');
+        expect(errors.acceptTerms).toBe('Du må godta salgsvilkårene.');
+    });
+
+    it('limits the lengths as the API does', () => {
+        const errors = messages({ ...checkout, name: 'a'.repeat(121), streetAddress: 'a'.repeat(201), city: 'a'.repeat(101), pickupNote: 'a'.repeat(501) });
+        expect(errors.name).toBe('Bruk 120 eller færre tegn.');
+        expect(errors.streetAddress).toBe('Bruk 200 eller færre tegn.');
+        expect(errors.city).toBe('Bruk 100 eller færre tegn.');
+        expect(errors.pickupNote).toBe('Bruk 500 eller færre tegn.');
+        expect(messages({ ...checkout, email: `${'a'.repeat(200)}@example.no` }).email).toBe('Bruk 200 eller færre tegn.');
+    });
+
+    it('rejects an email that is not an address', () => {
+        expect(messages({ ...checkout, email: 'kari' }).email).toBe('Skriv inn en gyldig e-postadresse.');
+    });
+
+    it('wants a postal code of four digits for shipping and home delivery only', () => {
+        expect(messages({ ...checkout, postalCode: '434' }).postalCode).toBe('Postnummeret må ha fire siffer.');
+        expect(messages({ ...checkout, postalCode: '43470' }).postalCode).toBe('Postnummeret må ha fire siffer.');
+        expect(messages({ ...checkout, deliveryMethod: 'Pickup', postalCode: 'x' }).postalCode).toBeUndefined();
+    });
+
+    it('wants the distance confirmed for home delivery only', () => {
+        const home = { ...checkout, deliveryMethod: 'HomeDelivery' };
+        expect(messages(home).withinDistance).toBe('Du må bekrefte at adressen er innenfor 30 km.');
+        expect(checkoutSchema.safeParse({ ...home, withinDistance: true }).success).toBe(true);
+        expect(checkoutSchema.safeParse(checkout).success).toBe(true);
+    });
+
+    it('gives the English messages', () => {
+        const en = getDictionary('en');
+        const result = checkoutSchema.safeParse({ ...checkout, deliveryMethod: 'HomeDelivery', acceptTerms: false, phone: '1' });
+        expect(result.success).toBe(false);
+        if (result.success) return;
+        const errors = zodFieldErrors(result.error, { message: issue => checkoutIssueMessage(issue, 'name', en, 30) });
+        expect(errors.withinDistance).toBe('You must confirm that the address is within 30 km.');
+        expect(errors.acceptTerms).toBe('You must accept the terms of sale.');
+        expect(errors.phone).toBe('Enter a Norwegian mobile number.');
     });
 });

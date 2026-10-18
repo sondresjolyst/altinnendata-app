@@ -92,6 +92,56 @@
     "callUs": "Call us",
     "emailUs": "Email us"
   },
+  "shop": {
+    "buy": "Buy with Vipps",
+    "unavailable": "This computer cannot be bought online right now.",
+    "toBuild": "Back to the computer",
+    "contactUs": "Get in touch",
+    "notOpen": "Buying has not opened yet.",
+    "checkoutTitle": "Buy {title}",
+    "price": "Price",
+    "delivery": "Delivery",
+    "free": "Free",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Mobile number",
+    "streetAddress": "Street address",
+    "postalCode": "Postal code",
+    "city": "City",
+    "withinDistance": "The address is within {km} km of us",
+    "pickupNote": "When would you like to collect it?",
+    "pickupHint": "We agree the time afterwards.",
+    "acceptTerms": "I accept the",
+    "termsLink": "terms of sale",
+    "total": "Total",
+    "pay": "Pay with Vipps",
+    "paying": "Going to Vipps…",
+    "fieldNames": {
+      "name": "your name",
+      "email": "your email address",
+      "phone": "your mobile number",
+      "streetAddress": "the street address",
+      "postalCode": "the postal code",
+      "city": "the city",
+      "pickupNote": "the collection time"
+    },
+    "validation": {
+      "required": "Enter {field}.",
+      "tooLong": "Use {max} characters or fewer.",
+      "email": "Enter a valid email address.",
+      "phone": "Enter a Norwegian mobile number.",
+      "postalCode": "The postal code must have four digits.",
+      "terms": "You must accept the terms of sale.",
+      "distance": "You must confirm that the address is within {km} km."
+    },
+    "apiErrors": {
+      "buildUnavailable": "The computer is no longer available. Someone else has bought or reserved it.",
+      "shopClosed": "Buying has not opened yet.",
+      "deliveryUnavailable": "That delivery method is no longer available. Choose another.",
+      "paymentProviderUnavailable": "Vipps is not responding. Try again shortly."
+    },
+    "failed": "The payment could not be started. Try again, or get in touch."
+  },
   "validation": {
     "required": "This field is required",
     "email": "Enter a valid email address",
