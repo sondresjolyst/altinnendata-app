@@ -89,19 +89,25 @@ describe('captureWarning', () => {
 
 describe('invoiceDetails', () => {
     it('leaves out the address and the captured date for a reserved pickup order', () => {
-        expect(invoiceDetails(pickupOrder, no).map(d => d.key)).toEqual(['name', 'email', 'phone', 'line1', 'line2', 'total', 'orderDate', 'reservedDate', 'reference', 'vat']);
+        expect(invoiceDetails(pickupOrder, no).map(d => d.key)).toEqual(['name', 'email', 'phone', 'line1', 'line1Amount', 'line2', 'line2Amount', 'total', 'orderDate', 'reservedDate', 'reference', 'vat']);
     });
 
     it('adds the address and the captured date for a paid shipping order', () => {
         const details = invoiceDetails(order, no);
-        expect(details.map(d => d.key)).toEqual(['name', 'email', 'phone', 'address', 'line1', 'line2', 'total', 'orderDate', 'reservedDate', 'capturedDate', 'reference', 'vat']);
+        expect(details.map(d => d.key)).toEqual(['name', 'email', 'phone', 'address', 'line1', 'line1Amount', 'line2', 'line2Amount', 'total', 'orderDate', 'reservedDate', 'capturedDate', 'reference', 'vat']);
         expect(details.find(d => d.key === 'capturedDate')?.value).toBe('20.10.2026');
         expect(details.find(d => d.key === 'address')?.value).toBe('Storgata 1, 0155 Oslo');
-        expect(details.find(d => d.key === 'line1')?.value).toBe('Spillmaskin: 9990,00');
-        expect(details.find(d => d.key === 'line2')?.value).toBe('Sending: 300,00');
+        expect(details.find(d => d.key === 'line1')?.value).toBe('Spillmaskin');
+        expect(details.find(d => d.key === 'line1Amount')?.value).toBe('9990,00');
+        expect(details.find(d => d.key === 'line2')?.value).toBe('Sending');
+        expect(details.find(d => d.key === 'line2Amount')?.value).toBe('300,00');
         expect(details.find(d => d.key === 'total')?.value).toBe('12990,00');
         expect(details.find(d => d.key === 'orderDate')?.value).toBe('18.10.2026');
         expect(details.find(d => d.key === 'reference')?.value).toBe('ref-7');
+    });
+
+    it('leaves out the reserved date when the payment was never reserved', () => {
+        expect(invoiceDetails({ ...order, authorizedAt: null }, no).some(d => d.key === 'reservedDate')).toBe(false);
     });
 
     it('says the seller is not VAT registered in both languages', () => {

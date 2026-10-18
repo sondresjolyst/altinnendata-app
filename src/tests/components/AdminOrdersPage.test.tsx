@@ -72,4 +72,12 @@ describe('the admin orders page', () => {
 
         expect(await screen.findByText('Ukjent')).toBeInTheDocument();
     });
+
+    it('shows an error instead of Laster when the orders cannot be loaded', async () => {
+        service.getOrders.mockRejectedValue(new Error('Boom'));
+        renderPage();
+
+        expect(await screen.findByText('Kunne ikke hente ordrene')).toBeInTheDocument();
+        expect(screen.queryByText('Laster…')).not.toBeInTheDocument();
+    });
 });

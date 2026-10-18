@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { formatNok } from '@sjolystinnovation/app-kit/payments';
+import { Alert } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type AdminOrderSummary } from '@/services/shopService';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
@@ -13,6 +14,7 @@ export default function AdminOrdersPage() {
     const { locale, dict } = useDictionary();
     const text = dict.admin.shop;
     const [orders, setOrders] = useState<AdminOrderSummary[] | null>(null);
+    const [loadFailed, setLoadFailed] = useState(false);
 
     useEffect(() => {
         let current = true;
@@ -20,9 +22,15 @@ export default function AdminOrdersPage() {
             .then(loaded => {
                 if (current) setOrders([...loaded].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
             })
-            .catch(err => toast.error(err instanceof Error ? err.message : text.ordersLoadFailed));
+            .catch(err => {
+                if (!current) return;
+                setLoadFailed(true);
+                toast.error(err instanceof Error ? err.message : text.ordersLoadFailed);
+            });
         return () => { current = false; };
     }, [text.ordersLoadFailed]);
+
+    if (!orders && loadFailed) return <Alert variant="error">{text.ordersLoadFailed}</Alert>;
 
     if (!orders) {
         return <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>;

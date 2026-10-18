@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { apiErrorCode } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { formatNok } from '@sjolystinnovation/app-kit/payments';
-import { TextInput } from '@sjolystinnovation/app-kit/ui';
+import { Alert, TextInput } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type AdminOrder } from '@/services/shopService';
+import ConfirmDialog from '@/components/shop/ConfirmDialog';
 import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import { invoiceDetails, osloDate } from '@/lib/shop';
+import { formatAddress, invoiceDetails, osloDate } from '@/lib/shop';
 
 type Action = 'capture' | 'cancel' | 'refund';
 
@@ -24,6 +25,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
     const { locale, dict } = useDictionary();
     const text = dict.admin.shop;
     const [order, setOrder] = useState<AdminOrder | null>(null);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [confirming, setConfirming] = useState<Action | null>(null);
     const [busy, setBusy] = useState(false);
     const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -37,9 +39,15 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                 setOrder(loaded);
                 setInvoiceNumber(loaded.invoiceNumber ?? '');
             })
-            .catch(err => toast.error(err instanceof Error ? err.message : text.orderLoadFailed));
+            .catch(err => {
+                if (!current) return;
+                setLoadFailed(true);
+                toast.error(err instanceof Error ? err.message : text.orderLoadFailed);
+            });
         return () => { current = false; };
     }, [id, text.orderLoadFailed]);
+
+    if (!order && loadFailed) return <Alert variant="error">{text.orderLoadFailed}</Alert>;
 
     if (!order) {
         return <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>;
@@ -91,7 +99,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
     }
     const pending = actions.find(a => a.action === confirming);
 
-    const address = [order.streetAddress, [order.postalCode, order.city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    const address = formatAddress(order);
     const date = (iso: string | null) => (iso ? osloDate(iso) : null);
     const fields: [string, ReactNode][] = [
         [
@@ -110,6 +118,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         [text.withinDistance, order.deliveryMethod === 'HomeDelivery' ? (order.withinDistanceConfirmed ? dict.common.yes : dict.common.no) : null],
         [text.pickupNote, order.pickupNote],
         [text.columns.build, order.buildTitle],
+        [text.buildPrice, formatNok(order.buildPriceInOre)],
         [text.columns.total, formatNok(order.totalInOre)],
         [text.captured, order.capturedInOre > 0 ? formatNok(order.capturedInOre) : null],
         [text.refunded, order.refundedInOre > 0 ? formatNok(order.refundedInOre) : null],
@@ -181,20 +190,15 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             </section>
 
             {pending && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    <div role="dialog" aria-modal="true" aria-labelledby="confirm-heading" className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-xl">
-                        <h2 id="confirm-heading" className="font-bold text-gray-900">{pending.label}</h2>
-                        <p className="text-sm text-gray-700">{pending.confirm}</p>
-                        <div className="flex justify-end gap-3">
-                            <button type="button" disabled={busy} onClick={() => setConfirming(null)} className={`${BUTTON} ${SECONDARY}`}>
-                                {dict.common.cancel}
-                            </button>
-                            <button type="button" disabled={busy} onClick={() => void run(pending.action)} className={`${BUTTON} ${PRIMARY}`}>
-                                {pending.label}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <ConfirmDialog
+                    title={pending.label}
+                    message={pending.confirm}
+                    confirmLabel={pending.label}
+                    cancelLabel={dict.common.cancel}
+                    busy={busy}
+                    onConfirm={() => void run(pending.action)}
+                    onClose={() => setConfirming(null)}
+                />
             )}
         </div>
     );

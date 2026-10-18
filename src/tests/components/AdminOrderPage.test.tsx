@@ -152,6 +152,53 @@ describe('the admin order page', () => {
         expect(toastSpies.success).toHaveBeenCalledWith('Fakturanummeret er lagret');
     });
 
+    it('moves focus into the confirm dialog, closes it on Escape and gives focus back', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        const user = userEvent.setup();
+        renderPage();
+
+        const trigger = await screen.findByRole('button', { name: 'Kanseller' });
+        await user.click(trigger);
+        expect(screen.getByRole('dialog')).toContainElement(document.activeElement as HTMLElement);
+
+        await user.keyboard('{Escape}');
+
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(document.activeElement).toBe(trigger);
+        expect(service.cancel).not.toHaveBeenCalled();
+    });
+
+    it('ignores Escape while the request runs', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        service.capture.mockReturnValue(new Promise(() => {}));
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+        await user.keyboard('{Escape}');
+
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('shows the build price and the invoice lines as separate copy fields', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        renderPage();
+
+        expect(await screen.findByText('Pris for datamaskinen')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kopier Linje 1' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kopier Linje 1, beløp' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kopier Linje 2, beløp' })).toBeInTheDocument();
+    });
+
+    it('shows an error instead of Laster when the order cannot be loaded', async () => {
+        service.getOrder.mockRejectedValue(new Error('Boom'));
+        renderPage();
+
+        expect(await screen.findByText('Kunne ikke hente ordren')).toBeInTheDocument();
+        expect(screen.queryByText('Laster…')).not.toBeInTheDocument();
+    });
+
     it('shows the wrongStatus text when the API answers 409', async () => {
         service.getOrder.mockResolvedValue(reserved);
         service.capture.mockRejectedValue(await refused(409, { message: 'Wrong status', code: 'wrongStatus' }));

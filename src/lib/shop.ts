@@ -29,6 +29,12 @@ export interface InvoiceDetail {
     value: string;
 }
 
+/** Street, then postal code and city, on one line. Empty parts are left out. */
+export function formatAddress(order: Pick<AdminOrder, 'streetAddress' | 'postalCode' | 'city'>): string {
+    const place = [order.postalCode, order.city].filter(Boolean).join(' ');
+    return [order.streetAddress, place].filter(Boolean).join(', ');
+}
+
 /** The facts to type into an invoice for the order, in the order an invoice asks for them. */
 export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDetail[] {
     const text = dict.admin.shop;
@@ -40,18 +46,19 @@ export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDeta
     ];
 
     if (order.deliveryMethod !== 'Pickup') {
-        const place = [order.postalCode, order.city].filter(Boolean).join(' ');
-        const address = [order.streetAddress, place].filter(Boolean).join(', ');
-        details.push({ key: 'address', label: labels.address, value: address });
+        details.push({ key: 'address', label: labels.address, value: formatAddress(order) });
     }
 
     details.push(
-        { key: 'line1', label: labels.line1, value: `${order.buildTitle}: ${kroner(order.buildPriceInOre)}` },
-        { key: 'line2', label: labels.line2, value: `${order.deliveryLabel}: ${kroner(order.deliveryPriceInOre)}` },
+        { key: 'line1', label: labels.line1, value: order.buildTitle },
+        { key: 'line1Amount', label: labels.line1Amount, value: kroner(order.buildPriceInOre) },
+        { key: 'line2', label: labels.line2, value: order.deliveryLabel },
+        { key: 'line2Amount', label: labels.line2Amount, value: kroner(order.deliveryPriceInOre) },
         { key: 'total', label: labels.total, value: kroner(order.totalInOre) },
         { key: 'orderDate', label: labels.orderDate, value: osloDate(order.createdAt) },
-        { key: 'reservedDate', label: labels.reservedDate, value: order.authorizedAt ? osloDate(order.authorizedAt) : '' },
     );
+
+    if (order.authorizedAt) details.push({ key: 'reservedDate', label: labels.reservedDate, value: osloDate(order.authorizedAt) });
 
     if (order.capturedAt) details.push({ key: 'capturedDate', label: labels.capturedDate, value: osloDate(order.capturedAt) });
 
