@@ -65,17 +65,22 @@ describe('Footer', () => {
         expect(screen.getByText('Mårvegen 21a, 4347 Lye')).toBeInTheDocument();
     });
 
-    it('shows the legal name in the copyright line and the address', () => {
+    it('stacks the copyright, the org number, the address and the maker in one block', () => {
         renderFooter(company);
 
-        expect(screen.getByText(/© \d{4} ALTINNENDATA AS/)).toBeInTheDocument();
-        // The address sits under the org number line.
-        expect(registerLine()!.nextElementSibling).toHaveTextContent(/^Mårvegen 21a, 4347 Lye$/);
+        const lines = [...registerLine()!.parentElement!.children].map(line => line.textContent);
+        expect(lines).toEqual([
+            expect.stringMatching(/^© \d{4} ALTINNENDATA AS$/),
+            'Org.nr. 938 433 240 Foretaksregisteret',
+            'Mårvegen 21a, 4347 Lye',
+            'Laget av Sjølyst Innovation AS',
+        ]);
+        expect(screen.getByRole('link', { name: 'Sjølyst Innovation AS' })).toHaveAttribute('href', 'https://www.sjolystinnovation.no/');
     });
 
     it('falls back to the company name when the legal name is empty', () => {
         renderFooter({ ...company, legalName: '' });
 
-        expect(screen.getByText(/© \d{4} Altinnendata ·/)).toBeInTheDocument();
+        expect(screen.getByText(/^© \d{4} Altinnendata$/)).toBeInTheDocument();
     });
 });
