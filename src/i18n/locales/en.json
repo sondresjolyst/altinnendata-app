@@ -97,6 +97,7 @@
     "unavailable": "This computer cannot be bought online right now.",
     "toBuild": "Back to the computer",
     "reserved": "Reserved by another buyer.",
+    "sold": "Sold.",
     "contactUs": "Get in touch",
     "notOpen": "Buying has not opened yet.",
     "checkoutTitle": "Buy {title}",

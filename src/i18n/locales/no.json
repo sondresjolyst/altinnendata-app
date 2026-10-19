@@ -97,6 +97,7 @@
     "unavailable": "Datamaskinen kan ikke kjøpes på nettet nå.",
     "toBuild": "Tilbake til datamaskinen",
     "reserved": "Reservert av en annen kjøper.",
+    "sold": "Solgt.",
     "contactUs": "Ta kontakt",
     "notOpen": "Kjøp er ikke åpnet ennå.",
     "checkoutTitle": "Kjøp {title}",

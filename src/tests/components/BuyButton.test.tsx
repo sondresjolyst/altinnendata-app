@@ -41,24 +41,59 @@ describe('BuyButton', () => {
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
 
-    it.each(['Reserved', 'Sold'] as const)('shows nothing for a %s build', availability => {
-        session.roles = ['Admin'];
-        render(<BuyButton build={build({ availability })} mode="Everyone" locale="no" hasDelivery />);
+    it.each([
+        ['Reserved', 'no', 'Reservert av en annen kjøper.'],
+        ['Sold', 'no', 'Solgt.'],
+        ['Reserved', 'en', 'Reserved by another buyer.'],
+        ['Sold', 'en', 'Sold.'],
+    ] as const)('shows a disabled button and the note for a %s build in %s', (availability, locale, note) => {
+        session.roles = [];
+        render(<BuyButton build={build({ availability })} mode="Everyone" locale={locale} hasDelivery />);
 
+        const button = screen.getByRole('button', { name: locale === 'no' ? 'Kjøp med Vipps' : 'Buy with Vipps' });
+        expect(button).toBeDisabled();
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
+        expect(screen.getByText(note)).toBeInTheDocument();
     });
 
-    it('shows nothing for a build without a price', () => {
+    it('gives the disabled button the size classes of the link, so nothing moves', () => {
+        session.roles = [];
+        const link = render(<BuyButton build={build()} mode="Everyone" locale="no" hasDelivery />);
+        const linkClasses = screen.getByRole('link').className;
+        link.unmount();
+        render(<BuyButton build={build({ availability: 'Reserved' })} mode="Everyone" locale="no" hasDelivery />);
+
+        for (const name of ['px-6', 'py-3', 'font-semibold', 'rounded-lg']) {
+            expect(linkClasses).toContain(name);
+            expect(screen.getByRole('button').className).toContain(name);
+        }
+    });
+
+    it.each(['Reserved', 'Sold'] as const)('shows a disabled button for a %s build only to a viewer the mode allows', availability => {
+        session.roles = [];
+        render(<BuyButton build={build({ availability })} mode="AdminsOnly" locale="no" hasDelivery />);
+
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
+        expect(screen.queryByText(/Reservert|Solgt/)).not.toBeInTheDocument();
+    });
+
+    it.each([
+        ['without a price', { priceNok: null }],
+        ['that is unpublished', { published: false }],
+        ['that is unpublished and reserved', { published: false, availability: 'Reserved' as const }],
+    ])('shows nothing for a build %s', (_name, overrides) => {
         session.roles = ['Admin'];
-        render(<BuyButton build={build({ priceNok: null })} mode="Everyone" locale="no" hasDelivery />);
+        render(<BuyButton build={build(overrides)} mode="Everyone" locale="no" hasDelivery />);
 
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 
     it('shows nothing when no delivery option is offered', () => {
         session.roles = ['Admin'];
-        render(<BuyButton build={build()} mode="Everyone" locale="no" hasDelivery={false} />);
+        render(<BuyButton build={build({ availability: 'Reserved' })} mode="Everyone" locale="no" hasDelivery={false} />);
 
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 });

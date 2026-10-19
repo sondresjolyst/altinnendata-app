@@ -86,6 +86,7 @@ describe('build page buy button', () => {
         const contact = screen.getByRole('link', { name: 'Ta kontakt om maskinen' });
         expect(contact).toHaveAttribute('href', '/no/contact?build=gaming-pc');
         expect(screen.getByTestId('buy-button')).toHaveTextContent('Everyone true');
+        expect(screen.getByTestId('buy-button').parentElement).toBe(contact.parentElement);
         expect(contact.compareDocumentPosition(screen.getByTestId('buy-button')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         expect(publicGetOptional).toHaveBeenCalledWith('/shop/config?locale=no', { tags: ['shop'] });
     });
