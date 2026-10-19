@@ -1,10 +1,9 @@
 import type { Locale } from '@/i18n/config';
 
-export type VippsVerb = 'buyNow' | 'pay';
+export type VippsVerb = 'pay';
 
 // The official Vipps buttons from the Vipps MobilePay brand portal (Vipps MobilePay_Buttons_2026.zip), unaltered.
 const ART: Record<VippsVerb, Record<Locale, string>> = {
-    buyNow: { no: '/vipps/kjop-na-med-vipps.svg', en: '/vipps/buy-now-with-vipps.svg' },
     pay: { no: '/vipps/betal-med-vipps.svg', en: '/vipps/pay-with-vipps.svg' },
 };
 

@@ -13,18 +13,18 @@ const build = (overrides: Partial<BuildDetail> = {}) =>
     ({ slug: 'gaming-pc', availability: 'Available', priceNok: 9990, published: true, ...overrides }) as BuildDetail;
 
 describe('BuyButton', () => {
-    it('shows Kjøp nå med Vipps to an admin while the mode is AdminsOnly', () => {
+    it('shows Kjøp to an admin while the mode is AdminsOnly', () => {
         session.roles = ['Admin'];
         render(<BuyButton build={build()} mode="AdminsOnly" locale="no" hasDelivery />);
 
-        expect(screen.getByRole('link', { name: 'Kjøp nå med Vipps' })).toHaveAttribute('href', '/no/builds/gaming-pc/buy');
+        expect(screen.getByRole('link', { name: 'Kjøp' })).toHaveAttribute('href', '/no/builds/gaming-pc/buy');
     });
 
     it('shows the English text and path for the English site', () => {
         session.roles = [];
         render(<BuyButton build={build()} mode="Everyone" locale="en" hasDelivery />);
 
-        expect(screen.getByRole('link', { name: 'Buy now with Vipps' })).toHaveAttribute('href', '/en/builds/gaming-pc/buy');
+        expect(screen.getByRole('link', { name: 'Buy' })).toHaveAttribute('href', '/en/builds/gaming-pc/buy');
     });
 
     it('shows nothing to a visitor while the mode is AdminsOnly', () => {
@@ -50,30 +50,30 @@ describe('BuyButton', () => {
         session.roles = [];
         render(<BuyButton build={build({ availability })} mode="Everyone" locale={locale} hasDelivery />);
 
-        const button = screen.getByRole('button', { name: locale === 'no' ? 'Kjøp nå med Vipps' : 'Buy now with Vipps' });
+        const button = screen.getByRole('button', { name: locale === 'no' ? 'Kjøp' : 'Buy' });
         expect(button).toBeDisabled();
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
         expect(screen.getByText(note)).toBeInTheDocument();
     });
 
-    it('gives the disabled button the same artwork and size as the link, so nothing moves', () => {
+    it('gives the disabled button the size classes of the link, so nothing moves', () => {
         session.roles = [];
         const link = render(<BuyButton build={build()} mode="Everyone" locale="no" hasDelivery />);
-        const linkImage = screen.getByRole('img').outerHTML;
+        const linkClasses = screen.getByRole('link').className;
         link.unmount();
         render(<BuyButton build={build({ availability: 'Reserved' })} mode="Everyone" locale="no" hasDelivery />);
 
-        expect(screen.getByRole('img').outerHTML).toBe(linkImage);
+        for (const name of ['px-6', 'py-3', 'font-semibold', 'rounded-lg']) {
+            expect(linkClasses).toContain(name);
+            expect(screen.getByRole('button').className).toContain(name);
+        }
     });
 
-    it.each([
-        ['no', '/vipps/kjop-na-med-vipps.svg'],
-        ['en', '/vipps/buy-now-with-vipps.svg'],
-    ] as const)('shows the official Vipps artwork for %s', (locale, src) => {
+    it('shows a plain site button, not the Vipps artwork, because it opens our own checkout', () => {
         session.roles = [];
-        render(<BuyButton build={build()} mode="Everyone" locale={locale} hasDelivery />);
+        render(<BuyButton build={build()} mode="Everyone" locale="no" hasDelivery />);
 
-        expect(screen.getByRole('img')).toHaveAttribute('src', src);
+        expect(screen.queryByRole('img')).not.toBeInTheDocument();
     });
 
     it.each(['Reserved', 'Sold'] as const)('shows a disabled button for a %s build only to a viewer the mode allows', availability => {

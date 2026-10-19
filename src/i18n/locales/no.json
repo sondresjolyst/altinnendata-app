@@ -93,7 +93,7 @@
     "emailUs": "Send e-post"
   },
   "shop": {
-    "buy": "Kjøp nå med Vipps",
+    "buy": "Kjøp",
     "unavailable": "Datamaskinen kan ikke kjøpes på nettet nå.",
     "toBuild": "Tilbake til datamaskinen",
     "reserved": "Reservert av en annen kjøper.",

@@ -97,7 +97,7 @@ describe('buy page', () => {
 
         expect(screen.getByRole('heading', { name: 'Kjøp Gaming PC' })).toBeInTheDocument();
         expect(screen.getByText(/9\s?990/)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Kjøp nå med Vipps' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Kjøp' })).toBeDisabled();
         expect(screen.getByText('Reservert av en annen kjøper.')).toBeInTheDocument();
         expect(screen.queryByTestId('checkout-form')).not.toBeInTheDocument();
         expect(screen.queryByText('Datamaskinen kan ikke kjøpes på nettet nå.')).not.toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('buy page', () => {
         vi.mocked(publicGetLiveOptional).mockResolvedValue(config);
         render(await BuyPage({ params: Promise.resolve({ locale: 'en', slug: 'gaming-pc' }) }));
 
-        expect(screen.getByRole('button', { name: 'Buy now with Vipps' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Buy' })).toBeDisabled();
         expect(screen.getByText('Reserved by another buyer.')).toBeInTheDocument();
     });
 

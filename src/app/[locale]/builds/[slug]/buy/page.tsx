@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ContentImage } from '@sjolystinnovation/app-kit/ui';
 import CheckoutForm from '@/components/shop/CheckoutForm';
-import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from '@/components/shop/VippsButtonArt';
 import { BuildDetail } from '@/services/buildService';
 import type { ShopConfig } from '@/services/shopService';
 import { publicGetLive, publicGetLiveOptional } from '@/lib/publicApi';
@@ -60,8 +59,8 @@ export default async function BuyPage({ params }: { params: Params }) {
                 <h1 className="mt-4 text-3xl font-black text-gray-900 break-words">{fillTemplate(text.checkoutTitle, { title: build.title })}</h1>
                 <BuildSummary build={build} locale={locale} />
                 <div className="mt-8 space-y-3">
-                    <button type="button" disabled className={`${VIPPS_BUTTON} ${VIPPS_DISABLED}`}>
-                        <VippsButtonArt verb="buyNow" locale={locale} alt={text.buy} />
+                    <button type="button" disabled className="rounded-lg border border-gray-900 bg-gray-900 px-6 py-3 font-semibold text-white opacity-50 cursor-not-allowed">
+                        {text.buy}
                     </button>
                     <p className="text-sm text-gray-700">{text.reserved}</p>
                 </div>
