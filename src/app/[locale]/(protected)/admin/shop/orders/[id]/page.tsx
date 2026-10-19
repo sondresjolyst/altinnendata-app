@@ -2,7 +2,7 @@
 
 import { use, useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { apiErrorCode } from '@sjolystinnovation/app-kit/api';
+import { apiErrorCode, apiFieldErrors } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { Alert, TextInput } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type AdminOrder } from '@/services/shopService';
@@ -10,8 +10,8 @@ import ConfirmDialog from '@/components/shop/ConfirmDialog';
 import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import { formatOre } from '@/lib/format';
-import { formatAddress, invoiceDetails, osloDate, plainPhone } from '@/lib/shop';
+import { fillTemplate, formatOre } from '@/lib/format';
+import { formatAddress, invoiceDetails, osloDate, parseKroner, plainPhone, refundAmountIssue, remainingInOre, type RefundAmountIssue, kroner } from '@/lib/shop';
 
 type Action = 'capture' | 'cancel' | 'refund';
 
@@ -33,6 +33,8 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
     const [invoiceNumber, setInvoiceNumber] = useState('');
     const [savingInvoice, setSavingInvoice] = useState(false);
     const [acted, setActed] = useState(0);
+    const [refundAmount, setRefundAmount] = useState('');
+    const [refundIssue, setRefundIssue] = useState<RefundAmountIssue | null>(null);
     const heading = useRef<HTMLHeadingElement>(null);
 
     // The action buttons change with the status, so the one that opened the dialog may be gone.
@@ -68,17 +70,39 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         return known ?? (err instanceof Error && err.message ? err.message : fallback);
     };
 
+    const remaining = remainingInOre(order);
+
+    const openAction = (action: Action) => {
+        setRefundAmount(kroner(remaining));
+        setRefundIssue(null);
+        setConfirming(action);
+    };
+
     const run = async (action: Action) => {
+        let amountInOre = 0;
+        if (action === 'refund') {
+            const issue = refundAmountIssue(refundAmount, remaining);
+            setRefundIssue(issue);
+            if (issue) return;
+            amountInOre = parseKroner(refundAmount) ?? 0;
+        }
         setBusy(true);
         try {
-            const updated = await ShopService[action](order.id);
+            const updated = action === 'refund'
+                ? await ShopService.refund(order.id, amountInOre, order.refundedInOre)
+                : await ShopService[action](order.id);
             setOrder(updated);
             setConfirming(null);
             setActed(n => n + 1);
             toast.success({ capture: text.captureDone, cancel: text.cancelDone, refund: text.refundDone }[action]);
         } catch (err) {
-            setConfirming(null);
-            toast.error(failureText(err, text.actionFailed));
+            if (action === 'refund' && apiFieldErrors(err)?.amountInOre) {
+                // The dialog stays open so the amount can be fixed.
+                setRefundIssue(refundAmountIssue(refundAmount, remaining) ?? 'tooHigh');
+            } else {
+                setConfirming(null);
+                toast.error(failureText(err, text.actionFailed));
+            }
         } finally {
             setBusy(false);
         }
@@ -98,14 +122,16 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         }
     };
 
-    const actions: { action: Action; label: string; confirm: string; style: string }[] = [];
+    const actions: { action: Action; label: string; title: string; confirm: string; style: string }[] = [];
     if (order.status === 'Reserved') {
         actions.push(
-            { action: 'capture', label: text.capture, confirm: text.confirmCapture, style: PRIMARY },
-            { action: 'cancel', label: text.cancel, confirm: text.confirmCancel, style: SECONDARY },
+            { action: 'capture', label: text.capture, title: fillTemplate(text.captureTitle, { amount: formatOre(order.totalInOre, locale) }), confirm: text.confirmCapture, style: PRIMARY },
+            { action: 'cancel', label: text.cancel, title: text.cancel, confirm: text.confirmCancel, style: SECONDARY },
         );
-    } else if (order.status === 'Paid') {
-        actions.push({ action: 'refund', label: text.refund, confirm: text.confirmRefund, style: SECONDARY });
+    } else if (order.status === 'Paid' && remaining > 0) {
+        const typed = parseKroner(refundAmount);
+        const shown = typed !== null && typed > 0 && typed <= remaining ? typed : remaining;
+        actions.push({ action: 'refund', label: text.refund, title: text.refund, confirm: fillTemplate(text.confirmRefund, { amount: formatOre(shown, locale) }), style: SECONDARY });
     }
     const pending = actions.find(a => a.action === confirming);
 
@@ -131,7 +157,6 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         [text.buildPrice, formatOre(order.buildPriceInOre, locale)],
         [text.columns.total, formatOre(order.totalInOre, locale)],
         [text.captured, order.capturedInOre > 0 ? formatOre(order.capturedInOre, locale) : null],
-        [text.refunded, order.refundedInOre > 0 ? formatOre(order.refundedInOre, locale) : null],
         [text.columns.deadline, date(order.captureGuaranteedUntil) ?? text.unknown],
         [text.created, date(order.createdAt)],
         [text.termsAccepted, date(order.termsAcceptedAt)],
@@ -164,10 +189,15 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                         </div>
                     ))}
                 </dl>
+                {order.refundedInOre > 0 && (
+                    <p className="text-sm font-semibold text-gray-900">
+                        {fillTemplate(text.refundedOf, { refunded: formatOre(order.refundedInOre, locale), captured: formatOre(order.capturedInOre, locale) })}
+                    </p>
+                )}
                 {actions.length > 0 && (
                     <div className="flex flex-wrap gap-3">
                         {actions.map(a => (
-                            <button key={a.action} type="button" disabled={busy} onClick={() => setConfirming(a.action)} className={`${BUTTON} ${a.style}`}>
+                            <button key={a.action} type="button" disabled={busy} onClick={() => openAction(a.action)} className={`${BUTTON} ${a.style}`}>
                                 {a.label}
                             </button>
                         ))}
@@ -201,14 +231,25 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
 
             {pending && (
                 <ConfirmDialog
-                    title={pending.label}
+                    title={pending.title}
                     message={pending.confirm}
                     confirmLabel={pending.label}
                     cancelLabel={dict.common.cancel}
                     busy={busy}
                     onConfirm={() => void run(pending.action)}
                     onClose={() => setConfirming(null)}
-                />
+                >
+                    {pending.action === 'refund' && (
+                        <TextInput
+                            label={text.refundAmount}
+                            inputMode="decimal"
+                            autoComplete="off"
+                            value={refundAmount}
+                            onChange={e => setRefundAmount(e.target.value)}
+                            error={refundIssue ? fillTemplate(text.refundValidation[refundIssue], { max: formatOre(remaining, locale) }) : undefined}
+                        />
+                    )}
+                </ConfirmDialog>
             )}
         </div>
     );

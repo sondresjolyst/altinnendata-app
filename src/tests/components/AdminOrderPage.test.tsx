@@ -78,10 +78,10 @@ describe('the admin order page', () => {
         for (const fn of Object.values(service)) fn.mockReset();
     });
 
-    it('shows Ta betalt and Kanseller only for a reserved order, Betal tilbake only for a paid one', async () => {
+    it('shows Trekk beløpet and Kanseller only for a reserved order, Betal tilbake only for a paid one', async () => {
         service.getOrder.mockResolvedValue(reserved);
         const first = renderPage();
-        expect(await screen.findByRole('button', { name: 'Ta betalt' })).toBeInTheDocument();
+        expect(await screen.findByRole('button', { name: 'Trekk beløpet' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kanseller' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Betal tilbake' })).not.toBeInTheDocument();
         first.unmount();
@@ -89,7 +89,7 @@ describe('the admin order page', () => {
         service.getOrder.mockResolvedValue(paid);
         renderPage();
         expect(await screen.findByRole('button', { name: 'Betal tilbake' })).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Ta betalt' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Trekk beløpet' })).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Kanseller' })).not.toBeInTheDocument();
     });
 
@@ -118,15 +118,25 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
         expect(service.capture).not.toHaveBeenCalled();
 
-        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
 
         await waitFor(() => expect(service.capture).toHaveBeenCalledWith(7));
         expect(await screen.findByRole('button', { name: 'Betal tilbake' })).toBeInTheDocument();
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
         expect(screen.getAllByText('Betalt').length).toBeGreaterThan(0);
+    });
+
+    it('asks Trekk beløpet fra kundens Vipps in the capture dialog', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
+
+        expect(within(screen.getByRole('dialog')).getByRole('heading', { name: /^Trekk .*12\s990.* fra kundens Vipps\?$/ })).toBeInTheDocument();
     });
 
     it('does nothing when the confirm dialog is cancelled', async () => {
@@ -187,8 +197,8 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
-        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
         await user.keyboard('{Escape}');
 
         expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -219,11 +229,11 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
-        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
 
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Ordren har endret status. Last siden på nytt.'));
-        expect(screen.getByRole('button', { name: 'Ta betalt' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Trekk beløpet' })).toBeInTheDocument();
     });
 
     it('limits the invoice number to 50 characters', async () => {
@@ -239,8 +249,8 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
-        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
 
         await screen.findByRole('button', { name: 'Betal tilbake' });
         expect(screen.getByRole('heading', { name: 'Ordre' })).toHaveFocus();
@@ -257,7 +267,7 @@ describe('the admin order page', () => {
 
         await waitFor(() => expect(service.cancel).toHaveBeenCalledWith(7));
         await waitFor(() => expect(toastSpies.success).toHaveBeenCalledWith('Ordren er kansellert'));
-        expect(screen.queryByRole('button', { name: 'Ta betalt' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Trekk beløpet' })).not.toBeInTheDocument();
         expect(screen.getAllByText('Kansellert').length).toBeGreaterThan(0);
     });
 
@@ -270,9 +280,84 @@ describe('the admin order page', () => {
         await user.click(await screen.findByRole('button', { name: 'Betal tilbake' }));
         await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Betal tilbake' }));
 
-        await waitFor(() => expect(service.refund).toHaveBeenCalledWith(7));
+        await waitFor(() => expect(service.refund).toHaveBeenCalledWith(7, 1299000, 0));
         await waitFor(() => expect(toastSpies.success).toHaveBeenCalledWith('Beløpet er betalt tilbake'));
         expect(screen.queryByRole('button', { name: 'Betal tilbake' })).not.toBeInTheDocument();
+    });
+
+    describe('refunding an amount', () => {
+        const partly: AdminOrder = { ...paid, refundedInOre: 300000 };
+        const flat = (t: string) => t.replace(/[\s\u00a0\u202f]/g, ' ');
+        const openRefund = async () => {
+            const user = userEvent.setup();
+            renderPage();
+            await user.click(await screen.findByRole('button', { name: 'Betal tilbake' }));
+            return { user, dialog: within(screen.getByRole('dialog')) };
+        };
+
+        it('prefills the rest in kroner and asks about it', async () => {
+            service.getOrder.mockResolvedValue(partly);
+            const { dialog } = await openRefund();
+
+            expect(dialog.getByLabelText('Beløp (kr)')).toHaveValue('9990,00');
+            expect(dialog.getByText(/^Betal tilbake .*9\s990.* til kunden\?$/)).toBeInTheDocument();
+        });
+
+        it('sends the typed amount in øre with the refunded total the page loaded', async () => {
+            service.getOrder.mockResolvedValue(partly);
+            service.refund.mockResolvedValue({ ...partly, refundedInOre: 400000 });
+            const { user, dialog } = await openRefund();
+
+            await user.clear(dialog.getByLabelText('Beløp (kr)'));
+            await user.type(dialog.getByLabelText('Beløp (kr)'), '1000');
+            await user.click(dialog.getByRole('button', { name: 'Betal tilbake' }));
+
+            await waitFor(() => expect(service.refund).toHaveBeenCalledWith(7, 100000, 300000));
+            expect(await screen.findByRole('button', { name: 'Betal tilbake' })).toBeInTheDocument();
+        });
+
+        it.each([
+            ['', 'Du må fylle ut beløp.'],
+            ['abc', 'Skriv beløpet i hele kroner eller med to desimaler.'],
+            ['0', 'Beløpet må være større enn 0 kr.'],
+            ['9990,01', 'Beløpet kan ikke være større enn 9 990 kr.'],
+        ])('refuses %j without calling the API', async (typed, message) => {
+            service.getOrder.mockResolvedValue(partly);
+            const { user, dialog } = await openRefund();
+
+            await user.clear(dialog.getByLabelText('Beløp (kr)'));
+            if (typed) await user.type(dialog.getByLabelText('Beløp (kr)'), typed);
+            await user.click(dialog.getByRole('button', { name: 'Betal tilbake' }));
+
+            expect(dialog.getByText(message, { normalizer: flat })).toBeInTheDocument();
+            expect(service.refund).not.toHaveBeenCalled();
+        });
+
+        it('shows the client text when the API refuses the amount', async () => {
+            service.getOrder.mockResolvedValue(partly);
+            service.refund.mockRejectedValue(await refused(400, { errors: { amountInOre: ['The amount must be between 1 and 999000 øre.'] } }));
+            const { user, dialog } = await openRefund();
+
+            await user.click(dialog.getByRole('button', { name: 'Betal tilbake' }));
+
+            expect(await screen.findByText(/Beløpet kan ikke være større enn/)).toBeInTheDocument();
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        });
+
+        it('shows how much has been refunded of the captured amount', async () => {
+            service.getOrder.mockResolvedValue(partly);
+            renderPage();
+
+            expect(await screen.findByText(/^Betalt tilbake: .*3\s000.* av .*12\s990.*$/)).toBeInTheDocument();
+        });
+
+        it('has no Betal tilbake once everything is paid back', async () => {
+            service.getOrder.mockResolvedValue({ ...paid, refundedInOre: 1299000 });
+            renderPage();
+
+            await screen.findByText('Ordre');
+            expect(screen.queryByRole('button', { name: 'Betal tilbake' })).not.toBeInTheDocument();
+        });
     });
 
     it('shows the captureIncomplete text when Vipps did not confirm the full amount', async () => {
@@ -281,22 +366,25 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
-        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
 
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke hele beløpet.'));
     });
 
-    it('shows the refundIncomplete text when Vipps did not confirm the full refund', async () => {
+    it.each([
+        ['refundChanged', 'Ordren er betalt tilbake i mellomtiden. Last ordren på nytt.'],
+        ['refundPending', 'Vent til Vipps har bekreftet forrige tilbakebetaling.'],
+    ])('shows the %s text when the API answers 409', async (code, message) => {
         service.getOrder.mockResolvedValue(paid);
-        service.refund.mockRejectedValue(await refused(502, { message: 'Partial', code: 'refundIncomplete' }));
+        service.refund.mockRejectedValue(await refused(409, { message: 'x', code }));
         const user = userEvent.setup();
         renderPage();
 
         await user.click(await screen.findByRole('button', { name: 'Betal tilbake' }));
         await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Betal tilbake' }));
 
-        await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke hele tilbakebetalingen.'));
+        await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith(message));
     });
 
     it('shows the Vipps did not confirm text when Vipps cannot be reached after an action', async () => {
@@ -305,8 +393,8 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Ta betalt' }));
-        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ta betalt' }));
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
 
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen.'));
     });

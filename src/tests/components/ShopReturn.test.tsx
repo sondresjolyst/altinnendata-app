@@ -39,6 +39,8 @@ describe('ShopReturn', () => {
         expect(screen.getByRole('heading', { name: 'Betalingen er reservert' })).toBeInTheDocument();
         expect(screen.getByText(/Vi har reservert (kr\s)?12\s990(\skr)? i Vipps for Gaming PC\./)).toBeInTheDocument();
         expect(screen.getByText('Ordrenummer AD-1001. Du får en ordrebekreftelse på e-post.')).toBeInTheDocument();
+        expect(screen.getByText(/Vi har reservert .* i Vipps for Gaming PC\.$/)).toBeInTheDocument();
+        expect(document.body.textContent).not.toMatch(/trekkes|levering|henting/i);
         expect(screen.getByRole('link', { name: 'Til datamaskinene' })).toHaveAttribute('href', '/no/builds');
         expect(orderStatus).toHaveBeenCalledWith('abc123');
     });

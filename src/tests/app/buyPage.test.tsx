@@ -47,7 +47,6 @@ describe('buy page', () => {
     });
 
     it.each([
-        ['a reserved build', build({ availability: 'Reserved' }), config],
         ['a build without a price', build({ priceNok: null }), config],
         ['a closed shop', build(), { ...config, buyButton: 'Off' } as ShopConfig],
         ['a missing config', build(), null],
@@ -61,6 +60,28 @@ describe('buy page', () => {
         expect(screen.getByRole('link', { name: 'Tilbake til datamaskinen' })).toHaveAttribute('href', '/no/builds/gaming-pc');
         expect(screen.getByRole('link', { name: 'Ta kontakt' })).toHaveAttribute('href', '/no/contact?build=gaming-pc');
         expect(screen.queryByTestId('checkout-form')).not.toBeInTheDocument();
+    });
+
+    it('shows the summary and a disabled button with the reserved text for a reserved build, and no form', async () => {
+        vi.mocked(publicGetLive).mockResolvedValue(build({ availability: 'Reserved' }));
+        vi.mocked(publicGetLiveOptional).mockResolvedValue(config);
+        render(await BuyPage({ params }));
+
+        expect(screen.getByRole('heading', { name: 'Kjøp Gaming PC' })).toBeInTheDocument();
+        expect(screen.getByText(/9\s?990/)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kjøp med Vipps' })).toBeDisabled();
+        expect(screen.getByText('Reservert av en annen kjøper.')).toBeInTheDocument();
+        expect(screen.queryByTestId('checkout-form')).not.toBeInTheDocument();
+        expect(screen.queryByText('Datamaskinen kan ikke kjøpes på nettet nå.')).not.toBeInTheDocument();
+    });
+
+    it('says it in English for a reserved build', async () => {
+        vi.mocked(publicGetLive).mockResolvedValue(build({ availability: 'Reserved' }));
+        vi.mocked(publicGetLiveOptional).mockResolvedValue(config);
+        render(await BuyPage({ params: Promise.resolve({ locale: 'en', slug: 'gaming-pc' }) }));
+
+        expect(screen.getByRole('button', { name: 'Buy with Vipps' })).toBeDisabled();
+        expect(screen.getByText('Reserved by another buyer.')).toBeInTheDocument();
     });
 
     it('has a heading on the unavailable view', async () => {

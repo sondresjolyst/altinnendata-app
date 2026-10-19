@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canBuy, captureWarning, invoiceDetails, isBuyable, kroner, osloDate } from '@/lib/shop';
+import { canBuy, captureWarning, invoiceDetails, isBuyable, kroner, osloDate, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { AdminOrder } from '@/services/shopService';
 
@@ -146,5 +146,51 @@ describe('isBuyable', () => {
         expect(isBuyable({ ...build, availability: 'Sold' } as never)).toBe(false);
         expect(isBuyable({ ...build, priceNok: null } as never)).toBe(false);
         expect(isBuyable({ ...build, published: false } as never)).toBe(false);
+    });
+});
+
+describe('remainingInOre', () => {
+    it('is what was captured less what was refunded', () => {
+        expect(remainingInOre({ capturedInOre: 1299000, refundedInOre: 300000 })).toBe(999000);
+        expect(remainingInOre({ capturedInOre: 0, refundedInOre: 0 })).toBe(0);
+    });
+});
+
+describe('parseKroner', () => {
+    it.each([
+        ['100', 10000], ['100,5', 10050], ['100,50', 10050], ['100.50', 10050], [' 12990,00 ', 1299000], ['0,05', 5], ['0', 0],
+    ])('reads %j as %d øre', (typed, ore) => expect(parseKroner(typed)).toBe(ore));
+
+    it.each(['', 'abc', '1,234', '-5', '1 000', '1,', ',5', '1e3'])('refuses %j', typed => expect(parseKroner(typed)).toBeNull());
+});
+
+describe('refundAmountIssue', () => {
+    it('names what is wrong with the typed amount', () => {
+        expect(refundAmountIssue('', 1000)).toBe('required');
+        expect(refundAmountIssue('  ', 1000)).toBe('required');
+        expect(refundAmountIssue('x', 1000)).toBe('invalid');
+        expect(refundAmountIssue('0', 1000)).toBe('tooLow');
+        expect(refundAmountIssue('0,00', 1000)).toBe('tooLow');
+        expect(refundAmountIssue('10,01', 1000)).toBe('tooHigh');
+        expect(refundAmountIssue('10', 1000)).toBeNull();
+        expect(refundAmountIssue('0,01', 1000)).toBeNull();
+    });
+});
+
+describe('invoiceDetails after a refund', () => {
+    it('adds the refunded amount and its date after the captured date', () => {
+        const details = invoiceDetails({ ...order, status: 'Refunded', refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, no);
+        const keys = details.map(d => d.key);
+        expect(keys.slice(keys.indexOf('capturedDate'), keys.indexOf('reference'))).toEqual(['capturedDate', 'refunded', 'refundedDate']);
+        expect(details.find(d => d.key === 'refunded')).toMatchObject({ label: 'Betalt tilbake', value: '12990,00' });
+        expect(details.find(d => d.key === 'refundedDate')?.value).toBe('21.10.2026');
+        expect(invoiceDetails({ ...order, refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, en).find(d => d.key === 'refunded')?.label).toBe('Refunded');
+    });
+
+    it('adds only the amount for a partial refund and nothing before any refund', () => {
+        const partial = invoiceDetails({ ...order, refundedInOre: 300000 }, no).map(d => d.key);
+        expect(partial).toContain('refunded');
+        expect(partial).not.toContain('refundedDate');
+        expect(invoiceDetails(order, no).some(d => d.key === 'refunded')).toBe(false);
     });
 });

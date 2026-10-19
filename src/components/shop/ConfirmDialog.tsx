@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 interface ConfirmDialogProps {
     title: string;
@@ -8,12 +8,14 @@ interface ConfirmDialogProps {
     confirmLabel: string;
     cancelLabel: string;
     busy: boolean;
+    /** Extra content under the message, such as an amount field. */
+    children?: ReactNode;
     onConfirm: () => void;
     onClose: () => void;
 }
 
 /** A modal confirmation. The native dialog traps focus, closes on Escape and gives focus back to the opener. */
-export default function ConfirmDialog({ title, message, confirmLabel, cancelLabel, busy, onConfirm, onClose }: ConfirmDialogProps) {
+export default function ConfirmDialog({ title, message, confirmLabel, cancelLabel, busy, children, onConfirm, onClose }: ConfirmDialogProps) {
     const ref = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
@@ -43,6 +45,7 @@ export default function ConfirmDialog({ title, message, confirmLabel, cancelLabe
             <div className="space-y-4">
                 <h2 id="confirm-heading" className="font-bold text-gray-900">{title}</h2>
                 <p className="text-sm text-gray-700">{message}</p>
+                {children}
                 <div className="flex justify-end gap-3">
                     <button type="button" disabled={busy} onClick={onClose} className={`${button} border border-gray-300 text-gray-900 hover:bg-gray-50`}>
                         {cancelLabel}

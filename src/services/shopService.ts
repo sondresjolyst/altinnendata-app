@@ -79,6 +79,8 @@ export interface AdminOrderSummary {
     isTest: boolean;
     captureGuaranteedUntil: string | null;
     invoiceNumber: string | null;
+    capturedInOre: number;
+    refundedInOre: number;
     createdAt: string;
 }
 
@@ -120,8 +122,8 @@ export interface AdminOrder {
 export type ShopSettingsInput = Omit<ShopSettings, 'termsUpdatedSinceShop' | 'shopCreatedAt'>;
 
 // Each of these changes whether the build can be sold, so the public build pages are purged.
-const act = async (id: number, action: 'capture' | 'cancel' | 'refund', fallback: string) => {
-    const order = await request(() => axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/${action}`), fallback);
+const act = async (id: number, action: 'capture' | 'cancel' | 'refund', fallback: string, body?: object) => {
+    const order = await request(() => (body ? axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/${action}`, body) : axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/${action}`)), fallback);
     await revalidateTarget(REVALIDATE_TARGETS.builds);
     return order;
 };
@@ -146,14 +148,20 @@ const ShopService = {
 
     cancel: (id: number) => act(id, 'cancel', 'Failed to cancel the order'),
 
-    refund: (id: number) => act(id, 'refund', 'Failed to refund the order'),
+    /** `expectedRefundedInOre` is the refunded total the page loaded, so the API can refuse a refund made on a stale order. */
+    refund: (id: number, amountInOre: number, expectedRefundedInOre: number) =>
+        act(id, 'refund', 'Failed to refund the order', { amountInOre, expectedRefundedInOre }),
 
     setInvoiceNumber: (id: number, invoiceNumber: string | null) =>
         request(() => axiosInstance.put<AdminOrder>(`/admin/shop/orders/${id}/invoice-number`, { invoiceNumber }), 'Failed to save the invoice number'),
 
     /** Sends the admin's token when signed in and none otherwise. */
-    checkout: (req: CheckoutRequest) =>
-        request(() => axiosInstance.post<CheckoutResponse>('/shop/checkout', req), 'Failed to start the payment'),
+    checkout: async (req: CheckoutRequest) => {
+        const started = await request(() => axiosInstance.post<CheckoutResponse>('/shop/checkout', req), 'Failed to start the payment');
+        // The build is held now, so its pages must stop offering it before the buyer is sent to Vipps.
+        await revalidateTarget(REVALIDATE_TARGETS.builds);
+        return started;
+    },
 
     /** The public status of an order by its token, or null when no order has it. */
     orderStatus: async (token: string) => {

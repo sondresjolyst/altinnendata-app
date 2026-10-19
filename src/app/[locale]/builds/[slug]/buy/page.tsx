@@ -46,6 +46,27 @@ export default async function BuyPage({ params }: { params: Params }) {
     const text = getDictionary(locale).shop;
     const buildHref = localeHref(locale, `/builds/${build.slug}`);
 
+    const reserved = build.availability === 'Reserved' && build.published && build.priceNok != null;
+    const shopOpen = shop && shop.buyButton !== 'Off' && shop.delivery.length > 0;
+
+    if (reserved && shopOpen) {
+        return (
+            <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+                <Link href={buildHref} className="text-sm font-semibold text-gray-500 hover:text-gray-900">
+                    ← {text.toBuild}
+                </Link>
+                <h1 className="mt-4 text-3xl font-black text-gray-900 break-words">{fillTemplate(text.checkoutTitle, { title: build.title })}</h1>
+                <BuildSummary build={build} locale={locale} price={text.price} />
+                <div className="mt-8 space-y-3">
+                    <button type="button" disabled className="rounded-lg border border-gray-900 bg-gray-900 px-6 py-3 font-semibold text-white opacity-50 cursor-not-allowed">
+                        {text.buy}
+                    </button>
+                    <p className="text-sm text-gray-700">{text.reserved}</p>
+                </div>
+            </div>
+        );
+    }
+
     if (!isBuyable(build) || !shop || shop.buyButton === 'Off' || shop.delivery.length === 0) {
         return (
             <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
@@ -69,25 +90,31 @@ export default async function BuyPage({ params }: { params: Params }) {
             </Link>
             <h1 className="mt-4 text-3xl font-black text-gray-900 break-words">{fillTemplate(text.checkoutTitle, { title: build.title })}</h1>
 
-            <div className="mt-6 flex items-center gap-4 rounded-2xl border border-gray-200 p-4">
-                {build.coverImageId && (
-                    <div className="h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
-                        <ContentImage
-                            imageId={build.coverImageId}
-                            alt={build.title}
-                            sizes="128px"
-                            className="h-full w-auto max-w-full object-contain"
-                        />
-                    </div>
-                )}
-                <div className="min-w-0">
-                    <p className="font-bold text-gray-900 break-words">{build.title}</p>
-                    <p className="text-sm text-gray-600">{text.price}: {formatPrice(build.priceNok!, locale)}</p>
-                </div>
-            </div>
+            <BuildSummary build={build} locale={locale} price={text.price} />
 
             <div className="mt-8">
                 <CheckoutForm build={build} delivery={shop.delivery} mode={shop.buyButton} locale={locale} />
+            </div>
+        </div>
+    );
+}
+
+function BuildSummary({ build, locale, price }: { build: BuildDetail; locale: Locale; price: string }) {
+    return (
+        <div className="mt-6 flex items-center gap-4 rounded-2xl border border-gray-200 p-4">
+            {build.coverImageId && (
+                <div className="h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+                    <ContentImage
+                        imageId={build.coverImageId}
+                        alt={build.title}
+                        sizes="128px"
+                        className="h-full w-auto max-w-full object-contain"
+                    />
+                </div>
+            )}
+            <div className="min-w-0">
+                <p className="font-bold text-gray-900 break-words">{build.title}</p>
+                <p className="text-sm text-gray-600">{price}: {formatPrice(build.priceNok!, locale)}</p>
             </div>
         </div>
     );

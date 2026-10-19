@@ -36,6 +36,34 @@ export function captureWarning(until: string | null, now: Date): 'unknown' | 'so
     return new Date(until).getTime() - now.getTime() < SOON_HOURS * HOUR ? 'soon' : 'ok';
 }
 
+/** What is left to refund on a paid order, in øre. */
+export function remainingInOre(order: Pick<AdminOrder, 'capturedInOre' | 'refundedInOre'>): number {
+    return order.capturedInOre - order.refundedInOre;
+}
+
+/** Whether part of the captured amount, but not all of it, has been paid back. */
+export function isPartlyRefunded(order: Pick<AdminOrder, 'capturedInOre' | 'refundedInOre'>): boolean {
+    return order.refundedInOre > 0 && order.refundedInOre < order.capturedInOre;
+}
+
+/** Whole kroner or kroner with one or two decimals, comma or dot, as øre. Anything else is null. */
+export function parseKroner(typed: string): number | null {
+    const match = /^(\d+)(?:[.,](\d{1,2}))?$/.exec(typed.trim());
+    if (!match) return null;
+    return Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0'));
+}
+
+export type RefundAmountIssue = 'required' | 'invalid' | 'tooLow' | 'tooHigh';
+
+/** What is wrong with a typed refund amount, the way the API checks it: more than 0 and at most what is left. */
+export function refundAmountIssue(typed: string, remaining: number): RefundAmountIssue | null {
+    if (typed.trim() === '') return 'required';
+    const ore = parseKroner(typed);
+    if (ore === null) return 'invalid';
+    if (ore < 1) return 'tooLow';
+    return ore > remaining ? 'tooHigh' : null;
+}
+
 export interface InvoiceDetail {
     key: string;
     label: string;
@@ -79,6 +107,10 @@ export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDeta
     if (order.authorizedAt) details.push({ key: 'reservedDate', label: labels.reservedDate, value: osloDate(order.authorizedAt) });
 
     if (order.capturedAt) details.push({ key: 'capturedDate', label: labels.capturedDate, value: osloDate(order.capturedAt) });
+
+    if (order.refundedInOre > 0) details.push({ key: 'refunded', label: labels.refunded, value: kroner(order.refundedInOre) });
+
+    if (order.refundedInOre > 0 && order.refundedAt) details.push({ key: 'refundedDate', label: labels.refundedDate, value: osloDate(order.refundedAt) });
 
     details.push(
         { key: 'reference', label: labels.reference, value: order.reference },

@@ -57,7 +57,7 @@ describe('the order actions', () => {
         revalidate.mockReset();
     });
 
-    it.each(['capture', 'cancel', 'refund'] as const)('purges the build pages after %s', async action => {
+    it.each(['capture', 'cancel'] as const)('purges the build pages after %s', async action => {
         post.mockResolvedValueOnce({ data: { id: 7 } });
 
         await ShopService[action](7);
@@ -66,10 +66,60 @@ describe('the order actions', () => {
         expect(revalidate).toHaveBeenCalledWith('builds');
     });
 
-    it.each(['capture', 'cancel', 'refund'] as const)('leaves the build pages alone when %s fails', async action => {
+    it.each(['capture', 'cancel'] as const)('leaves the build pages alone when %s fails', async action => {
         post.mockRejectedValueOnce(new Error('Boom'));
 
         await expect(ShopService[action](7)).rejects.toThrow();
+
+        expect(revalidate).not.toHaveBeenCalled();
+    });
+});
+
+describe('ShopService.refund', () => {
+    beforeEach(() => {
+        post.mockReset();
+        revalidate.mockReset();
+    });
+
+    it('posts the amount and the refunded total the page saw, then purges the build pages', async () => {
+        post.mockResolvedValueOnce({ data: { id: 7 } });
+
+        await ShopService.refund(7, 100000, 300000);
+
+        expect(post).toHaveBeenCalledWith('/admin/shop/orders/7/refund', { amountInOre: 100000, expectedRefundedInOre: 300000 });
+        expect(revalidate).toHaveBeenCalledWith('builds');
+    });
+
+    it('leaves the build pages alone when the refund fails', async () => {
+        post.mockRejectedValueOnce(new Error('Boom'));
+
+        await expect(ShopService.refund(7, 100000, 0)).rejects.toThrow();
+
+        expect(revalidate).not.toHaveBeenCalled();
+    });
+});
+
+describe('ShopService.checkout', () => {
+    beforeEach(() => {
+        post.mockReset();
+        revalidate.mockReset();
+    });
+
+    it('purges the build pages once the payment started, so the held build shows as reserved', async () => {
+        const order: string[] = [];
+        post.mockImplementationOnce(async () => { order.push('post'); return { data: { redirectUrl: 'https://vipps.test/x', token: 't' } }; });
+        revalidate.mockImplementationOnce(async () => { order.push('revalidate'); });
+
+        await expect(ShopService.checkout({} as never)).resolves.toEqual({ redirectUrl: 'https://vipps.test/x', token: 't' });
+
+        expect(revalidate).toHaveBeenCalledWith('builds');
+        expect(order).toEqual(['post', 'revalidate']);
+    });
+
+    it('does not purge when the checkout is refused', async () => {
+        post.mockRejectedValueOnce(new Error('Boom'));
+
+        await expect(ShopService.checkout({} as never)).rejects.toThrow();
 
         expect(revalidate).not.toHaveBeenCalled();
     });

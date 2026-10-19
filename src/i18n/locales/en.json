@@ -96,6 +96,7 @@
     "buy": "Buy with Vipps",
     "unavailable": "This computer cannot be bought online right now.",
     "toBuild": "Back to the computer",
+    "reserved": "Reserved by another buyer.",
     "contactUs": "Get in touch",
     "notOpen": "Buying has not opened yet.",
     "checkoutTitle": "Buy {title}",
@@ -149,7 +150,7 @@
       },
       "success": {
         "title": "The payment is reserved",
-        "body": "We have reserved {total} in Vipps for {build}. The amount is taken when you receive the computer. We will be in touch about delivery or collection.",
+        "body": "We have reserved {total} in Vipps for {build}.",
         "note": "Order number {reference}. You will get an order confirmation by email."
       },
       "pending": {
@@ -359,7 +360,7 @@
         "build": "Computer",
         "delivery": "Delivery",
         "total": "Total",
-        "deadline": "Capture deadline",
+        "deadline": "Deadline to take the payment",
         "invoice": "Invoice number"
       },
       "test": "Test",
@@ -379,20 +380,29 @@
       "withinDistance": "Lives within the delivery distance",
       "buildLink": "View the computer",
       "captured": "Amount paid",
-      "refunded": "Amount refunded",
       "created": "Created",
       "reserved": "Reserved",
       "paid": "Paid",
       "cancelled": "Cancelled",
       "refundedAt": "Refunded",
       "termsAccepted": "Terms accepted",
-      "capture": "Take payment",
+      "capture": "Take the payment",
+      "captureTitle": "Take {amount} from the customer's Vipps?",
       "cancel": "Cancel order",
       "refund": "Refund",
-      "confirmCapture": "Do you want to take payment for this order? The amount is charged to the buyer.",
+      "confirmCapture": "This cannot be undone.",
       "confirmCancel": "Do you want to cancel the order? The reservation is released and the computer becomes available again.",
-      "confirmRefund": "Do you want to refund the full amount to the buyer?",
-      "captureDone": "The payment has been taken",
+      "confirmRefund": "Refund {amount} to the customer?",
+      "refundAmount": "Amount (NOK)",
+      "refundedOf": "Refunded: {refunded} of {captured}",
+      "partlyRefunded": "Partly refunded",
+      "refundValidation": {
+        "required": "Enter an amount.",
+        "invalid": "Enter the amount in whole kroner or with two decimals.",
+        "tooLow": "The amount must be more than 0 kr.",
+        "tooHigh": "The amount cannot be more than {max}."
+      },
+      "captureDone": "The amount has been taken",
       "cancelDone": "The order has been cancelled",
       "refundDone": "The amount has been refunded",
       "copy": "Copy {label}",
@@ -411,7 +421,9 @@
         "total": "Total",
         "orderDate": "Order date",
         "reservedDate": "Payment reserved",
-        "capturedDate": "Payment taken",
+        "capturedDate": "Amount taken",
+        "refunded": "Refunded",
+        "refundedDate": "Refund date",
         "reference": "Vipps reference"
       },
       "vatLabel": "VAT",
@@ -423,7 +435,8 @@
       "apiErrors": {
         "wrongStatus": "The order has changed status. Reload the page.",
         "captureIncomplete": "Vipps did not confirm the full amount.",
-        "refundIncomplete": "Vipps did not confirm the full refund.",
+        "refundChanged": "The order was refunded meanwhile. Reload the order.",
+        "refundPending": "Wait until Vipps has confirmed the last refund.",
         "paymentProviderUnavailable": "Vipps did not confirm the change. Check the payment in the Vipps portal before you try again."
       }
     }

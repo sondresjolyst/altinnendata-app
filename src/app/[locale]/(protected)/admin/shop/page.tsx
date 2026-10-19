@@ -8,7 +8,7 @@ import ShopService, { type AdminOrderSummary } from '@/services/shopService';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { formatOre } from '@/lib/format';
-import { captureWarning, osloDate } from '@/lib/shop';
+import { captureWarning, isPartlyRefunded, osloDate } from '@/lib/shop';
 
 export default function AdminOrdersPage() {
     const { locale, dict } = useDictionary();
@@ -65,6 +65,9 @@ export default function AdminOrdersPage() {
                             <tr key={order.id}>
                                 <td className={cell}>
                                     <span>{text.statuses[order.status]}</span>
+                                    {isPartlyRefunded(order) && (
+                                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{text.partlyRefunded}</span>
+                                    )}
                                     {order.isTest && (
                                         <span className="ml-2 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-700">{text.test}</span>
                                     )}

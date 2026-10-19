@@ -20,6 +20,8 @@ const summary = (overrides: Partial<AdminOrderSummary>): AdminOrderSummary => ({
     pcBuildId: 3,
     deliveryMethod: 'Shipping',
     totalInOre: 1299000,
+    capturedInOre: 0,
+    refundedInOre: 0,
     isTest: false,
     captureGuaranteedUntil: '2099-01-01T00:00:00Z',
     invoiceNumber: null,
@@ -64,6 +66,20 @@ describe('the admin orders page', () => {
         expect(older.getByText('F-1001')).toBeInTheDocument();
         expect(older.queryByText('Under 2 dager igjen')).not.toBeInTheDocument();
         expect(older.queryByText('Test')).not.toBeInTheDocument();
+    });
+
+    it('shows the Delvis tilbakebetalt pill only while part of the captured amount is refunded', async () => {
+        service.getOrders.mockResolvedValue([
+            summary({ id: 1, status: 'Paid', capturedInOre: 1299000, refundedInOre: 300000 }),
+            summary({ id: 2, status: 'Paid', capturedInOre: 1299000, refundedInOre: 0, createdAt: '2026-10-17T10:00:00Z' }),
+            summary({ id: 3, status: 'Refunded', capturedInOre: 1299000, refundedInOre: 1299000, createdAt: '2026-10-16T10:00:00Z' }),
+        ]);
+        renderPage();
+
+        const rows = (await screen.findAllByRole('row')).slice(1);
+        expect(within(rows[0]).getByText('Delvis tilbakebetalt')).toBeInTheDocument();
+        expect(within(rows[1]).queryByText('Delvis tilbakebetalt')).not.toBeInTheDocument();
+        expect(within(rows[2]).queryByText('Delvis tilbakebetalt')).not.toBeInTheDocument();
     });
 
     it('shows Ukjent when the capture deadline is not known', async () => {

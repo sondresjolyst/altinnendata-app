@@ -96,6 +96,7 @@
     "buy": "Kjøp med Vipps",
     "unavailable": "Datamaskinen kan ikke kjøpes på nettet nå.",
     "toBuild": "Tilbake til datamaskinen",
+    "reserved": "Reservert av en annen kjøper.",
     "contactUs": "Ta kontakt",
     "notOpen": "Kjøp er ikke åpnet ennå.",
     "checkoutTitle": "Kjøp {title}",
@@ -149,7 +150,7 @@
       },
       "success": {
         "title": "Betalingen er reservert",
-        "body": "Vi har reservert {total} i Vipps for {build}. Beløpet trekkes når du får maskinen. Vi tar kontakt om levering eller henting.",
+        "body": "Vi har reservert {total} i Vipps for {build}.",
         "note": "Ordrenummer {reference}. Du får en ordrebekreftelse på e-post."
       },
       "pending": {
@@ -359,7 +360,7 @@
         "build": "Datamaskin",
         "delivery": "Levering",
         "total": "Sum",
-        "deadline": "Frist for å ta betalt",
+        "deadline": "Frist for å trekke beløpet",
         "invoice": "Fakturanummer"
       },
       "test": "Test",
@@ -379,20 +380,29 @@
       "withinDistance": "Bor innenfor leveringsavstanden",
       "buildLink": "Se datamaskinen",
       "captured": "Betalt beløp",
-      "refunded": "Tilbakebetalt beløp",
       "created": "Opprettet",
       "reserved": "Reservert",
       "paid": "Betalt",
       "cancelled": "Kansellert",
       "refundedAt": "Tilbakebetalt",
       "termsAccepted": "Vilkår godtatt",
-      "capture": "Ta betalt",
+      "capture": "Trekk beløpet",
+      "captureTitle": "Trekk {amount} fra kundens Vipps?",
       "cancel": "Kanseller",
       "refund": "Betal tilbake",
-      "confirmCapture": "Vil du ta betalt for denne ordren? Beløpet trekkes fra kjøperen.",
+      "confirmCapture": "Dette kan ikke angres.",
       "confirmCancel": "Vil du kansellere ordren? Reservasjonen frigjøres og datamaskinen blir tilgjengelig igjen.",
-      "confirmRefund": "Vil du betale tilbake hele beløpet til kjøperen?",
-      "captureDone": "Betalingen er tatt",
+      "confirmRefund": "Betal tilbake {amount} til kunden?",
+      "refundAmount": "Beløp (kr)",
+      "refundedOf": "Betalt tilbake: {refunded} av {captured}",
+      "partlyRefunded": "Delvis tilbakebetalt",
+      "refundValidation": {
+        "required": "Du må fylle ut beløp.",
+        "invalid": "Skriv beløpet i hele kroner eller med to desimaler.",
+        "tooLow": "Beløpet må være større enn 0 kr.",
+        "tooHigh": "Beløpet kan ikke være større enn {max}."
+      },
+      "captureDone": "Beløpet er trukket",
       "cancelDone": "Ordren er kansellert",
       "refundDone": "Beløpet er betalt tilbake",
       "copy": "Kopier {label}",
@@ -411,7 +421,9 @@
         "total": "Sum",
         "orderDate": "Ordredato",
         "reservedDate": "Betaling reservert",
-        "capturedDate": "Betaling tatt",
+        "capturedDate": "Beløp trukket",
+        "refunded": "Betalt tilbake",
+        "refundedDate": "Dato for tilbakebetaling",
         "reference": "Vipps-referanse"
       },
       "vatLabel": "Merverdiavgift",
@@ -423,7 +435,8 @@
       "apiErrors": {
         "wrongStatus": "Ordren har endret status. Last siden på nytt.",
         "captureIncomplete": "Vipps bekreftet ikke hele beløpet.",
-        "refundIncomplete": "Vipps bekreftet ikke hele tilbakebetalingen.",
+        "refundChanged": "Ordren er betalt tilbake i mellomtiden. Last ordren på nytt.",
+        "refundPending": "Vent til Vipps har bekreftet forrige tilbakebetaling.",
         "paymentProviderUnavailable": "Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen."
       }
     }
