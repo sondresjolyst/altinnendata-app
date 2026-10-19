@@ -23,20 +23,9 @@ import { sessionConfig } from '@/lib/session';
 
 const AVAILABILITIES: Availability[] = ['Available', 'Reserved', 'Sold'];
 
-const AVAILABILITY_LABELS: Record<Availability, string> = {
-    Available: 'Tilgjengelig',
-    Reserved: 'Reservert',
-    Sold: 'Solgt',
-};
+const AVAILABILITY_KEYS = { Available: 'available', Reserved: 'reserved', Sold: 'sold' } as const;
 
-const CATEGORIES = ['gaming', 'office', 'streaming', 'workstation'];
-
-const CATEGORY_LABELS: Record<string, string> = {
-    gaming: 'Gaming',
-    office: 'Kontor',
-    streaming: 'Streaming',
-    workstation: 'Arbeidsstasjon',
-};
+const CATEGORIES = ['gaming', 'office', 'streaming', 'workstation'] as const;
 
 interface PartLine {
     componentPartId: number | null;
@@ -307,7 +296,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                     >
                         <option value="">—</option>
-                        {CATEGORIES.map(key => <option key={key} value={key}>{CATEGORY_LABELS[key]}</option>)}
+                        {CATEGORIES.map(key => <option key={key} value={key}>{dict.builds.category[key]}</option>)}
                     </select>
                 </div>
 
@@ -333,7 +322,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                         onChange={e => setAvailability(e.target.value as Availability)}
                         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                     >
-                        {AVAILABILITIES.map(a => <option key={a} value={a}>{AVAILABILITY_LABELS[a]}</option>)}
+                        {AVAILABILITIES.map(a => <option key={a} value={a}>{dict.builds.availability[AVAILABILITY_KEYS[a]]}</option>)}
                     </select>
                 </div>
 
@@ -458,14 +447,14 @@ export default function BuildForm({ build, onSaved, onCancel }: {
             </div>
 
             <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Deleliste</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">{dict.admin.partsList}</h3>
                 <div className="space-y-2">
                     {parts.map((part, i) => (
                         <div key={i} className="space-y-3 rounded-lg border border-gray-200 p-3">
                             <div className="flex items-end gap-3">
                                 <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Del fra katalog</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">{dict.admin.partFromCatalog}</label>
                                         <select
                                             value={part.componentPartId ?? ''}
                                             onChange={e => {
@@ -478,7 +467,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                                             }}
                                             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                                         >
-                                            <option value="">— fritekst —</option>
+                                            <option value="">{dict.admin.freeTextOption}</option>
                                             {tree.map(category => (
                                                 <optgroup key={category.id} label={category.name}>
                                                     {category.parts.map(p => (
@@ -494,7 +483,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                                     {part.componentPartId == null && (
                                         <>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.category.label}</label>
                                                 <select
                                                     value={part.componentCategoryId ?? ''}
                                                     onChange={e => patchPart(i, { componentCategoryId: e.target.value === '' ? null : Number(e.target.value) })}
@@ -504,7 +493,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                                                     {tree.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                                 </select>
                                             </div>
-                                            <TextInput label="Navn" value={part.name} onChange={e => patchPart(i, { name: e.target.value })} />
+                                            <TextInput label={dict.admin.name} value={part.name} onChange={e => patchPart(i, { name: e.target.value })} />
                                         </>
                                     )}
 
@@ -527,7 +516,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                             </div>
 
                             <TextArea
-                                label="Detaljer"
+                                label={dict.admin.details}
                                 rows={2}
                                 value={part.details}
                                 onChange={e => patchPart(i, { details: e.target.value })}
@@ -539,21 +528,21 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                         onClick={() => setParts([...parts, { componentPartId: null, componentCategoryId: null, componentConditionId: null, name: '', details: '' }])}
                         className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
                     >
-                        <PlusIcon className="h-4 w-4" /> Legg til del
+                        <PlusIcon className="h-4 w-4" /> {dict.admin.addPart}
                     </button>
                 </div>
             </div>
 
             <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
                 <button onClick={onCancel} className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
-                    Avbryt
+                    {dict.common.cancel}
                 </button>
                 <button
                     onClick={save}
                     disabled={saving}
                     className="rounded-lg bg-primary text-primary-foreground font-semibold px-5 py-2 text-sm hover:brightness-95 disabled:opacity-60 transition"
                 >
-                    {saving ? 'Lagrer…' : 'Lagre'}
+                    {saving ? dict.common.saving : dict.common.save}
                 </button>
             </div>
         </div>
