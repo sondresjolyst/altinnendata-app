@@ -12,6 +12,7 @@ import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { fillTemplate, formatPrice } from '@/lib/format';
 import { canBuy } from '@/lib/shop';
+import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from './VippsButtonArt';
 import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, type CheckoutField } from '@/lib/validation';
 
 interface CheckoutFormProps {
@@ -251,13 +252,11 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
                     <p className="text-lg font-extrabold text-gray-900">
                         {text.total}: <span data-testid="total">{formatPrice(total, locale)}</span>
                     </p>
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white hover:bg-gray-800 disabled:opacity-60 transition"
-                    >
-                        {submitting ? text.paying : text.pay}
+                    {/* The artwork keeps its words while the payment starts, so the status says it instead. */}
+                    <button type="submit" disabled={submitting} aria-busy={submitting} className={`${VIPPS_BUTTON} ${submitting ? VIPPS_DISABLED : ''}`}>
+                        <VippsButtonArt verb="pay" locale={locale} alt={text.pay} />
                     </button>
+                    <p role="status" className="sr-only">{submitting ? text.paying : ''}</p>
                 </div>
             </fieldset>
         </form>

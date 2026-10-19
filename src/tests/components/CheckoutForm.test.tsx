@@ -221,12 +221,30 @@ describe('CheckoutForm', () => {
         service.checkout.mockResolvedValue({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
         renderForm();
         await submitPickup(user);
-        await waitFor(() => expect(screen.getByRole('button', { name: 'Går til Vipps…' })).toBeDisabled());
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Betal med Vipps' })).toBeDisabled());
+        expect(screen.getByRole('button', { name: 'Betal med Vipps' })).toHaveAttribute('aria-busy', 'true');
+        expect(screen.getByRole('status')).toHaveTextContent('Går til Vipps…');
 
         act(() => { window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true })); });
 
         expect(screen.getByRole('button', { name: 'Betal med Vipps' })).toBeEnabled();
+        expect(screen.getByRole('status')).toBeEmptyDOMElement();
         vi.unstubAllGlobals();
+    });
+
+    it.each([
+        ['no', 'Betal med Vipps', '/vipps/betal-med-vipps.svg'],
+        ['en', 'Pay with Vipps', '/vipps/pay-with-vipps.svg'],
+    ] as const)('submits with the official Vipps artwork in %s', (locale, name, src) => {
+        render(
+            <DictionaryProvider locale={locale}>
+                <CheckoutForm build={build} delivery={delivery} mode="Everyone" locale={locale} />
+            </DictionaryProvider>,
+        );
+
+        const button = screen.getByRole('button', { name });
+        expect(button).toHaveAttribute('type', 'submit');
+        expect(button.querySelector('img')).toHaveAttribute('src', src);
     });
 
     it('links the checkbox errors to their checkboxes', async () => {

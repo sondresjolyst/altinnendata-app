@@ -7,6 +7,7 @@ import { getDictionary } from '@/i18n/dictionaries';
 import { canBuy, isBuyable } from '@/lib/shop';
 import type { BuildDetail } from '@/services/buildService';
 import type { BuyButtonMode } from '@/services/shopService';
+import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from './VippsButtonArt';
 
 interface BuyButtonProps {
     build: BuildDetail;
@@ -15,8 +16,6 @@ interface BuyButtonProps {
     hasDelivery: boolean;
     locale: Locale;
 }
-
-const BUTTON = 'rounded-lg border border-gray-900 bg-gray-900 text-white font-semibold px-6 py-3 transition';
 
 /**
  * The link to the checkout page. It shows when the build can be sold and the shop is open to this visitor.
@@ -33,8 +32,8 @@ export default function BuyButton({ build, mode, hasDelivery, locale }: BuyButto
 
     if (isBuyable(build)) {
         return (
-            <Link href={localeHref(locale, `/builds/${build.slug}/buy`)} className={`${BUTTON} hover:bg-gray-800`}>
-                {text.buy}
+            <Link href={localeHref(locale, `/builds/${build.slug}/buy`)} className={VIPPS_BUTTON}>
+                <VippsButtonArt verb="buyNow" locale={locale} alt={text.buy} />
             </Link>
         );
     }
@@ -43,8 +42,8 @@ export default function BuyButton({ build, mode, hasDelivery, locale }: BuyButto
 
     return (
         <>
-            <button type="button" disabled className={`${BUTTON} opacity-50 cursor-not-allowed`}>
-                {text.buy}
+            <button type="button" disabled className={`${VIPPS_BUTTON} ${VIPPS_DISABLED}`}>
+                <VippsButtonArt verb="buyNow" locale={locale} alt={text.buy} />
             </button>
             {/* order-last with a full basis puts the note on its own line under the row of buttons. */}
             <p className="order-last basis-full text-sm text-gray-700">{build.availability === 'Reserved' ? text.reserved : text.sold}</p>
