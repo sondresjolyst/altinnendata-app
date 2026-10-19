@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { POST, resetHeldThrottle } from '@/app/api/shop/held/route';
@@ -131,6 +131,68 @@ describe('the held build route', () => {
 
         expect(await (await first).json()).toEqual({ revalidated: false });
         expect(await (await second).json()).toEqual({ revalidated: true });
+    });
+
+    describe('with a slow API', () => {
+        const never = () => new Promise<never>(() => {});
+        const settle = () => vi.advanceTimersByTimeAsync(0);
+
+        beforeEach(() => vi.useFakeTimers());
+        afterEach(() => vi.useRealTimers());
+
+        it('counts a read that takes longer than two seconds as not Reserved and then lets the next request through', async () => {
+            vi.mocked(publicGetLiveOptional).mockReturnValueOnce(never()).mockResolvedValue({ availability: 'Reserved' });
+
+            const first = call({ slug: 'gaming-pc' });
+            await vi.advanceTimersByTimeAsync(1_999);
+            expect(revalidateTag).not.toHaveBeenCalled();
+            await vi.advanceTimersByTimeAsync(2);
+
+            expect(await (await first).json()).toEqual({ revalidated: false });
+            expect(revalidateTag).not.toHaveBeenCalled();
+            expect(await (await call({ slug: 'gaming-pc' })).json()).toEqual({ revalidated: true });
+        });
+
+        it('answers false at once beyond three waiters', async () => {
+            vi.mocked(publicGetLiveOptional).mockReturnValue(never());
+
+            const running = call({ slug: 'a' });
+            await settle();
+            const waiters = [call({ slug: 'b' }), call({ slug: 'c' }), call({ slug: 'd' })];
+            await settle();
+            const extra = await call({ slug: 'e' });
+
+            expect(await extra.json()).toEqual({ revalidated: false });
+            expect(publicGetLiveOptional).toHaveBeenCalledTimes(1);
+
+            await vi.advanceTimersByTimeAsync(20_000);
+            await Promise.all([running, ...waiters]);
+        });
+
+        it('lets a waiter give up after three seconds in the queue', async () => {
+            vi.mocked(publicGetLiveOptional).mockReturnValue(never());
+
+            const first = call({ slug: 'a' });
+            await settle();
+            const second = call({ slug: 'b' });
+            const third = call({ slug: 'c' });
+            await settle();
+            let thirdAnswer: unknown = null;
+            void third.then(res => res.json()).then(body => { thirdAnswer = body; });
+
+            await vi.advanceTimersByTimeAsync(2_001);
+            // The first read timed out, so the second request is reading now and the third still waits.
+            expect(publicGetLiveOptional).toHaveBeenCalledTimes(2);
+            expect(thirdAnswer).toBeNull();
+
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(thirdAnswer).toEqual({ revalidated: false });
+            expect(publicGetLiveOptional).toHaveBeenCalledTimes(2);
+
+            await vi.advanceTimersByTimeAsync(5_000);
+            await Promise.all([first, second]);
+            expect(revalidateTag).not.toHaveBeenCalled();
+        });
     });
 
     it.each([['.'], ['..'], ['a/b'], ['Gaming-PC'], ['a b'], ['-a'], ['a-'], ['a--b'], ['a?x=1'], ['x'.repeat(161)]])('answers 400 for the slug %j without reading the API', async slug => {
