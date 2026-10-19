@@ -69,6 +69,44 @@ describe('the held build route', () => {
         }
     });
 
+    it('purges exactly once for five concurrent requests for a Reserved build', async () => {
+        vi.mocked(publicGetLiveOptional).mockImplementation(async () => {
+            await new Promise(resolve => setTimeout(resolve, 20));
+            return { availability: 'Reserved' };
+        });
+
+        const answers = await Promise.all(Array.from({ length: 5 }, () => call({ slug: 'gaming-pc' }).then(res => res.json())));
+
+        expect(answers.filter(a => a.revalidated)).toHaveLength(1);
+        expect(vi.mocked(revalidateTag)).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['Available', 'Sold'])('does not let a %s build block a following Reserved one', async availability => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValueOnce({ availability });
+        await call({ slug: 'kontor-pc' });
+        expect(revalidateTag).not.toHaveBeenCalled();
+
+        vi.mocked(publicGetLiveOptional).mockResolvedValueOnce({ availability: 'Reserved' });
+        expect(await (await call({ slug: 'gaming-pc' })).json()).toEqual({ revalidated: true });
+    });
+
+    it('does not undo a claim made by a concurrent request when its own read finds nothing to purge', async () => {
+        let release: () => void = () => {};
+        const slow = new Promise<{ availability: string }>(resolve => { release = () => resolve({ availability: 'Available' }); });
+        vi.mocked(publicGetLiveOptional).mockReturnValueOnce(slow).mockResolvedValue({ availability: 'Reserved' });
+
+        const first = call({ slug: 'kontor-pc' });
+        await Promise.resolve();
+        release();
+        await first;
+        const second = await call({ slug: 'gaming-pc' });
+        const third = await call({ slug: 'gaming-pc' });
+
+        expect(await second.json()).toEqual({ revalidated: true });
+        expect(await third.json()).toEqual({ revalidated: false });
+        expect(vi.mocked(revalidateTag)).toHaveBeenCalledTimes(1);
+    });
+
     it.each([['.'], ['..'], ['a/b'], ['Gaming-PC'], ['a b'], ['-a'], ['a-'], ['a--b'], ['a?x=1'], ['x'.repeat(161)]])('answers 400 for the slug %j without reading the API', async slug => {
         const res = await call({ slug });
 

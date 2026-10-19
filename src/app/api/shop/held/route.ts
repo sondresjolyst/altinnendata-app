@@ -8,12 +8,16 @@ const MAX_SLUG_LENGTH = 160;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const THROTTLE_MS = 10_000;
 
-// When the pages were last purged. The purge covers every build page, so one window serves the whole process.
-let lastPurge = Number.NEGATIVE_INFINITY;
+interface Claim {
+    at: number;
+}
+
+// The window the pages are being or were last purged in. The purge covers every build page, so one window serves the whole process.
+let claim: Claim | null = null;
 
 /** Forgets the throttle. For tests. */
 export function resetHeldThrottle() {
-    lastPurge = Number.NEGATIVE_INFINITY;
+    claim = null;
 }
 
 /**
@@ -32,13 +36,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: 'Expected a build slug' }, { status: 400 });
     }
 
-    if (Date.now() - lastPurge < THROTTLE_MS) return NextResponse.json({ revalidated: false });
+    // The window is claimed before any await, so concurrent requests cannot all pass the check.
+    if (claim && Date.now() - claim.at < THROTTLE_MS) return NextResponse.json({ revalidated: false });
+    const mine: Claim = { at: Date.now() };
+    claim = mine;
 
-    // Any failure to read the build, or any answer but Reserved, purges nothing.
+    // Any failure to read the build, or any answer but Reserved, purges nothing and gives the window back,
+    // unless a later claim has replaced it.
     const build = await publicGetLiveOptional<Pick<BuildDetail, 'availability'>>(`/builds/${slug}?locale=no`).catch(() => null);
-    if (build?.availability !== 'Reserved') return NextResponse.json({ revalidated: false });
+    if (build?.availability !== 'Reserved') {
+        if (claim === mine) claim = null;
+        return NextResponse.json({ revalidated: false });
+    }
 
-    lastPurge = Date.now();
     for (const path of TARGET_PATHS[REVALIDATE_TARGETS.builds]) {
         if (path.includes('[')) revalidatePath(path, 'page');
         else revalidatePath(path);
