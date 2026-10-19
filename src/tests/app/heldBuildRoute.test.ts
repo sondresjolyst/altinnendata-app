@@ -19,8 +19,8 @@ describe('the held build route', () => {
         resetHeldThrottle();
     });
 
-    it.each(['Reserved', 'Sold'])('purges the build pages without a session when the live build is %s', async availability => {
-        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability });
+    it('purges the build pages without a session when the live build is Reserved', async () => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability: 'Reserved' });
 
         const res = await call({ slug: 'gaming-pc' });
 
@@ -31,8 +31,8 @@ describe('the held build route', () => {
         expect(revalidateTag).toHaveBeenCalledWith('builds', { expire: 0 });
     });
 
-    it('purges nothing while the build is still Available, so it cannot force a rebuild', async () => {
-        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability: 'Available' });
+    it.each(['Available', 'Sold', 'Unknown'])('purges nothing when the live build is %s, so it cannot force a rebuild', async availability => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability });
 
         const res = await call({ slug: 'gaming-pc' });
 
@@ -41,7 +41,7 @@ describe('the held build route', () => {
         expect(revalidateTag).not.toHaveBeenCalled();
     });
 
-    it('purges nothing for an unknown build or a failed read', async () => {
+    it('purges nothing for an unknown build or a failed read, and a failed read does not use up the window', async () => {
         vi.mocked(publicGetLiveOptional).mockResolvedValue(null);
         expect(await (await call({ slug: 'nope' })).json()).toEqual({ revalidated: false });
 
@@ -50,17 +50,39 @@ describe('the held build route', () => {
         expect(revalidatePath).not.toHaveBeenCalled();
     });
 
-    it('purges a held build at most once every ten seconds', async () => {
-        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability: 'Reserved' });
+    it('purges at most once every ten seconds for the whole process, whatever the slug', async () => {
+        vi.useFakeTimers();
+        try {
+            vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability: 'Reserved' });
 
-        await call({ slug: 'gaming-pc' });
-        const second = await call({ slug: 'gaming-pc' });
+            await call({ slug: 'gaming-pc' });
+            const second = await call({ slug: 'kontor-pc' });
+            expect(await second.json()).toEqual({ revalidated: false });
+            expect(second.status).toBe(200);
+            expect(vi.mocked(revalidateTag)).toHaveBeenCalledTimes(1);
 
-        expect(await second.json()).toEqual({ revalidated: false });
-        expect(vi.mocked(revalidateTag)).toHaveBeenCalledTimes(1);
+            vi.advanceTimersByTime(10_001);
+            await call({ slug: 'kontor-pc' });
+            expect(vi.mocked(revalidateTag)).toHaveBeenCalledTimes(2);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
-    it.each([[{ slug: 5 }], [{}], ['not json'], [{ slug: '' }], [{ slug: 'x'.repeat(201) }]])('answers 400 for the body %j', async body => {
+    it.each([['.'], ['..'], ['a/b'], ['Gaming-PC'], ['a b'], ['-a'], ['a-'], ['a--b'], ['a?x=1'], ['x'.repeat(161)]])('answers 400 for the slug %j without reading the API', async slug => {
+        const res = await call({ slug });
+
+        expect(res.status).toBe(400);
+        expect(publicGetLiveOptional).not.toHaveBeenCalled();
+    });
+
+    it('accepts a slug of 160 characters', async () => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability: 'Available' });
+
+        expect((await call({ slug: 'x'.repeat(160) })).status).toBe(200);
+    });
+
+    it.each([[{ slug: 5 }], [{}], ['not json'], [{ slug: '' }]])('answers 400 for the body %j', async body => {
         const res = await call(body);
 
         expect(res.status).toBe(400);
