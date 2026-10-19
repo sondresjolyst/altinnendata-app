@@ -11,6 +11,7 @@ import { publicGet, publicGetOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { formatDate, formatPrice } from '@/lib/format';
+import { partConditions } from '@/lib/buildParts';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata, breadcrumbNode, absoluteLocaleUrl, localePath } from '@/lib/seo/site';
@@ -57,6 +58,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
     }[status];
 
     const gallery = build.imageIds;
+    const conditions = partConditions(build.components);
     const pageUrl = absoluteLocaleUrl(locale, `/builds/${slug}`);
 
     return (
@@ -100,6 +102,12 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                     )}
 
                     <dl className="mt-6 space-y-1 text-sm text-gray-500">
+                        {conditions.length > 0 && (
+                            <div className="flex gap-2">
+                                <dt>{dict.builds.condition}:</dt>
+                                <dd className="text-gray-900">{conditions.join(', ')}</dd>
+                            </div>
+                        )}
                         {build.builtOn && (
                             <div className="flex gap-2">
                                 <dt>{dict.builds.builtOn}:</dt>

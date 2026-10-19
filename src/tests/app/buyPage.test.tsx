@@ -46,6 +46,34 @@ describe('buy page', () => {
         expect(screen.getByTestId('checkout-form')).toHaveTextContent('Everyone');
     });
 
+    it('shows the condition and the main parts above the checkout form', async () => {
+        const part = (id: number, categoryKey: string, categoryName: string, name: string, condition: string | null) => ({
+            id, componentPartId: null, componentCategoryId: null, categoryKey, categoryName, manufacturerName: null, name, details: null,
+            condition: condition ? { id: condition === 'Ny' ? 2 : 1, key: condition.toLowerCase(), name: condition } : null, sortOrder: id,
+        });
+        vi.mocked(publicGetLive).mockResolvedValue(build({
+            components: [
+                part(1, 'storage', 'Lagring', 'Samsung 860 EVO 1 TB', 'Ny'),
+                part(2, 'cooling', 'Kjøling', 'Arctic Freezer 34', 'Ny'),
+                part(3, 'cpu', 'Prosessor', 'Ryzen 5 5600X', 'Brukt'),
+                part(4, 'memory', 'Minne', '16 GB DDR4', null),
+                part(5, 'gpu', 'Skjermkort', 'RTX 4070', 'Brukt'),
+            ],
+        }));
+        vi.mocked(publicGetLiveOptional).mockResolvedValue(config);
+        const { container } = render(await BuyPage({ params }));
+
+        const rows = [...container.querySelectorAll('dl > div')].map(row => row.textContent);
+        expect(rows).toEqual([
+            'Tilstand:Ny, Brukt',
+            'Prosessor:Ryzen 5 5600X (Brukt)',
+            'Skjermkort:RTX 4070 (Brukt)',
+            'Minne:16 GB DDR4',
+            'Lagring:Samsung 860 EVO 1 TB (Ny)',
+        ]);
+        expect(container.querySelector('dl')!.compareDocumentPosition(screen.getByTestId('checkout-form'))).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
     it.each([
         ['a build without a price', build({ priceNok: null }), config],
         ['a closed shop', build(), { ...config, buyButton: 'Off' } as ShopConfig],

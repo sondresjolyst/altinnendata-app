@@ -105,4 +105,19 @@ describe('build page buy button', () => {
 
         expect(screen.getByTestId('buy-button')).toHaveTextContent('undefined false');
     });
+
+    it('shows the conditions of the parts next to the other facts', async () => {
+        await renderPage([
+            component(1, { condition: { id: 1, key: 'brukt', name: 'Brukt' } }),
+            component(2, { condition: { id: 2, key: 'ny', name: 'Ny' } }),
+        ]);
+
+        expect(screen.getByText('Tilstand:').nextElementSibling).toHaveTextContent('Brukt, Ny');
+    });
+
+    it('leaves the condition out when no part has one', async () => {
+        await renderPage([component(1, {})]);
+
+        expect(screen.queryByText('Tilstand:')).not.toBeInTheDocument();
+    });
 });

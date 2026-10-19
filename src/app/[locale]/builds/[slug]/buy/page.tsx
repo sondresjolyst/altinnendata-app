@@ -10,6 +10,7 @@ import { publicGetLive, publicGetLiveOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
 import { fillTemplate, formatPrice } from '@/lib/format';
 import { isBuyable } from '@/lib/shop';
+import { mainParts, partConditions } from '@/lib/buildParts';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata } from '@/lib/seo/site';
@@ -57,7 +58,7 @@ export default async function BuyPage({ params }: { params: Params }) {
                     ← {text.toBuild}
                 </Link>
                 <h1 className="mt-4 text-3xl font-black text-gray-900 break-words">{fillTemplate(text.checkoutTitle, { title: build.title })}</h1>
-                <BuildSummary build={build} locale={locale} price={text.price} />
+                <BuildSummary build={build} locale={locale} />
                 <div className="mt-8 space-y-3">
                     <button type="button" disabled className={`${VIPPS_BUTTON} ${VIPPS_DISABLED}`}>
                         <VippsButtonArt verb="buyNow" locale={locale} alt={text.buy} />
@@ -91,7 +92,7 @@ export default async function BuyPage({ params }: { params: Params }) {
             </Link>
             <h1 className="mt-4 text-3xl font-black text-gray-900 break-words">{fillTemplate(text.checkoutTitle, { title: build.title })}</h1>
 
-            <BuildSummary build={build} locale={locale} price={text.price} />
+            <BuildSummary build={build} locale={locale} />
 
             <div className="mt-8">
                 <CheckoutForm build={build} delivery={shop.delivery} mode={shop.buyButton} locale={locale} />
@@ -100,23 +101,49 @@ export default async function BuyPage({ params }: { params: Params }) {
     );
 }
 
-function BuildSummary({ build, locale, price }: { build: BuildDetail; locale: Locale; price: string }) {
+function BuildSummary({ build, locale }: { build: BuildDetail; locale: Locale }) {
+    const dict = getDictionary(locale);
+    const conditions = partConditions(build.components ?? []);
+    const parts = mainParts(build.components ?? []);
+
     return (
-        <div className="mt-6 flex items-center gap-4 rounded-2xl border border-gray-200 p-4">
-            {build.coverImageId && (
-                <div className="h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
-                    <ContentImage
-                        imageId={build.coverImageId}
-                        alt={build.title}
-                        sizes="128px"
-                        className="h-full w-auto max-w-full object-contain"
-                    />
+        <div className="mt-6 rounded-2xl border border-gray-200 p-4">
+            <div className="flex items-center gap-4">
+                {build.coverImageId && (
+                    <div className="h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+                        <ContentImage
+                            imageId={build.coverImageId}
+                            alt={build.title}
+                            sizes="128px"
+                            className="h-full w-auto max-w-full object-contain"
+                        />
+                    </div>
+                )}
+                <div className="min-w-0">
+                    <p className="font-bold text-gray-900 break-words">{build.title}</p>
+                    <p className="text-sm text-gray-600">{dict.shop.price}: {formatPrice(build.priceNok!, locale)}</p>
                 </div>
-            )}
-            <div className="min-w-0">
-                <p className="font-bold text-gray-900 break-words">{build.title}</p>
-                <p className="text-sm text-gray-600">{price}: {formatPrice(build.priceNok!, locale)}</p>
             </div>
+            {/* Angrerettloven § 16 wants the main characteristics right before the order. */}
+            {(conditions.length > 0 || parts.length > 0) && (
+                <dl className="mt-4 space-y-1 border-t border-gray-200 pt-4 text-sm">
+                    {conditions.length > 0 && (
+                        <div className="flex gap-2">
+                            <dt className="shrink-0 text-gray-600">{dict.builds.condition}:</dt>
+                            <dd className="min-w-0 text-gray-900">{conditions.join(', ')}</dd>
+                        </div>
+                    )}
+                    {parts.map(part => (
+                        <div key={part.id} className="flex gap-2">
+                            <dt className="shrink-0 text-gray-600">{part.categoryName ?? part.categoryKey}:</dt>
+                            <dd className="min-w-0 break-words text-gray-900">
+                                {part.name}
+                                {part.condition && <span className="text-gray-600"> ({part.condition.name})</span>}
+                            </dd>
+                        </div>
+                    ))}
+                </dl>
+            )}
         </div>
     );
 }
