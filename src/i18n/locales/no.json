@@ -413,6 +413,7 @@
       "copied": "Kopiert",
       "invoiceDetails": "Fakturadetaljer",
       "invoiceNote": "Lag fakturaen i regnskapssystemet. Marker den som betalt med Vipps.",
+      "settlementNote": "Bokfør utbetalinger fra Vipps mot en egen Vipps-konto med oppgjørsrapporten fra Vipps-portalen. Bokfør gebyrene som kostnad.",
       "invoiceFields": {
         "name": "Kjøper",
         "email": "E-post",

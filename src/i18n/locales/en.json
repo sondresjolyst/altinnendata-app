@@ -413,6 +413,7 @@
       "copied": "Copied",
       "invoiceDetails": "Invoice details",
       "invoiceNote": "Create the invoice in your accounting system. Mark it as paid with Vipps.",
+      "settlementNote": "Book payouts from Vipps against a separate Vipps account using the settlement report from the Vipps portal. Book the fees as an expense.",
       "invoiceFields": {
         "name": "Buyer",
         "email": "Email",

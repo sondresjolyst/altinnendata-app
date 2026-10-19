@@ -208,6 +208,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             <section aria-labelledby="invoice-heading" className="space-y-3 rounded-2xl border border-gray-200 p-5">
                 <h2 id="invoice-heading" className="font-bold text-gray-900">{text.invoiceDetails}</h2>
                 <p className="text-sm text-gray-600">{text.invoiceNote}</p>
+                <p className="text-sm text-gray-600">{text.settlementNote}</p>
                 <div className="divide-y divide-gray-100">
                     {invoiceDetails(order, dict).map(detail => (
                         <CopyField key={detail.key} label={detail.label} value={detail.value} />

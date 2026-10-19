@@ -100,6 +100,14 @@ describe('the admin order page', () => {
         expect(await screen.findByRole('link', { name: 'Se datamaskinen' })).toHaveAttribute('href', '/no/builds/spillmaskin');
     });
 
+    it('tells the owner how to book the Vipps payouts and fees in the invoice details', async () => {
+        service.getOrder.mockResolvedValue(paid);
+        renderPage();
+
+        const invoice = await screen.findByRole('region', { name: 'Fakturadetaljer' });
+        expect(within(invoice).getByText('Bokfør utbetalinger fra Vipps mot en egen Vipps-konto med oppgjørsrapporten fra Vipps-portalen. Bokfør gebyrene som kostnad.')).toBeInTheDocument();
+    });
+
     it('copies the total as 12990,00', async () => {
         service.getOrder.mockResolvedValue(reserved);
         const user = userEvent.setup();
