@@ -8,16 +8,29 @@ const MAX_SLUG_LENGTH = 160;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const THROTTLE_MS = 10_000;
 
-interface Claim {
-    at: number;
+// When the pages were last purged. The purge covers every build page, so one window serves the whole process.
+let lastPurge = Number.NEGATIVE_INFINITY;
+// The check that is reading the build now. Requests take turns, so one API read runs at a time.
+let inFlight: Promise<boolean> | null = null;
+
+/** Forgets the throttle and the queue. For tests. */
+export function resetHeldThrottle() {
+    lastPurge = Number.NEGATIVE_INFINITY;
+    inFlight = null;
 }
 
-// The window the pages are being or were last purged in. The purge covers every build page, so one window serves the whole process.
-let claim: Claim | null = null;
+/** Reads the build and purges the build pages when it is Reserved right now. Any failure or other answer purges nothing. */
+async function purgeIfReserved(slug: string): Promise<boolean> {
+    const build = await publicGetLiveOptional<Pick<BuildDetail, 'availability'>>(`/builds/${slug}?locale=no`).catch(() => null);
+    if (build?.availability !== 'Reserved') return false;
 
-/** Forgets the throttle. For tests. */
-export function resetHeldThrottle() {
-    claim = null;
+    lastPurge = Date.now();
+    for (const path of TARGET_PATHS[REVALIDATE_TARGETS.builds]) {
+        if (path.includes('[')) revalidatePath(path, 'page');
+        else revalidatePath(path);
+    }
+    revalidateTag(REVALIDATE_TARGETS.builds, { expire: 0 });
+    return true;
 }
 
 /**
@@ -36,23 +49,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: 'Expected a build slug' }, { status: 400 });
     }
 
-    // The window is claimed before any await, so concurrent requests cannot all pass the check.
-    if (claim && Date.now() - claim.at < THROTTLE_MS) return NextResponse.json({ revalidated: false });
-    const mine: Claim = { at: Date.now() };
-    claim = mine;
+    // Wait for the check in flight. The loop matters: another waiter may take the turn first.
+    while (inFlight) await inFlight.catch(() => false);
+    if (Date.now() - lastPurge < THROTTLE_MS) return NextResponse.json({ revalidated: false });
 
-    // Any failure to read the build, or any answer but Reserved, purges nothing and gives the window back,
-    // unless a later claim has replaced it.
-    const build = await publicGetLiveOptional<Pick<BuildDetail, 'availability'>>(`/builds/${slug}?locale=no`).catch(() => null);
-    if (build?.availability !== 'Reserved') {
-        if (claim === mine) claim = null;
-        return NextResponse.json({ revalidated: false });
+    // Nothing awaits between the loop and this line, so this request is the only one checking.
+    const check = purgeIfReserved(slug);
+    inFlight = check;
+    try {
+        return NextResponse.json({ revalidated: await check });
+    } finally {
+        if (inFlight === check) inFlight = null;
     }
-
-    for (const path of TARGET_PATHS[REVALIDATE_TARGETS.builds]) {
-        if (path.includes('[')) revalidatePath(path, 'page');
-        else revalidatePath(path);
-    }
-    revalidateTag(REVALIDATE_TARGETS.builds, { expire: 0 });
-    return NextResponse.json({ revalidated: true });
 }

@@ -90,21 +90,47 @@ describe('the held build route', () => {
         expect(await (await call({ slug: 'gaming-pc' })).json()).toEqual({ revalidated: true });
     });
 
-    it('does not undo a claim made by a concurrent request when its own read finds nothing to purge', async () => {
+    it('lets a slow non-Reserved check finish first and then purges for the Reserved request behind it', async () => {
         let release: () => void = () => {};
         const slow = new Promise<{ availability: string }>(resolve => { release = () => resolve({ availability: 'Available' }); });
         vi.mocked(publicGetLiveOptional).mockReturnValueOnce(slow).mockResolvedValue({ availability: 'Reserved' });
 
         const first = call({ slug: 'kontor-pc' });
-        await Promise.resolve();
+        const second = call({ slug: 'gaming-pc' });
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(publicGetLiveOptional).toHaveBeenCalledTimes(1);
         release();
-        await first;
-        const second = await call({ slug: 'gaming-pc' });
-        const third = await call({ slug: 'gaming-pc' });
 
-        expect(await second.json()).toEqual({ revalidated: true });
-        expect(await third.json()).toEqual({ revalidated: false });
+        expect(await (await first).json()).toEqual({ revalidated: false });
+        expect(await (await second).json()).toEqual({ revalidated: true });
         expect(vi.mocked(revalidateTag)).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs at most one API read at a time', async () => {
+        let running = 0;
+        let most = 0;
+        vi.mocked(publicGetLiveOptional).mockImplementation(async () => {
+            running += 1;
+            most = Math.max(most, running);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            running -= 1;
+            return { availability: 'Available' };
+        });
+
+        await Promise.all(Array.from({ length: 6 }, () => call({ slug: 'gaming-pc' })));
+
+        expect(most).toBe(1);
+        expect(revalidateTag).not.toHaveBeenCalled();
+    });
+
+    it('releases the queue when a read fails', async () => {
+        vi.mocked(publicGetLiveOptional).mockRejectedValueOnce(new Error('down')).mockResolvedValue({ availability: 'Reserved' });
+
+        const first = call({ slug: 'kontor-pc' });
+        const second = call({ slug: 'gaming-pc' });
+
+        expect(await (await first).json()).toEqual({ revalidated: false });
+        expect(await (await second).json()).toEqual({ revalidated: true });
     });
 
     it.each([['.'], ['..'], ['a/b'], ['Gaming-PC'], ['a b'], ['-a'], ['a-'], ['a--b'], ['a?x=1'], ['x'.repeat(161)]])('answers 400 for the slug %j without reading the API', async slug => {
