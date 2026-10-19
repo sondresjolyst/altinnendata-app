@@ -244,6 +244,11 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
                         </span>
                     </label>
                     {errors.acceptTerms && <p id="acceptTerms-error" className="mt-1 text-xs text-red-600">{errors.acceptTerms}</p>}
+                    {/* Angrerettloven § 17 wants delivery limits before the order, GDPR art. 13 the privacy notice. */}
+                    <p className="mt-2 text-sm text-gray-600">
+                        {text.deliveryNote}{' '}
+                        <Link href={localeHref(locale, '/privacy')} target="_blank" className="font-semibold underline">{text.privacyLink}</Link>.
+                    </p>
                 </div>
 
                 {failure && <Alert variant="error">{failure}</Alert>}

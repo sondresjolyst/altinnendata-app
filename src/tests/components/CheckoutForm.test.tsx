@@ -247,6 +247,21 @@ describe('CheckoutForm', () => {
         expect(button.querySelector('img')).toHaveAttribute('src', src);
     });
 
+    it.each([
+        ['no', 'Vi leverer bare i Norge. Les også personvernerklæringen.', 'personvernerklæringen', '/no/privacy'],
+        ['en', 'We only deliver in Norway. Also read the privacy notice.', 'privacy notice', '/en/privacy'],
+    ] as const)('says where it delivers and links the privacy notice under the terms in %s', (locale, note, link, href) => {
+        render(
+            <DictionaryProvider locale={locale}>
+                <CheckoutForm build={build} delivery={delivery} mode="Everyone" locale={locale} />
+            </DictionaryProvider>,
+        );
+
+        const privacy = screen.getByRole('link', { name: link });
+        expect(privacy).toHaveAttribute('href', href);
+        expect(privacy.closest('p')).toHaveTextContent(note);
+    });
+
     it('links the checkbox errors to their checkboxes', async () => {
         const user = userEvent.setup();
         renderForm();
