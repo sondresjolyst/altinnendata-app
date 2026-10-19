@@ -437,6 +437,7 @@
         "captureIncomplete": "Vipps did not confirm the full amount.",
         "refundChanged": "The order was refunded meanwhile. Reload the order.",
         "refundPending": "Wait until Vipps has confirmed the last refund.",
+      "refundRefused": "Vipps refused the refund. Nothing was paid back.",
         "paymentProviderUnavailable": "Vipps did not confirm the change. Check the payment in the Vipps portal before you try again."
       }
     }

@@ -375,7 +375,8 @@ describe('the admin order page', () => {
     it.each([
         ['refundChanged', 'Ordren er betalt tilbake i mellomtiden. Last ordren på nytt.'],
         ['refundPending', 'Vent til Vipps har bekreftet forrige tilbakebetaling.'],
-    ])('shows the %s text when the API answers 409', async (code, message) => {
+        ['refundRefused', 'Vipps avviste tilbakebetalingen. Ingenting er betalt tilbake.'],
+    ])('shows the %s text when the API refuses the refund', async (code, message) => {
         service.getOrder.mockResolvedValue(paid);
         service.refund.mockRejectedValue(await refused(409, { message: 'x', code }));
         const user = userEvent.setup();

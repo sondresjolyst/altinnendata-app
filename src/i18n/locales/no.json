@@ -437,6 +437,7 @@
         "captureIncomplete": "Vipps bekreftet ikke hele beløpet.",
         "refundChanged": "Ordren er betalt tilbake i mellomtiden. Last ordren på nytt.",
         "refundPending": "Vent til Vipps har bekreftet forrige tilbakebetaling.",
+      "refundRefused": "Vipps avviste tilbakebetalingen. Ingenting er betalt tilbake.",
         "paymentProviderUnavailable": "Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen."
       }
     }
