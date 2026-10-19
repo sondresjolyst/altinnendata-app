@@ -177,8 +177,8 @@
     "sessionRestored": "Du er logget inn igjen. Prøv å lagre på nytt."
   },
   "footer": {
-    "orgNumber": "Org.nr",
-    "vatRegistered": "Registrert i Merverdiavgiftsregisteret",
+    "orgNumber": "Org.nr.",
+    "register": "Foretaksregisteret",
     "terms": "Vilkår",
     "privacy": "Personvern",
     "cookies": "Informasjonskapsler",

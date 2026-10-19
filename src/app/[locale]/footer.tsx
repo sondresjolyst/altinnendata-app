@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useBranding } from '@sjolystinnovation/app-kit/branding';
-import { formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
+import { brregUrl, formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
@@ -13,40 +13,60 @@ export default function Footer({ company }: { company: CompanyInfo }) {
     const { locale, dict } = useDictionary();
     const { status } = useSession();
     const href = (path: string) => localeHref(locale, path);
+    const legalName = company.legalName || company.name;
 
     return (
         <footer className="border-t border-gray-200 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logoUrl ?? '/logo.png'} alt="" className="h-7 w-7 rounded-md object-cover" />
-                    <span className="text-sm font-semibold text-gray-900">{company.name}</span>
-                    {company.orgNumber && (
-                        <span className="text-xs text-gray-500">{dict.footer.orgNumber} {formatOrgNumber(company)}</span>
-                    )}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex flex-col items-center gap-1 sm:items-start">
+                        <div className="flex items-center gap-2.5">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={logoUrl ?? '/logo.png'} alt="" className="h-7 w-7 rounded-md object-cover" />
+                            <span className="text-sm font-semibold text-gray-900">{company.name}</span>
+                        </div>
+                        {company.address && <p className="text-xs text-gray-600">{company.address}</p>}
+                    </div>
+
+                    <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-gray-600">
+                        <Link href={href('/contact')} className="hover:text-gray-900">{dict.nav.contact}</Link>
+                        <Link href={href('/terms')} className="hover:text-gray-900">{dict.footer.terms}</Link>
+                        <Link href={href('/privacy')} className="hover:text-gray-900">{dict.footer.privacy}</Link>
+                        <Link href={href('/cookies')} className="hover:text-gray-900">{dict.footer.cookies}</Link>
+                        {status !== 'authenticated' && (
+                            <Link href={href('/login')} className="hover:text-gray-900">{dict.nav.signIn}</Link>
+                        )}
+                    </nav>
                 </div>
 
-                <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-gray-600">
-                    <Link href={href('/contact')} className="hover:text-gray-900">{dict.nav.contact}</Link>
-                    <Link href={href('/terms')} className="hover:text-gray-900">{dict.footer.terms}</Link>
-                    <Link href={href('/privacy')} className="hover:text-gray-900">{dict.footer.privacy}</Link>
-                    <Link href={href('/cookies')} className="hover:text-gray-900">{dict.footer.cookies}</Link>
-                    {status !== 'authenticated' && (
-                        <Link href={href('/login')} className="hover:text-gray-900">{dict.nav.signIn}</Link>
+                <div className="mt-6 flex flex-col items-center gap-2 border-t border-gray-200 pt-4 text-xs text-gray-600 sm:flex-row sm:justify-between">
+                    <p>
+                        © {year} {legalName} · {dict.footer.createdBy}{' '}
+                        <a
+                            href="https://www.sjolystinnovation.no/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-4 hover:text-gray-900"
+                        >
+                            Sjølyst Innovation AS
+                        </a>
+                    </p>
+                    {/* Foretaksregisterloven § 10-2 wants the register next to the org number. */}
+                    {company.orgNumber && (
+                        <p>
+                            {dict.footer.orgNumber}{' '}
+                            <a
+                                href={brregUrl(company.orgNumber)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline underline-offset-4 hover:text-gray-900"
+                            >
+                                {formatOrgNumber(company)}
+                            </a>{' '}
+                            {dict.footer.register}
+                        </p>
                     )}
-                </nav>
-
-                <p className="text-xs text-gray-400">
-                    © {year} {company.name} · {dict.footer.createdBy}{' '}
-                    <a
-                        href="https://www.sjolystinnovation.no/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-500 hover:text-gray-900 hover:underline"
-                    >
-                        Sjølyst Innovation AS
-                    </a>
-                </p>
+                </div>
             </div>
         </footer>
     );

@@ -177,8 +177,8 @@
     "sessionRestored": "You're signed in again. Try saving again."
   },
   "footer": {
-    "orgNumber": "Org. no",
-    "vatRegistered": "Registered in the Norwegian VAT Register",
+    "orgNumber": "Org. no.",
+    "register": "Register of Business Enterprises",
     "terms": "Terms",
     "privacy": "Privacy",
     "cookies": "Cookies",

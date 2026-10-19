@@ -8,3 +8,7 @@ export { formatOrgNumber, type CompanyInfo } from '@sjolystinnovation/app-kit/co
 export async function getCompanyInfo(): Promise<CompanyInfo> {
     return mergeCompanyInfo(await publicGetOptional<CompanyInfo>('/company'), COMPANY);
 }
+
+/** The Brønnøysund Register Centre's page for the business, from the digits of its org number. */
+export const brregUrl = (orgNumber: string): string =>
+    `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgNumber.replace(/\D/g, '')}`;
