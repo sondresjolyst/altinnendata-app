@@ -1,0 +1,74 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { POST, resetHeldThrottle } from '@/app/api/shop/held/route';
+import { publicGetLiveOptional } from '@/lib/publicApi';
+import { TARGET_PATHS } from '@/lib/cacheTags';
+
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }));
+vi.mock('@/lib/publicApi', () => ({ publicGetLiveOptional: vi.fn() }));
+
+const call = (body: unknown, type = 'application/json') =>
+    POST(new NextRequest('http://localhost/api/shop/held', { method: 'POST', headers: { 'content-type': type }, body: typeof body === 'string' ? body : JSON.stringify(body) }));
+
+describe('the held build route', () => {
+    beforeEach(() => {
+        vi.mocked(revalidatePath).mockReset();
+        vi.mocked(revalidateTag).mockReset();
+        vi.mocked(publicGetLiveOptional).mockReset();
+        resetHeldThrottle();
+    });
+
+    it.each(['Reserved', 'Sold'])('purges the build pages without a session when the live build is %s', async availability => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability });
+
+        const res = await call({ slug: 'gaming-pc' });
+
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({ revalidated: true });
+        expect(publicGetLiveOptional).toHaveBeenCalledWith('/builds/gaming-pc?locale=no');
+        for (const path of TARGET_PATHS.builds) expect(revalidatePath).toHaveBeenCalledWith(...(path.includes('[') ? [path, 'page'] : [path]));
+        expect(revalidateTag).toHaveBeenCalledWith('builds', { expire: 0 });
+    });
+
+    it('purges nothing while the build is still Available, so it cannot force a rebuild', async () => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability: 'Available' });
+
+        const res = await call({ slug: 'gaming-pc' });
+
+        expect(await res.json()).toEqual({ revalidated: false });
+        expect(revalidatePath).not.toHaveBeenCalled();
+        expect(revalidateTag).not.toHaveBeenCalled();
+    });
+
+    it('purges nothing for an unknown build or a failed read', async () => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValue(null);
+        expect(await (await call({ slug: 'nope' })).json()).toEqual({ revalidated: false });
+
+        vi.mocked(publicGetLiveOptional).mockRejectedValue(new Error('down'));
+        expect(await (await call({ slug: 'nope' })).json()).toEqual({ revalidated: false });
+        expect(revalidatePath).not.toHaveBeenCalled();
+    });
+
+    it('purges a held build at most once every ten seconds', async () => {
+        vi.mocked(publicGetLiveOptional).mockResolvedValue({ availability: 'Reserved' });
+
+        await call({ slug: 'gaming-pc' });
+        const second = await call({ slug: 'gaming-pc' });
+
+        expect(await second.json()).toEqual({ revalidated: false });
+        expect(vi.mocked(revalidateTag)).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([[{ slug: 5 }], [{}], ['not json'], [{ slug: '' }], [{ slug: 'x'.repeat(201) }]])('answers 400 for the body %j', async body => {
+        const res = await call(body);
+
+        expect(res.status).toBe(400);
+        expect(publicGetLiveOptional).not.toHaveBeenCalled();
+    });
+
+    it('answers 415 unless the body is JSON', async () => {
+        expect((await call('{"slug":"gaming-pc"}', 'text/plain')).status).toBe(415);
+        expect(publicGetLiveOptional).not.toHaveBeenCalled();
+    });
+});

@@ -183,7 +183,8 @@ describe('invoiceDetails after a refund', () => {
         const keys = details.map(d => d.key);
         expect(keys.slice(keys.indexOf('capturedDate'), keys.indexOf('reference'))).toEqual(['capturedDate', 'refunded', 'refundedDate']);
         expect(details.find(d => d.key === 'refunded')).toMatchObject({ label: 'Betalt tilbake', value: '12990,00' });
-        expect(details.find(d => d.key === 'refundedDate')?.value).toBe('21.10.2026');
+        expect(details.find(d => d.key === 'refundedDate')).toMatchObject({ label: 'Dato for full tilbakebetaling', value: '21.10.2026' });
+        expect(invoiceDetails({ ...order, refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, en).find(d => d.key === 'refundedDate')?.label).toBe('Date of full refund');
         expect(invoiceDetails({ ...order, refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, en).find(d => d.key === 'refunded')?.label).toBe('Refunded');
     });
 

@@ -398,10 +398,11 @@
       "partlyRefunded": "Delvis tilbakebetalt",
       "refundValidation": {
         "required": "Du må fylle ut beløp.",
-        "invalid": "Skriv beløpet i hele kroner eller med to desimaler.",
+        "invalid": "Skriv beløpet i hele kroner eller med én eller to desimaler.",
         "tooLow": "Beløpet må være større enn 0 kr.",
         "tooHigh": "Beløpet kan ikke være større enn {max}."
       },
+      "refundInvalidAmount": "Skriv inn et gyldig beløp.",
       "captureDone": "Beløpet er trukket",
       "cancelDone": "Ordren er kansellert",
       "refundDone": "Beløpet er betalt tilbake",
@@ -423,7 +424,7 @@
         "reservedDate": "Betaling reservert",
         "capturedDate": "Beløp trukket",
         "refunded": "Betalt tilbake",
-        "refundedDate": "Dato for tilbakebetaling",
+        "refundedDate": "Dato for full tilbakebetaling",
         "reference": "Vipps-referanse"
       },
       "vatLabel": "Merverdiavgift",
@@ -437,7 +438,7 @@
         "captureIncomplete": "Vipps bekreftet ikke hele beløpet.",
         "refundChanged": "Ordren er betalt tilbake i mellomtiden. Last ordren på nytt.",
         "refundPending": "Vent til Vipps har bekreftet forrige tilbakebetaling.",
-      "refundRefused": "Vipps avviste tilbakebetalingen. Ingenting er betalt tilbake.",
+        "refundRefused": "Vipps avviste tilbakebetalingen. Ingenting er betalt tilbake.",
         "paymentProviderUnavailable": "Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen."
       }
     }

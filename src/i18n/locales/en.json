@@ -398,10 +398,11 @@
       "partlyRefunded": "Partly refunded",
       "refundValidation": {
         "required": "Enter an amount.",
-        "invalid": "Enter the amount in whole kroner or with two decimals.",
+        "invalid": "Enter the amount in whole kroner or with one or two decimals.",
         "tooLow": "The amount must be more than 0 kr.",
         "tooHigh": "The amount cannot be more than {max}."
       },
+      "refundInvalidAmount": "Enter a valid amount.",
       "captureDone": "The amount has been taken",
       "cancelDone": "The order has been cancelled",
       "refundDone": "The amount has been refunded",
@@ -423,7 +424,7 @@
         "reservedDate": "Payment reserved",
         "capturedDate": "Amount taken",
         "refunded": "Refunded",
-        "refundedDate": "Refund date",
+        "refundedDate": "Date of full refund",
         "reference": "Vipps reference"
       },
       "vatLabel": "VAT",
@@ -437,7 +438,7 @@
         "captureIncomplete": "Vipps did not confirm the full amount.",
         "refundChanged": "The order was refunded meanwhile. Reload the order.",
         "refundPending": "Wait until Vipps has confirmed the last refund.",
-      "refundRefused": "Vipps refused the refund. Nothing was paid back.",
+        "refundRefused": "Vipps refused the refund. Nothing was paid back.",
         "paymentProviderUnavailable": "Vipps did not confirm the change. Check the payment in the Vipps portal before you try again."
       }
     }

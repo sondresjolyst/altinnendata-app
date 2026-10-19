@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AxiosError } from 'axios';
 import ShopService, { type OrderStatusInfo } from '@/services/shopService';
 
@@ -100,27 +100,46 @@ describe('ShopService.refund', () => {
 });
 
 describe('ShopService.checkout', () => {
+    const request = { buildSlug: 'gaming-pc' } as never;
+    const fetchSpy = vi.fn();
+
     beforeEach(() => {
         post.mockReset();
         revalidate.mockReset();
+        fetchSpy.mockReset().mockResolvedValue({ ok: true });
+        vi.stubGlobal('fetch', fetchSpy);
     });
 
-    it('purges the build pages once the payment started, so the held build shows as reserved', async () => {
-        const order: string[] = [];
-        post.mockImplementationOnce(async () => { order.push('post'); return { data: { redirectUrl: 'https://vipps.test/x', token: 't' } }; });
-        revalidate.mockImplementationOnce(async () => { order.push('revalidate'); });
+    afterEach(() => vi.unstubAllGlobals());
 
-        await expect(ShopService.checkout({} as never)).resolves.toEqual({ redirectUrl: 'https://vipps.test/x', token: 't' });
+    it('tells the app the build is held through the open route, not the admin purge', async () => {
+        post.mockResolvedValueOnce({ data: { redirectUrl: 'https://vipps.test/x', token: 't' } });
 
-        expect(revalidate).toHaveBeenCalledWith('builds');
-        expect(order).toEqual(['post', 'revalidate']);
+        await expect(ShopService.checkout(request)).resolves.toEqual({ redirectUrl: 'https://vipps.test/x', token: 't' });
+
+        expect(fetchSpy).toHaveBeenCalledWith('/api/shop/held', expect.objectContaining({ method: 'POST', keepalive: true, body: JSON.stringify({ slug: 'gaming-pc' }) }));
+        expect(revalidate).not.toHaveBeenCalled();
     });
 
-    it('does not purge when the checkout is refused', async () => {
+    it('does not wait for the route, so the redirect to Vipps is never delayed', async () => {
+        post.mockResolvedValueOnce({ data: { redirectUrl: 'https://vipps.test/x', token: 't' } });
+        fetchSpy.mockReturnValue(new Promise(() => {}));
+
+        await expect(ShopService.checkout(request)).resolves.toMatchObject({ token: 't' });
+    });
+
+    it('still redirects when the route cannot be reached', async () => {
+        post.mockResolvedValueOnce({ data: { redirectUrl: 'https://vipps.test/x', token: 't' } });
+        fetchSpy.mockRejectedValue(new Error('offline'));
+
+        await expect(ShopService.checkout(request)).resolves.toMatchObject({ token: 't' });
+    });
+
+    it('does not call the route when the checkout is refused', async () => {
         post.mockRejectedValueOnce(new Error('Boom'));
 
-        await expect(ShopService.checkout({} as never)).rejects.toThrow();
+        await expect(ShopService.checkout(request)).rejects.toThrow();
 
-        expect(revalidate).not.toHaveBeenCalled();
+        expect(fetchSpy).not.toHaveBeenCalled();
     });
 });

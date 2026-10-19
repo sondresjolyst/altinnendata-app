@@ -318,19 +318,33 @@ describe('the admin order page', () => {
 
         it.each([
             ['', 'Du må fylle ut beløp.'],
-            ['abc', 'Skriv beløpet i hele kroner eller med to desimaler.'],
+            ['abc', 'Skriv beløpet i hele kroner eller med én eller to desimaler.'],
             ['0', 'Beløpet må være større enn 0 kr.'],
             ['9990,01', 'Beløpet kan ikke være større enn 9 990 kr.'],
-        ])('refuses %j without calling the API', async (typed, message) => {
+        ])('refuses %j with the error, a neutral confirm text and a disabled confirm button', async (typed, message) => {
             service.getOrder.mockResolvedValue(partly);
             const { user, dialog } = await openRefund();
 
             await user.clear(dialog.getByLabelText('Beløp (kr)'));
             if (typed) await user.type(dialog.getByLabelText('Beløp (kr)'), typed);
-            await user.click(dialog.getByRole('button', { name: 'Betal tilbake' }));
 
             expect(dialog.getByText(message, { normalizer: flat })).toBeInTheDocument();
+            expect(dialog.getByText('Skriv inn et gyldig beløp.')).toBeInTheDocument();
+            expect(dialog.queryByText(/til kunden\?/)).not.toBeInTheDocument();
+            expect(dialog.getByRole('button', { name: 'Betal tilbake' })).toBeDisabled();
+            await user.click(dialog.getByRole('button', { name: 'Betal tilbake' }));
             expect(service.refund).not.toHaveBeenCalled();
+        });
+
+        it('shows the typed amount in the confirm text once it is valid', async () => {
+            service.getOrder.mockResolvedValue(partly);
+            const { user, dialog } = await openRefund();
+
+            await user.clear(dialog.getByLabelText('Beløp (kr)'));
+            await user.type(dialog.getByLabelText('Beløp (kr)'), '100,5');
+
+            expect(dialog.getByText(/^Betal tilbake .*100.* til kunden\?$/)).toBeInTheDocument();
+            expect(dialog.getByRole('button', { name: 'Betal tilbake' })).toBeEnabled();
         });
 
         it('shows the client text when the API refuses the amount', async () => {
@@ -342,6 +356,8 @@ describe('the admin order page', () => {
 
             expect(await screen.findByText(/Beløpet kan ikke være større enn/)).toBeInTheDocument();
             expect(screen.getByRole('dialog')).toBeInTheDocument();
+            expect(dialog.getByRole('button', { name: 'Betal tilbake' })).toBeDisabled();
+            expect(dialog.getByText('Skriv inn et gyldig beløp.')).toBeInTheDocument();
         });
 
         it('shows how much has been refunded of the captured amount', async () => {
@@ -373,12 +389,12 @@ describe('the admin order page', () => {
     });
 
     it.each([
-        ['refundChanged', 'Ordren er betalt tilbake i mellomtiden. Last ordren på nytt.'],
-        ['refundPending', 'Vent til Vipps har bekreftet forrige tilbakebetaling.'],
-        ['refundRefused', 'Vipps avviste tilbakebetalingen. Ingenting er betalt tilbake.'],
-    ])('shows the %s text when the API refuses the refund', async (code, message) => {
+        [409, 'refundChanged', 'Ordren er betalt tilbake i mellomtiden. Last ordren på nytt.'],
+        [409, 'refundPending', 'Vent til Vipps har bekreftet forrige tilbakebetaling.'],
+        [502, 'refundRefused', 'Vipps avviste tilbakebetalingen. Ingenting er betalt tilbake.'],
+    ])('shows the %s %s text when the API refuses the refund', async (status, code, message) => {
         service.getOrder.mockResolvedValue(paid);
-        service.refund.mockRejectedValue(await refused(409, { message: 'x', code }));
+        service.refund.mockRejectedValue(await refused(status, { message: 'x', code }));
         const user = userEvent.setup();
         renderPage();
 

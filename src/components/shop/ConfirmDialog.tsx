@@ -8,6 +8,8 @@ interface ConfirmDialogProps {
     confirmLabel: string;
     cancelLabel: string;
     busy: boolean;
+    /** Whether the confirm button is off, for example while a field in the dialog is invalid. */
+    confirmDisabled?: boolean;
     /** Extra content under the message, such as an amount field. */
     children?: ReactNode;
     onConfirm: () => void;
@@ -15,7 +17,7 @@ interface ConfirmDialogProps {
 }
 
 /** A modal confirmation. The native dialog traps focus, closes on Escape and gives focus back to the opener. */
-export default function ConfirmDialog({ title, message, confirmLabel, cancelLabel, busy, children, onConfirm, onClose }: ConfirmDialogProps) {
+export default function ConfirmDialog({ title, message, confirmLabel, cancelLabel, busy, confirmDisabled = false, children, onConfirm, onClose }: ConfirmDialogProps) {
     const ref = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
@@ -50,7 +52,7 @@ export default function ConfirmDialog({ title, message, confirmLabel, cancelLabe
                     <button type="button" disabled={busy} onClick={onClose} className={`${button} border border-gray-300 text-gray-900 hover:bg-gray-50`}>
                         {cancelLabel}
                     </button>
-                    <button type="button" disabled={busy} onClick={onConfirm} className={`${button} bg-gray-900 text-white hover:bg-gray-800`}>
+                    <button type="button" disabled={busy || confirmDisabled} onClick={onConfirm} className={`${button} bg-gray-900 text-white hover:bg-gray-800`}>
                         {confirmLabel}
                     </button>
                 </div>

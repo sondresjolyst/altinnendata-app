@@ -7,8 +7,9 @@ const strings = (value: unknown): string[] =>
 
 describe('the shop copy', () => {
     it.each([['no', no], ['en', en]])('says nothing about when the money is taken in %s', (_locale, dictionary) => {
-        const claims = strings(dictionary).filter(text => /trekkes|ved levering|ved henting|handover|taken when|taken at|charged when|when you receive|når du får/i.test(text));
+        const claims = strings(dictionary).filter(text => /trekkes|ved levering|ved henting|når maskinen sendes|når varen sendes|handover|taken when|taken at|charged when|when you receive|when we ship|on delivery|når du får/i.test(text));
 
         expect(claims).toEqual([]);
     });
 });
+

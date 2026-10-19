@@ -158,8 +158,14 @@ const ShopService = {
     /** Sends the admin's token when signed in and none otherwise. */
     checkout: async (req: CheckoutRequest) => {
         const started = await request(() => axiosInstance.post<CheckoutResponse>('/shop/checkout', req), 'Failed to start the payment');
-        // The build is held now, so its pages must stop offering it before the buyer is sent to Vipps.
-        await revalidateTarget(REVALIDATE_TARGETS.builds);
+        // The build is held now. The open route purges its pages when the live build is no longer Available.
+        // It is not awaited, so the redirect to Vipps never waits for it, and keepalive lets it finish after the page leaves.
+        void fetch('/api/shop/held', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: req.buildSlug }),
+            keepalive: true,
+        }).catch(() => undefined);
         return started;
     },
 

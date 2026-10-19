@@ -22,7 +22,8 @@ export function formatDate(iso: string, locale: Locale): string {
 
 /** An amount in øre as a price, grouped the way the rest of the site writes prices. */
 export function formatOre(ore: number, locale: Locale): string {
-    return formatPrice(ore / 100, locale);
+    if (ore % 100 === 0) return formatPrice(ore / 100, locale);
+    return new Intl.NumberFormat(INTL_LOCALES[locale], { style: 'currency', currency: 'NOK' }).format(ore / 100);
 }
 
 /** Fills each `{name}` in `text` from `values`. A function replacer keeps `$` patterns in a value as typed. */

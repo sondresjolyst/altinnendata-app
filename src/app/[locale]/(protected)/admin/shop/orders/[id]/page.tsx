@@ -11,7 +11,7 @@ import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { fillTemplate, formatOre } from '@/lib/format';
-import { formatAddress, invoiceDetails, osloDate, parseKroner, plainPhone, refundAmountIssue, remainingInOre, type RefundAmountIssue, kroner } from '@/lib/shop';
+import { formatAddress, invoiceDetails, kroner, osloDate, parseKroner, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
 
 type Action = 'capture' | 'cancel' | 'refund';
 
@@ -34,7 +34,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
     const [savingInvoice, setSavingInvoice] = useState(false);
     const [acted, setActed] = useState(0);
     const [refundAmount, setRefundAmount] = useState('');
-    const [refundIssue, setRefundIssue] = useState<RefundAmountIssue | null>(null);
+    const [apiRefusedAmount, setApiRefusedAmount] = useState(false);
     const heading = useRef<HTMLHeadingElement>(null);
 
     // The action buttons change with the status, so the one that opened the dialog may be gone.
@@ -71,19 +71,19 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
     };
 
     const remaining = remainingInOre(order);
+    // The API refusing the amount counts as too high until the amount is edited.
+    const refundIssue = refundAmountIssue(refundAmount, remaining) ?? (apiRefusedAmount ? 'tooHigh' : null);
 
     const openAction = (action: Action) => {
         setRefundAmount(kroner(remaining));
-        setRefundIssue(null);
+        setApiRefusedAmount(false);
         setConfirming(action);
     };
 
     const run = async (action: Action) => {
         let amountInOre = 0;
         if (action === 'refund') {
-            const issue = refundAmountIssue(refundAmount, remaining);
-            setRefundIssue(issue);
-            if (issue) return;
+            if (refundIssue) return;
             amountInOre = parseKroner(refundAmount) ?? 0;
         }
         setBusy(true);
@@ -98,7 +98,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         } catch (err) {
             if (action === 'refund' && apiFieldErrors(err)?.amountInOre) {
                 // The dialog stays open so the amount can be fixed.
-                setRefundIssue(refundAmountIssue(refundAmount, remaining) ?? 'tooHigh');
+                setApiRefusedAmount(true);
             } else {
                 setConfirming(null);
                 toast.error(failureText(err, text.actionFailed));
@@ -129,9 +129,9 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             { action: 'cancel', label: text.cancel, title: text.cancel, confirm: text.confirmCancel, style: SECONDARY },
         );
     } else if (order.status === 'Paid' && remaining > 0) {
-        const typed = parseKroner(refundAmount);
-        const shown = typed !== null && typed > 0 && typed <= remaining ? typed : remaining;
-        actions.push({ action: 'refund', label: text.refund, title: text.refund, confirm: fillTemplate(text.confirmRefund, { amount: formatOre(shown, locale) }), style: SECONDARY });
+        // The confirm text names the typed amount only when it can be refunded.
+        const confirm = refundIssue ? text.refundInvalidAmount : fillTemplate(text.confirmRefund, { amount: formatOre(parseKroner(refundAmount) ?? 0, locale) });
+        actions.push({ action: 'refund', label: text.refund, title: text.refund, confirm, style: SECONDARY });
     }
     const pending = actions.find(a => a.action === confirming);
 
@@ -236,6 +236,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                     confirmLabel={pending.label}
                     cancelLabel={dict.common.cancel}
                     busy={busy}
+                    confirmDisabled={pending.action === 'refund' && refundIssue !== null}
                     onConfirm={() => void run(pending.action)}
                     onClose={() => setConfirming(null)}
                 >
@@ -245,7 +246,10 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                             inputMode="decimal"
                             autoComplete="off"
                             value={refundAmount}
-                            onChange={e => setRefundAmount(e.target.value)}
+                            onChange={e => {
+                                setRefundAmount(e.target.value);
+                                setApiRefusedAmount(false);
+                            }}
                             error={refundIssue ? fillTemplate(text.refundValidation[refundIssue], { max: formatOre(remaining, locale) }) : undefined}
                         />
                     )}
