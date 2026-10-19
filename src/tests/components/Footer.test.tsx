@@ -62,13 +62,15 @@ describe('Footer', () => {
 
         expect(screen.queryByText(/Foretaksregisteret/)).not.toBeInTheDocument();
         expect(screen.queryByText(/Org\.nr/)).not.toBeInTheDocument();
+        expect(screen.getByText('Mårvegen 21a, 4347 Lye')).toBeInTheDocument();
     });
 
     it('shows the legal name in the copyright line and the address', () => {
         renderFooter(company);
 
         expect(screen.getByText(/© \d{4} ALTINNENDATA AS/)).toBeInTheDocument();
-        expect(screen.getByText('Mårvegen 21a, 4347 Lye')).toBeInTheDocument();
+        // The address sits under the org number line.
+        expect(registerLine()!.nextElementSibling).toHaveTextContent(/^Mårvegen 21a, 4347 Lye$/);
     });
 
     it('falls back to the company name when the legal name is empty', () => {
