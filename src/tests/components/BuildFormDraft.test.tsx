@@ -160,7 +160,8 @@ describe('the build form draft bar', () => {
         // Drafts are kept for a week, so one can easily predate a newly added field. Asserting
         // on the rendered input would prove nothing: an undefined value makes React treat it as
         // uncontrolled and the old value stays on screen. What matters is what gets saved.
-        const { published: _dropped, ...older } = draft;
+        const older: Partial<typeof draft> = { ...draft };
+        delete older.published;
         window.localStorage.setItem(KEY, JSON.stringify({ savedAt: Date.now(), value: older }));
         render(form());
 
