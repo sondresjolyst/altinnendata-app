@@ -304,6 +304,21 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                         <CopyField key={detail.key} label={detail.label} value={detail.value} />
                     ))}
                 </div>
+                {order.refunds.length > 0 && (
+                    <div className="space-y-1 border-t border-gray-100 pt-3">
+                        <h3 className="text-sm font-semibold text-gray-900">{text.refunds}</h3>
+                        <p className="text-sm text-gray-600">{text.creditNoteNote}</p>
+                        <div className="divide-y divide-gray-100">
+                            {order.refunds.map((refund, index) => (
+                                <CopyField
+                                    key={`${refund.refundedAt}-${index}`}
+                                    label={fillTemplate(text.refundRow, { number: String(index + 1), date: osloDate(refund.refundedAt) })}
+                                    value={kroner(refund.amountInOre)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <form
                     className="flex flex-wrap items-end gap-3 pt-2"
                     onSubmit={e => {

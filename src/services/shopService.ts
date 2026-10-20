@@ -85,6 +85,8 @@ export interface AdminOrderSummary {
     capturedInOre: number;
     refundedInOre: number;
     createdAt: string;
+    /** When the payment was captured. Older APIs leave it out. */
+    capturedAt?: string | null;
 }
 
 export interface AdminOrder {
@@ -128,11 +130,23 @@ export interface AdminOrder {
     createdAt: string;
     updatedAt: string;
     /** When Vipps ended the reservation itself, so the build stays held until the admin releases it. */
+    /** Each refund, oldest first. Each one needs a credit note in the accounts. */
+    refunds: OrderRefund[];
+    /** When the order was sent or made ready for pickup, the delivery date on the invoice. */
+    deliveryDate: string | null;
+    /** The buyer's address, or the seller's for pickup, as one line. */
+    deliveryPlace: string;
     reservationEndedAt: string | null;
     /** Whether the build is still reserved for this order. */
     holdsBuild: boolean;
     /** Why the build cannot be released from this order now, or null when it can. */
     releaseBuildBlockedReason: ReleaseBuildBlockedReason | null;
+}
+
+export interface OrderRefund {
+    amountInOre: number;
+    refundedAt: string;
+    source: 'Admin' | 'Webhook' | 'Polling' | 'Migrated';
 }
 
 export type ReleaseBuildBlockedReason = 'wrongStatus' | 'buildNotHeld';

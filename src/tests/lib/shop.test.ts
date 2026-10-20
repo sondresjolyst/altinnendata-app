@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canBuy, captureWarning, invoiceDetails, isBuyable, kroner, osloDate, osloDateTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { canBuy, captureWarning, invoiceDetails, missingInvoiceNumber, isBuyable, kroner, osloDate, osloDateTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { AdminOrder } from '@/services/shopService';
 
@@ -44,6 +44,9 @@ const order: AdminOrder = {
     refundedAt: null,
     createdAt: '2026-10-18T10:00:00Z',
     updatedAt: '2026-10-20T08:00:00Z',
+    refunds: [],
+    deliveryDate: null,
+    deliveryPlace: 'Storgata 1, 0155 Oslo',
     reservationEndedAt: null,
     holdsBuild: false,
     releaseBuildBlockedReason: 'wrongStatus',
@@ -97,12 +100,12 @@ describe('captureWarning', () => {
 
 describe('invoiceDetails', () => {
     it('leaves out the address and the captured date for a reserved pickup order', () => {
-        expect(invoiceDetails(pickupOrder, no).map(d => d.key)).toEqual(['name', 'email', 'phone', 'line1', 'line1Amount', 'line2', 'line2Amount', 'total', 'orderDate', 'reservedDate', 'reference', 'vat']);
+        expect(invoiceDetails(pickupOrder, no).map(d => d.key)).toEqual(['name', 'email', 'phone', 'line1', 'line1Amount', 'line2', 'line2Amount', 'total', 'orderDate', 'reservedDate', 'deliveryPlace', 'reference', 'vat']);
     });
 
     it('adds the address and the captured date for a paid shipping order', () => {
         const details = invoiceDetails(order, no);
-        expect(details.map(d => d.key)).toEqual(['name', 'email', 'phone', 'address', 'line1', 'line1Amount', 'line2', 'line2Amount', 'total', 'orderDate', 'reservedDate', 'capturedDate', 'reference', 'vat']);
+        expect(details.map(d => d.key)).toEqual(['name', 'email', 'phone', 'address', 'line1', 'line1Amount', 'line2', 'line2Amount', 'total', 'orderDate', 'reservedDate', 'capturedDate', 'deliveryPlace', 'reference', 'vat']);
         expect(details.find(d => d.key === 'capturedDate')?.value).toBe('20.10.2026');
         expect(details.find(d => d.key === 'address')?.value).toBe('Storgata 1, 0155 Oslo');
         expect(details.find(d => d.key === 'line1')?.value).toBe('Spillmaskin');
@@ -186,21 +189,52 @@ describe('refundAmountIssue', () => {
 });
 
 describe('invoiceDetails after a refund', () => {
-    it('adds the refunded amount and its date after the captured date', () => {
+    it('adds the refunded total after the captured date, with no single refund date', () => {
         const details = invoiceDetails({ ...order, status: 'Refunded', refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, no);
         const keys = details.map(d => d.key);
-        expect(keys.slice(keys.indexOf('capturedDate'), keys.indexOf('reference'))).toEqual(['capturedDate', 'refunded', 'refundedDate']);
+        expect(keys.slice(keys.indexOf('capturedDate'), keys.indexOf('deliveryPlace'))).toEqual(['capturedDate', 'refunded']);
         expect(details.find(d => d.key === 'refunded')).toMatchObject({ label: 'Betalt tilbake', value: '12990,00' });
-        expect(details.find(d => d.key === 'refundedDate')).toMatchObject({ label: 'Dato for full tilbakebetaling', value: '21.10.2026' });
-        expect(invoiceDetails({ ...order, refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, en).find(d => d.key === 'refundedDate')?.label).toBe('Date of full refund');
-        expect(invoiceDetails({ ...order, refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, en).find(d => d.key === 'refunded')?.label).toBe('Refunded');
+        expect(keys).not.toContain('refundedDate');
+        expect(invoiceDetails({ ...order, refundedInOre: 1299000 }, en).find(d => d.key === 'refunded')?.label).toBe('Refunded');
     });
 
-    it('adds only the amount for a partial refund and nothing before any refund', () => {
-        const partial = invoiceDetails({ ...order, refundedInOre: 300000 }, no).map(d => d.key);
-        expect(partial).toContain('refunded');
-        expect(partial).not.toContain('refundedDate');
+    it('adds the amount for a partial refund and nothing before any refund', () => {
+        expect(invoiceDetails({ ...order, refundedInOre: 300000 }, no).map(d => d.key)).toContain('refunded');
         expect(invoiceDetails(order, no).some(d => d.key === 'refunded')).toBe(false);
+    });
+});
+
+describe('invoiceDetails delivery', () => {
+    it('gives Leveringsdato on the Oslo calendar and Leveringssted before the reference', () => {
+        const details = invoiceDetails({ ...order, deliveryDate: '2026-10-21T22:30:00Z' }, no);
+        const keys = details.map(d => d.key);
+        expect(keys.slice(keys.indexOf('deliveryDate'), keys.indexOf('reference'))).toEqual(['deliveryDate', 'deliveryPlace']);
+        expect(details.find(d => d.key === 'deliveryDate')).toMatchObject({ label: 'Leveringsdato', value: '22.10.2026' });
+        expect(details.find(d => d.key === 'deliveryPlace')).toMatchObject({ label: 'Leveringssted', value: 'Storgata 1, 0155 Oslo' });
+        expect(invoiceDetails({ ...order, deliveryDate: '2026-10-21T08:00:00Z' }, en).find(d => d.key === 'deliveryDate')?.label).toBe('Delivery date');
+    });
+
+    it('leaves out the delivery date until the order is sent, and an empty place', () => {
+        const keys = invoiceDetails({ ...order, deliveryPlace: '' }, no).map(d => d.key);
+        expect(keys).not.toContain('deliveryDate');
+        expect(keys).not.toContain('deliveryPlace');
+    });
+});
+
+describe('missingInvoiceNumber', () => {
+    const now = new Date('2026-11-04T08:00:00Z');
+    const paid = { status: 'Paid' as const, invoiceNumber: null, capturedAt: '2026-10-21T08:00:00Z' };
+
+    it('flags a paid order with no invoice number from 14 days after the capture', () => {
+        expect(missingInvoiceNumber(paid, now)).toBe(true);
+        expect(missingInvoiceNumber({ ...paid, capturedAt: '2026-10-21T08:00:01Z' }, now)).toBe(false);
+    });
+
+    it('does not flag an order with an invoice number, another status or no capture date', () => {
+        expect(missingInvoiceNumber({ ...paid, invoiceNumber: '1001' }, now)).toBe(false);
+        expect(missingInvoiceNumber({ ...paid, status: 'Refunded' }, now)).toBe(false);
+        expect(missingInvoiceNumber({ ...paid, capturedAt: null }, now)).toBe(false);
+        expect(missingInvoiceNumber({ status: 'Paid', invoiceNumber: null }, now)).toBe(false);
     });
 });
 

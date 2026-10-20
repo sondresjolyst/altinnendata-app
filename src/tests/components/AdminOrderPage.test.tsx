@@ -52,6 +52,9 @@ const reserved: AdminOrder = {
     refundedAt: null,
     createdAt: '2026-10-18T10:00:00Z',
     updatedAt: '2026-10-18T10:05:00Z',
+    refunds: [],
+    deliveryDate: null,
+    deliveryPlace: 'Storgata 1, 0155 Oslo',
     reservationEndedAt: null,
     holdsBuild: true,
     releaseBuildBlockedReason: 'wrongStatus',
@@ -631,6 +634,39 @@ describe('the admin order page', () => {
             await waitFor(() => expect(screen.getByRole('button', { name: 'Frigi datamaskinen' })).toBeDisabled());
             expect(service.getOrder).toHaveBeenCalledTimes(2);
         });
+    });
+
+    it('lists each refund with its date and amount and asks for a credit note for each', async () => {
+        service.getOrder.mockResolvedValue({
+            ...paid,
+            status: 'Refunded',
+            refundedInOre: 1299000,
+            refunds: [
+                { amountInOre: 300000, refundedAt: '2026-10-21T08:00:00Z', source: 'Admin' },
+                { amountInOre: 999000, refundedAt: '2026-10-22T09:00:00Z', source: 'Webhook' },
+            ],
+        });
+        renderPage();
+        expect(await screen.findByRole('heading', { name: 'Tilbakebetalinger' })).toBeInTheDocument();
+        expect(screen.getByText('Lag en kreditnota i regnskapssystemet for hver tilbakebetaling.')).toBeInTheDocument();
+        expect(screen.getByText('Tilbakebetaling 1, 21.10.2026').nextElementSibling).toHaveTextContent('3000,00');
+        expect(screen.getByText('Tilbakebetaling 2, 22.10.2026').nextElementSibling).toHaveTextContent('9990,00');
+        expect(screen.getByRole('button', { name: 'Kopier Tilbakebetaling 2, 22.10.2026' })).toBeInTheDocument();
+    });
+
+    it('has no refund list before any refund', async () => {
+        service.getOrder.mockResolvedValue(paid);
+        renderPage();
+        await screen.findByRole('button', { name: 'Betal tilbake' });
+        expect(screen.queryByRole('heading', { name: 'Tilbakebetalinger' })).not.toBeInTheDocument();
+    });
+
+    it('shows Leveringsdato and Leveringssted with copy buttons', async () => {
+        service.getOrder.mockResolvedValue({ ...paid, deliveryDate: '2026-10-21T10:00:00Z' });
+        renderPage();
+        expect(await screen.findByRole('button', { name: 'Kopier Leveringsdato' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kopier Leveringssted' })).toBeInTheDocument();
+        expect(screen.getByText('Leveringssted').nextElementSibling).toHaveTextContent('Storgata 1, 0155 Oslo');
     });
 
     it('shows when the order confirmation went out, the accepted terms version and the shortened IP address', async () => {

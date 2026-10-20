@@ -82,6 +82,21 @@ describe('the admin orders page', () => {
         expect(within(rows[2]).queryByText('Delvis tilbakebetalt')).not.toBeInTheDocument();
     });
 
+    it('flags a paid order with no invoice number 14 days after the capture with Mangler fakturanummer', async () => {
+        const old = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString();
+        const recent = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+        service.getOrders.mockResolvedValue([
+            summary({ id: 1, buyerName: 'Gammel', status: 'Paid', capturedAt: old, createdAt: '2026-10-18T10:00:00Z' }),
+            summary({ id: 2, buyerName: 'Ny', status: 'Paid', capturedAt: recent, createdAt: '2026-10-17T10:00:00Z' }),
+            summary({ id: 3, buyerName: 'Fakturert', status: 'Paid', capturedAt: old, invoiceNumber: '1001', createdAt: '2026-10-16T10:00:00Z' }),
+        ]);
+        renderPage();
+        const row = async (name: string) => within((await screen.findByText(name)).closest('tr')!);
+        expect((await row('Gammel')).getByText('Mangler fakturanummer')).toBeInTheDocument();
+        expect((await row('Ny')).queryByText('Mangler fakturanummer')).not.toBeInTheDocument();
+        expect((await row('Fakturert')).queryByText('Mangler fakturanummer')).not.toBeInTheDocument();
+    });
+
     it('shows Ukjent when the capture deadline is not known', async () => {
         service.getOrders.mockResolvedValue([summary({ captureGuaranteedUntil: null })]);
         renderPage();

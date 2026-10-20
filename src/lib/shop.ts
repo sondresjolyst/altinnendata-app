@@ -1,7 +1,7 @@
 import type { Dictionary } from '@/i18n/dictionaries';
 import { ADMIN_ROLE } from '@/lib/roles';
 import type { BuildDetail } from '@/services/buildService';
-import type { AdminOrder, BuyButtonMode } from '@/services/shopService';
+import type { AdminOrder, AdminOrderSummary, BuyButtonMode } from '@/services/shopService';
 
 const HOUR = 60 * 60 * 1000;
 const SOON_HOURS = 48;
@@ -89,6 +89,14 @@ export function plainPhone(stored: string): string {
     return /^47\d{8}$/.test(stored) ? stored.slice(2) : stored;
 }
 
+const INVOICE_DUE_DAYS = 14;
+
+/** Whether a paid order still has no invoice number 14 days after the capture. */
+export function missingInvoiceNumber(order: Pick<AdminOrderSummary, 'status' | 'invoiceNumber' | 'capturedAt'>, now: Date): boolean {
+    if (order.status !== 'Paid' || order.invoiceNumber || !order.capturedAt) return false;
+    return now.getTime() - new Date(order.capturedAt).getTime() >= INVOICE_DUE_DAYS * 24 * HOUR;
+}
+
 /** The facts to type into an invoice for the order, in the order an invoice asks for them. */
 export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDetail[] {
     const text = dict.admin.shop;
@@ -118,7 +126,9 @@ export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDeta
 
     if (order.refundedInOre > 0) details.push({ key: 'refunded', label: labels.refunded, value: kroner(order.refundedInOre) });
 
-    if (order.refundedInOre > 0 && order.refundedAt) details.push({ key: 'refundedDate', label: labels.refundedDate, value: osloDate(order.refundedAt) });
+    if (order.deliveryDate) details.push({ key: 'deliveryDate', label: labels.deliveryDate, value: osloDate(order.deliveryDate) });
+
+    if (order.deliveryPlace) details.push({ key: 'deliveryPlace', label: labels.deliveryPlace, value: order.deliveryPlace });
 
     details.push(
         { key: 'reference', label: labels.reference, value: order.reference },

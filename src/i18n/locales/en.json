@@ -450,8 +450,9 @@
         "reservedDate": "Payment reserved",
         "capturedDate": "Amount taken",
         "refunded": "Refunded",
-        "refundedDate": "Date of full refund",
-        "reference": "Vipps reference"
+        "reference": "Vipps reference",
+        "deliveryDate": "Delivery date",
+        "deliveryPlace": "Place of delivery"
       },
       "vatLabel": "VAT",
       "vatNote": "Not VAT registered, no VAT.",
@@ -478,7 +479,11 @@
       "releaseReasons": {
         "wrongStatus": "Only failed and cancelled orders can release the computer.",
         "buildNotHeld": "The order no longer holds the computer."
-      }
+      },
+      "refunds": "Refunds",
+      "creditNoteNote": "Make a credit note in the accounting system for each refund.",
+      "refundRow": "Refund {number}, {date}",
+      "missingInvoiceNumber": "Missing invoice number"
     },
     "vat": {
       "title": "VAT registration threshold",

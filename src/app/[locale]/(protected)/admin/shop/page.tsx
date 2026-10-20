@@ -8,7 +8,7 @@ import ShopService, { type AdminOrderSummary } from '@/services/shopService';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { formatOre } from '@/lib/format';
-import { captureWarning, isPartlyRefunded, osloDate } from '@/lib/shop';
+import { captureWarning, isPartlyRefunded, missingInvoiceNumber, osloDate } from '@/lib/shop';
 
 export default function AdminOrdersPage() {
     const { locale, dict } = useDictionary();
@@ -82,7 +82,12 @@ export default function AdminOrdersPage() {
                                         <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{text.soon}</span>
                                     )}
                                 </td>
-                                <td className={cell}>{order.invoiceNumber}</td>
+                                <td className={cell}>
+                                    {order.invoiceNumber}
+                                    {missingInvoiceNumber(order, now) && (
+                                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{text.missingInvoiceNumber}</span>
+                                    )}
+                                </td>
                                 <td className={cell}>
                                     <Link href={localeHref(locale, `/admin/shop/orders/${order.id}`)} className="font-semibold text-gray-900 underline">
                                         {text.openOrder}

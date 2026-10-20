@@ -450,8 +450,9 @@
         "reservedDate": "Betaling reservert",
         "capturedDate": "Beløp trukket",
         "refunded": "Betalt tilbake",
-        "refundedDate": "Dato for full tilbakebetaling",
-        "reference": "Vipps-referanse"
+        "reference": "Vipps-referanse",
+        "deliveryDate": "Leveringsdato",
+        "deliveryPlace": "Leveringssted"
       },
       "vatLabel": "Merverdiavgift",
       "vatNote": "Ikke merverdiavgiftsregistrert, ingen mva.",
@@ -478,7 +479,11 @@
       "releaseReasons": {
         "wrongStatus": "Bare mislykkede og kansellerte ordrer kan frigi datamaskinen.",
         "buildNotHeld": "Ordren holder ikke lenger datamaskinen."
-      }
+      },
+      "refunds": "Tilbakebetalinger",
+      "creditNoteNote": "Lag en kreditnota i regnskapssystemet for hver tilbakebetaling.",
+      "refundRow": "Tilbakebetaling {number}, {date}",
+      "missingInvoiceNumber": "Mangler fakturanummer"
     },
     "vat": {
       "title": "Registreringsgrensen for merverdiavgift",
