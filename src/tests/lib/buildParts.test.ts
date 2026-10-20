@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { mainParts, partConditions } from '@/lib/buildParts';
+import { mainParts } from '@/lib/buildParts';
 import type { BuildComponent } from '@/services/buildService';
-
-const used = { id: 1, key: 'brukt', name: 'Brukt' };
-const fresh = { id: 2, key: 'ny', name: 'Ny' };
 
 const part = (id: number, categoryKey: string | null, overrides: Partial<BuildComponent> = {}): BuildComponent => ({
     id,
@@ -37,17 +34,5 @@ describe('mainParts', () => {
         mainParts(parts);
 
         expect(parts.map(p => p.id)).toEqual([1, 2]);
-    });
-});
-
-describe('partConditions', () => {
-    it('gives each condition once, in the order the parts come', () => {
-        const parts = [part(3, 'gpu', { condition: fresh }), part(1, 'cpu', { condition: used }), part(2, 'memory', { condition: used })];
-
-        expect(partConditions(parts)).toEqual(['Brukt', 'Ny']);
-    });
-
-    it('is empty when no part has a condition', () => {
-        expect(partConditions([part(1, 'cpu'), part(2, 'gpu')])).toEqual([]);
     });
 });

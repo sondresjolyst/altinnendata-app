@@ -24,6 +24,7 @@ const component = (id: number, overrides: Partial<BuildComponent>): BuildCompone
 });
 
 const build = (components: BuildComponent[]): BuildDetail => ({
+    conditions: [...new Map(components.flatMap(c => (c.condition ? [[c.condition.id, c.condition] as const] : []))).values()],
     id: 1,
     slug: 'gaming-pc',
     category: null,
@@ -40,6 +41,7 @@ const build = (components: BuildComponent[]): BuildDetail => ({
     summary: null,
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
+    allPartsHaveCondition: true,
     finnUrl: null,
     description: null,
     imageIds: [],
@@ -113,6 +115,13 @@ describe('build page buy button', () => {
         ]);
 
         expect(screen.getByText('Tilstand:').nextElementSibling).toHaveTextContent('Brukt, Ny');
+    });
+
+    it('takes the conditions from the API, in its order', async () => {
+        vi.mocked(publicGet).mockResolvedValue({ ...build([]), conditions: [{ id: 2, key: 'ny', name: 'Ny' }, { id: 1, key: 'brukt', name: 'Brukt' }] });
+        render(await BuildPage({ params: Promise.resolve({ locale: 'no', slug: 'gaming-pc' }) }));
+
+        expect(screen.getByText('Tilstand:').nextElementSibling).toHaveTextContent('Ny, Brukt');
     });
 
     it('leaves the condition out when no part has one', async () => {

@@ -47,6 +47,8 @@ const existing: BuildAdmin = {
     imageIds: [],
     createdAt: '2026-10-01T10:00:00Z',
     updatedAt: '2026-10-18T10:05:00.123Z',
+    conditions: [],
+    allPartsHaveCondition: true,
 };
 
 const refused = (status: number, data: object) =>

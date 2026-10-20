@@ -11,7 +11,7 @@ vi.mock('@/components/shop/CheckoutForm', () => ({
 }));
 
 const build = (overrides: Partial<BuildDetail> = {}) =>
-    ({ slug: 'gaming-pc', title: 'Gaming PC', availability: 'Available', priceNok: 9990, published: true, coverImageId: null, ...overrides }) as BuildDetail;
+    ({ slug: 'gaming-pc', title: 'Gaming PC', availability: 'Available', priceNok: 9990, published: true, coverImageId: null, conditions: [], allPartsHaveCondition: true, ...overrides }) as BuildDetail;
 
 const config: ShopConfig = {
     buyButton: 'Everyone',
@@ -48,6 +48,17 @@ describe('buy page', () => {
         expect(screen.getByTestId('checkout-form')).toHaveAttribute('data-terms-version', '2026-10-19T12:00:00.000000Z');
     });
 
+    it('keeps Kjøp in place, off, with Mangler tilstand på delene. for a build with a part without a condition', async () => {
+        vi.mocked(publicGetLive).mockResolvedValue(build({ allPartsHaveCondition: false }));
+        vi.mocked(publicGetLiveOptional).mockResolvedValue(config);
+        render(await BuyPage({ params }));
+
+        expect(screen.getByRole('heading', { name: 'Kjøp Gaming PC' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kjøp' })).toBeDisabled();
+        expect(screen.getByText('Mangler tilstand på delene.')).toBeInTheDocument();
+        expect(screen.queryByTestId('checkout-form')).not.toBeInTheDocument();
+    });
+
     it('shows the condition and the main parts above the checkout form', async () => {
         const part = (id: number, categoryKey: string, categoryName: string, name: string, condition: string | null) => ({
             id, componentPartId: null, componentCategoryId: null, categoryKey, categoryName, manufacturerName: null, name, details: null,
@@ -61,6 +72,7 @@ describe('buy page', () => {
                 part(4, 'memory', 'Minne', '16 GB DDR4', null),
                 part(5, 'gpu', 'Skjermkort', 'RTX 4070', 'Brukt'),
             ],
+            conditions: [{ id: 2, key: 'ny', name: 'Ny' }, { id: 1, key: 'brukt', name: 'Brukt' }],
         }));
         vi.mocked(publicGetLiveOptional).mockResolvedValue(config);
         const { container } = render(await BuyPage({ params }));

@@ -11,7 +11,6 @@ import { publicGet, publicGetOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { formatDate, formatPrice } from '@/lib/format';
-import { partConditions } from '@/lib/buildParts';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata, breadcrumbNode, absoluteLocaleUrl, localePath } from '@/lib/seo/site';
@@ -58,7 +57,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
     }[status];
 
     const gallery = build.imageIds;
-    const conditions = partConditions(build.components);
+    const conditions = build.conditions.map(c => c.name);
     const pageUrl = absoluteLocaleUrl(locale, `/builds/${slug}`);
 
     return (

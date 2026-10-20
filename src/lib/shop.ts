@@ -14,7 +14,12 @@ export function canBuy(mode: BuyButtonMode | undefined, roles: readonly string[]
 
 /** Whether the build can be sold now. The API checks the same again when the buyer pays. */
 export function isBuyable(build: BuildDetail): boolean {
-    return build.availability === 'Available' && build.priceNok != null && build.published;
+    return build.availability === 'Available' && build.priceNok != null && build.published && build.allPartsHaveCondition;
+}
+
+/** Whether the build would be for sale but for a part without a condition. */
+export function lacksConditions(build: BuildDetail): boolean {
+    return build.availability === 'Available' && build.priceNok != null && build.published && !build.allPartsHaveCondition;
 }
 
 /** Øre as kroner the way an accounting system takes them: no grouping and a comma decimal. */

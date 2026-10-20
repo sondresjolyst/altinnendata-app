@@ -10,7 +10,7 @@ vi.mock('next-auth/react', () => ({
 }));
 
 const build = (overrides: Partial<BuildDetail> = {}) =>
-    ({ slug: 'gaming-pc', availability: 'Available', priceNok: 9990, published: true, ...overrides }) as BuildDetail;
+    ({ slug: 'gaming-pc', availability: 'Available', priceNok: 9990, published: true, allPartsHaveCondition: true, ...overrides }) as BuildDetail;
 
 describe('BuyButton', () => {
     it('shows Kjøp to an admin while the mode is AdminsOnly', () => {
@@ -102,5 +102,22 @@ describe('BuyButton', () => {
 
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
         expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
+    it('keeps Kjøp in place, off, with Mangler tilstand på delene. when a part has no condition', () => {
+        session.roles = [];
+        render(<BuyButton build={build({ allPartsHaveCondition: false })} mode="Everyone" locale="no" hasDelivery />);
+
+        expect(screen.queryByRole('link')).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kjøp' })).toBeDisabled();
+        expect(screen.getByText('Mangler tilstand på delene.')).toBeInTheDocument();
+    });
+
+    it('says the English text for a build missing conditions', () => {
+        session.roles = [];
+        render(<BuyButton build={build({ allPartsHaveCondition: false })} mode="Everyone" locale="en" hasDelivery />);
+
+        expect(screen.getByRole('button', { name: 'Buy' })).toBeDisabled();
+        expect(screen.getByText('The condition of the parts is missing.')).toBeInTheDocument();
     });
 });

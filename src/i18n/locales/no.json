@@ -169,7 +169,8 @@
       },
       "toBuilds": "Til datamaskinene"
     },
-    "failed": "Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt."
+    "failed": "Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt.",
+    "missingConditions": "Mangler tilstand på delene."
   },
   "validation": {
     "required": "Feltet må fylles ut",
@@ -507,7 +508,8 @@
         "amount": "Skriv beløpet i hele kroner eller med én eller to desimaler.",
         "tooHigh": "Beløpet kan ikke være større enn {max}."
       }
-    }
+    },
+    "conditionRequired": "Velg tilstand for alle delene før datamaskinen legges ut for salg."
   },
   "stats": {
     "builds": "Datamaskiner publisert",

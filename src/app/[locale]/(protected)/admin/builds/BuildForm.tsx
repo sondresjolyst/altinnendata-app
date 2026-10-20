@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { ArrowDownTrayIcon, LanguageIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { apiErrorCode } from '@sjolystinnovation/app-kit/api';
+import { apiErrorCode, apiFieldErrors } from '@sjolystinnovation/app-kit/api';
 import { Alert, TextArea, TextInput, Toggle } from '@sjolystinnovation/app-kit/ui';
 import BuildService, { Availability, BuildAdmin, BuildInput, BuildTranslation } from '@/services/buildService';
 import BuildClassService, { BuildClass } from '@/services/buildClassService';
@@ -96,6 +96,9 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const [conditions, setConditions] = useState<ComponentCondition[]>([]);
     const [saving, setSaving] = useState(false);
     const [changedElsewhere, setChangedElsewhere] = useState(false);
+    // The part rows the API refused for a missing condition, and whether it refused a build with no parts.
+    const [conditionErrorRows, setConditionErrorRows] = useState<ReadonlySet<number>>(new Set());
+    const [partsMissing, setPartsMissing] = useState(false);
 
     const values = {
         translations, category, buildClassId, availability, priceNok, builtOn, soldOn,
@@ -229,6 +232,20 @@ export default function BuildForm({ build, onSaved, onCancel }: {
     const patchPart = (index: number, changes: Partial<PartLine>) =>
         setParts(prev => prev.map((p, i) => (i === index ? { ...p, ...changes } : p)));
 
+    /** Marks the part rows the API refused for a missing condition. True when it refused any. */
+    const showConditionErrors = (err: unknown) => {
+        const rows = new Set<number>();
+        let missing = false;
+        for (const key of Object.keys(apiFieldErrors(err) ?? {})) {
+            const row = /^components\[(\d+)\]\.componentConditionId$/i.exec(key);
+            if (row) rows.add(Number(row[1]));
+            else if (key.toLowerCase() === 'components') missing = true;
+        }
+        setConditionErrorRows(rows);
+        setPartsMissing(missing);
+        return rows.size > 0 || missing;
+    };
+
     const save = async () => {
         const filled = LOCALES
             .map(locale => translations[locale])
@@ -268,6 +285,8 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
         setSaving(true);
         setChangedElsewhere(false);
+        setConditionErrorRows(new Set());
+        setPartsMissing(false);
         try {
             if (build) await BuildService.update(build.id, input);
             else await BuildService.create(input);
@@ -279,6 +298,8 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                 // The form stays as it is, so nothing typed is lost and the draft keeps it too.
                 setChangedElsewhere(true);
                 toast.error(dict.admin.buildChanged);
+            } else if (showConditionErrors(err)) {
+                toast.error(dict.admin.conditionRequired);
             } else {
                 toast.error(err instanceof Error ? err.message : dict.admin.buildSaveFailed);
             }
@@ -470,6 +491,7 @@ export default function BuildForm({ build, onSaved, onCancel }: {
 
             <div>
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Deleliste</h3>
+                {partsMissing && <p className="mb-2 text-sm text-red-600">{dict.admin.conditionRequired}</p>}
                 <div className="space-y-2">
                     {parts.map((part, i) => (
                         <div key={i} className="space-y-3 rounded-lg border border-gray-200 p-3">
@@ -520,15 +542,24 @@ export default function BuildForm({ build, onSaved, onCancel }: {
                                     )}
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.condition}</label>
+                                        <label htmlFor={`part-condition-${i}`} className="block text-sm font-medium text-gray-700 mb-1">{dict.builds.condition}</label>
                                         <select
+                                            id={`part-condition-${i}`}
                                             value={part.componentConditionId ?? ''}
-                                            onChange={e => patchPart(i, { componentConditionId: e.target.value === '' ? null : Number(e.target.value) })}
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                            aria-invalid={conditionErrorRows.has(i) || undefined}
+                                            aria-describedby={conditionErrorRows.has(i) ? `part-condition-error-${i}` : undefined}
+                                            onChange={e => {
+                                                patchPart(i, { componentConditionId: e.target.value === '' ? null : Number(e.target.value) });
+                                                setConditionErrorRows(prev => new Set([...prev].filter(row => row !== i)));
+                                            }}
+                                            className={`w-full rounded-lg border px-3 py-2 text-sm ${conditionErrorRows.has(i) ? 'border-red-500' : 'border-gray-300'}`}
                                         >
                                             <option value="">—</option>
                                             {conditions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                         </select>
+                                        {conditionErrorRows.has(i) && (
+                                            <p id={`part-condition-error-${i}`} className="mt-1 text-sm text-red-600">{dict.admin.conditionRequired}</p>
+                                        )}
                                     </div>
                                 </div>
 

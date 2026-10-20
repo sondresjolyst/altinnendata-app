@@ -9,9 +9,3 @@ export function mainParts(components: readonly BuildComponent[]): BuildComponent
         .filter(c => c.categoryKey !== null && MAIN_PART_KEYS.includes(c.categoryKey))
         .sort((a, b) => MAIN_PART_KEYS.indexOf(a.categoryKey!) - MAIN_PART_KEYS.indexOf(b.categoryKey!) || a.sortOrder - b.sortOrder);
 }
-
-/** The conditions of the build's parts, each once, in the order the parts come. Empty when no part has one. */
-export function partConditions(components: readonly BuildComponent[]): string[] {
-    const names = [...components].sort((a, b) => a.sortOrder - b.sortOrder).flatMap(c => (c.condition ? [c.condition.name] : []));
-    return [...new Set(names)];
-}

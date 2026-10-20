@@ -8,8 +8,8 @@ import type { ShopConfig } from '@/services/shopService';
 import { publicGetLive, publicGetLiveOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
 import { fillTemplate, formatPrice } from '@/lib/format';
-import { isBuyable } from '@/lib/shop';
-import { mainParts, partConditions } from '@/lib/buildParts';
+import { isBuyable, lacksConditions } from '@/lib/shop';
+import { mainParts } from '@/lib/buildParts';
 import { isLocale, localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata } from '@/lib/seo/site';
@@ -49,8 +49,10 @@ export default async function BuyPage({ params }: { params: Params }) {
 
     const reserved = build.availability === 'Reserved' && build.published && build.priceNok != null;
     const shopOpen = shop && shop.buyButton !== 'Off' && shop.delivery.length > 0;
+    // A build that cannot be bought for now keeps the button in place, disabled, with the reason.
+    const blockedNote = reserved ? text.reserved : lacksConditions(build) ? text.missingConditions : null;
 
-    if (reserved && shopOpen) {
+    if (blockedNote && shopOpen) {
         return (
             <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
                 <Link href={buildHref} className="text-sm font-semibold text-gray-500 hover:text-gray-900">
@@ -62,7 +64,7 @@ export default async function BuyPage({ params }: { params: Params }) {
                     <button type="button" disabled className="rounded-lg border border-gray-900 bg-gray-900 px-6 py-3 font-semibold text-white opacity-50 cursor-not-allowed">
                         {text.buy}
                     </button>
-                    <p className="text-sm text-gray-700">{text.reserved}</p>
+                    <p className="text-sm text-gray-700">{blockedNote}</p>
                 </div>
             </div>
         );
@@ -102,7 +104,7 @@ export default async function BuyPage({ params }: { params: Params }) {
 
 function BuildSummary({ build, locale }: { build: BuildDetail; locale: Locale }) {
     const dict = getDictionary(locale);
-    const conditions = partConditions(build.components ?? []);
+    const conditions = build.conditions.map(c => c.name);
     const parts = mainParts(build.components ?? []);
 
     return (

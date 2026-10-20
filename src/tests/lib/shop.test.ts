@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canBuy, captureWarning, invoiceDetails, missingInvoiceNumber, isBuyable, kroner, osloDate, osloDateTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { canBuy, captureWarning, invoiceDetails, missingInvoiceNumber, isBuyable, lacksConditions, kroner, osloDate, osloDateTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { AdminOrder } from '@/services/shopService';
 
@@ -149,14 +149,27 @@ describe('canBuy', () => {
 });
 
 describe('isBuyable', () => {
-    const build = { availability: 'Available', priceNok: 9990, published: true };
+    const build = { availability: 'Available', priceNok: 9990, published: true, allPartsHaveCondition: true };
 
-    it('needs an available, priced and published build', () => {
+    it('needs an available, priced and published build with a condition on every part', () => {
+        expect(isBuyable({ ...build, allPartsHaveCondition: false } as never)).toBe(false);
         expect(isBuyable(build as never)).toBe(true);
         expect(isBuyable({ ...build, availability: 'Reserved' } as never)).toBe(false);
         expect(isBuyable({ ...build, availability: 'Sold' } as never)).toBe(false);
         expect(isBuyable({ ...build, priceNok: null } as never)).toBe(false);
         expect(isBuyable({ ...build, published: false } as never)).toBe(false);
+    });
+});
+
+describe('lacksConditions', () => {
+    const build = { availability: 'Available', priceNok: 9990, published: true, allPartsHaveCondition: false };
+
+    it('is true only for a build that would be for sale but for a part without a condition', () => {
+        expect(lacksConditions(build as never)).toBe(true);
+        expect(lacksConditions({ ...build, allPartsHaveCondition: true } as never)).toBe(false);
+        expect(lacksConditions({ ...build, availability: 'Reserved' } as never)).toBe(false);
+        expect(lacksConditions({ ...build, priceNok: null } as never)).toBe(false);
+        expect(lacksConditions({ ...build, published: false } as never)).toBe(false);
     });
 });
 

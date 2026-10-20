@@ -52,6 +52,10 @@ export interface BuildSummary {
     summary: string | null;
     createdAt: string;
     updatedAt: string;
+    /** The distinct conditions of the parts, in the conditions' own order. */
+    conditions: ComponentConditionRef[];
+    /** Whether the build has parts and each has a condition. A build cannot be sold without it. */
+    allPartsHaveCondition: boolean;
 }
 
 export interface BuildDetail extends BuildSummary {
@@ -87,6 +91,8 @@ export interface BuildAdmin {
     imageIds: string[];
     createdAt: string;
     updatedAt: string;
+    conditions: ComponentConditionRef[];
+    allPartsHaveCondition: boolean;
 }
 
 export interface BuildInput {

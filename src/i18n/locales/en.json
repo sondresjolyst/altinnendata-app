@@ -169,7 +169,8 @@
       },
       "toBuilds": "To the computers"
     },
-    "failed": "The payment could not be started. Try again, or get in touch."
+    "failed": "The payment could not be started. Try again, or get in touch.",
+    "missingConditions": "The condition of the parts is missing."
   },
   "validation": {
     "required": "This field is required",
@@ -507,7 +508,8 @@
         "amount": "Enter the amount in whole kroner or with one or two decimals.",
         "tooHigh": "The amount cannot be more than {max}."
       }
-    }
+    },
+    "conditionRequired": "Choose a condition for every part before the computer is put on sale."
   },
   "stats": {
     "builds": "Computers published",
