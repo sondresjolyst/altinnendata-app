@@ -9,7 +9,7 @@ import { contactSchema, issueMessage, budgetRanges, ContactInput } from '@/lib/v
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function ContactForm({ build }: { build?: { slug: string; title: string } | null }) {
-    const { dict } = useDictionary();
+    const { dict, locale } = useDictionary();
 
     const empty: ContactInput = {
         name: '',
@@ -41,7 +41,7 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
         setErrors({});
         setSubmitting(true);
         try {
-            await ContactService.send(parsed.data);
+            await ContactService.send({ ...parsed.data, locale });
             toast.success(dict.contact.sent);
             setForm(empty);
         } catch {
