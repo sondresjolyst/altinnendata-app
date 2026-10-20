@@ -108,3 +108,23 @@ describe('during next build', () => {
         await expect(publicGet('/content/legal/terms')).rejects.toThrow(PublicApiError);
     });
 });
+
+describe('a live read', () => {
+    it('asks Next for no cache with revalidate 0, where the normal reads cache for a minute', async () => {
+        const fetched = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => Response.json({ ok: true }));
+
+        await publicGet('/shop/config');
+        await publicGet('/shop/config', { revalidate: 0 });
+        await publicGetOptional('/shop/config', { revalidate: 0 });
+
+        expect(fetched.mock.calls[0]![1]).toEqual({ next: { revalidate: 60 } });
+        expect(fetched.mock.calls[1]![1]).toEqual({ next: { revalidate: 0 } });
+        expect(fetched.mock.calls[2]![1]).toEqual({ next: { revalidate: 0 } });
+    });
+
+    it('gives null for a failing API when optional', async () => {
+        respond({}, { status: 500 });
+
+        expect(await publicGetOptional('/shop/config', { revalidate: 0 })).toBeNull();
+    });
+});

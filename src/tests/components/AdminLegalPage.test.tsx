@@ -14,6 +14,7 @@ vi.mock('@/services/legalService', () => ({
     default: {
         listAll: () => Promise.resolve([{ key: 'terms', locale: 'no', title: 'Vilkår', bodyMarkdown: '# Vilkår', updatedAt: '2026-10-01' }]),
         save: (...args: unknown[]) => save(...args),
+        listRevisions: () => Promise.resolve([{ id: 1, savedAt: '2026-10-01T10:00:00Z', title: 'Vilkår' }]),
     },
 }));
 
@@ -49,7 +50,7 @@ describe('admin legal page', () => {
 
     it.each([
         ['no', ['Vilkår', 'Personvern', 'Informasjonskapsler']],
-        ['en', ['Terms', 'Privacy', 'Cookies']],
+        ['en', ['Terms', 'Privacy notice', 'Cookies']],
     ] as const)('offers the three legal pages in order (%s)', async (locale, labels) => {
         renderPage(locale);
         await screen.findByRole('button', { name: labels[0], pressed: true });
@@ -84,5 +85,11 @@ describe('admin legal page', () => {
 
         expect(body).toHaveAccessibleDescription('Du må fylle ut dette feltet.');
         expect(save).not.toHaveBeenCalled();
+    });
+
+    it.each([['no', 'nb-NO'], ['en', 'en-GB']] as const)('writes the dates of the earlier versions in the page language (%s)', async (locale, tag) => {
+        renderPage(locale);
+        const expected = new Intl.DateTimeFormat(tag, { dateStyle: 'medium', timeStyle: 'medium' }).format(new Date('2026-10-01T10:00:00Z'));
+        expect(await screen.findByText(expected)).toBeInTheDocument();
     });
 });

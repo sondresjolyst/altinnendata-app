@@ -20,6 +20,8 @@ const base: BuildSummary = {
     summary: 'Rask maskin for spill',
     createdAt: '2026-05-01T00:00:00Z',
     updatedAt: '2026-05-01T00:00:00Z',
+    conditions: [],
+    allPartsHaveCondition: true,
 };
 
 describe('BuildCard', () => {
@@ -41,5 +43,11 @@ describe('BuildCard', () => {
     it('omits the price when the build has none', () => {
         render(<BuildCard build={{ ...base, priceNok: null }} locale="no" />);
         expect(screen.queryByText(/kr/)).not.toBeInTheDocument();
+    });
+
+    it('shows no condition line, the build page lists the condition of each part', () => {
+        const conditions = [{ id: 1, key: 'used', name: 'Brukt' }, { id: 2, key: 'new', name: 'Ny' }];
+        render(<BuildCard build={{ ...base, conditions }} locale="no" />);
+        expect(screen.queryByText(/Tilstand/)).not.toBeInTheDocument();
     });
 });

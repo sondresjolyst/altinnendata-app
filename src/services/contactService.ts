@@ -9,6 +9,8 @@ export interface ContactRequest {
     budgetNok?: string | null;
     buildSlug?: string;
     message: string;
+    /** The site language, so the receipt to the sender is in it. */
+    locale?: string;
 }
 
 const ContactService = {

@@ -7,6 +7,7 @@ import { EmailStatsPanel, StatHistoryChart } from '@sjolystinnovation/app-kit/ad
 import { nbEmailStatsPanelStrings, nbStatHistoryChartStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import { formatPrice } from '@/lib/format';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import VatThresholdPanel from '@/components/shop/VatThresholdPanel';
 
 function formatBytes(n: number): string {
     if (n <= 0) return '0 B';
@@ -86,6 +87,9 @@ export default function AdminStatsPage() {
                     {stats ? (
                         <div className="space-y-1.5 text-sm text-gray-700">
                             <div className="flex justify-between"><span className="text-gray-500">{dict.admin.revenue}</span><span className="tabular-nums font-semibold text-gray-900">{priceOrDash(stats.revenueNok)}</span></div>
+                            {typeof stats.capturedRevenueInOre === 'number' && (
+                                <div className="flex justify-between"><span className="text-gray-500">{dict.admin.capturedRevenue}</span><span className="tabular-nums">{formatPrice(stats.capturedRevenueInOre / 100, locale)}</span></div>
+                            )}
                             <div className="flex justify-between"><span className="text-gray-500">{dict.admin.averagePrice}</span><span className="tabular-nums">{priceOrDash(averageSoldPrice)}</span></div>
                             {(stats.soldWithoutPrice ?? 0) > 0 && (
                                 <div className="flex justify-between"><span className="text-gray-500">{dict.admin.soldWithoutPrice}</span><span className="tabular-nums">{stats.soldWithoutPrice}</span></div>
@@ -97,6 +101,8 @@ export default function AdminStatsPage() {
                     ) : <p className="text-sm text-gray-500">{dict.common.loading}</p>}
                 </div>
             </div>
+
+            <VatThresholdPanel />
 
             <div className="grid sm:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-gray-200 p-5">

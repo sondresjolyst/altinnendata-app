@@ -10,6 +10,7 @@ export interface AdminStats {
     reservedBuilds?: number;
     availableBuilds?: number;
     revenueNok?: number;
+    capturedRevenueInOre?: number;
     soldWithoutPrice?: number;
     soldWithoutDate?: number;
     catalogParts: number;

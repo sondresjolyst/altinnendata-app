@@ -12,6 +12,7 @@ const email = vi.hoisted(() => ({ get: vi.fn() }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 vi.mock('@/services/adminService', () => ({ default: admin, EmailStatsService: email }));
+vi.mock('@/components/shop/VatThresholdPanel', () => ({ default: () => <section data-testid="vat-panel" /> }));
 
 const stats = {
     totalUsers: 2, publishedBuilds: 3, draftBuilds: 1, soldBuilds: 0, catalogParts: 5, contentImages: 4,
@@ -65,5 +66,22 @@ describe('admin stats page', () => {
         expect(await screen.findByText('1.5 KB')).toBeInTheDocument();
         expect(row(dict.admin.diskFree)).toHaveTextContent('4.0 GB');
         expect(row(dict.admin.diskTotal)).toHaveTextContent('10.0 GB');
+    });
+
+    it('shows the captured Vipps revenue in kroner', async () => {
+        admin.getStats.mockResolvedValue({ ...stats, capturedRevenueInOre: 1299000 });
+        email.get.mockResolvedValue({ days: 30, requests: 0, delivered: 0, hardBounces: 0, softBounces: 0, spamReports: 0, blocked: 0, invalid: 0 });
+        renderPage('no');
+
+        expect(await screen.findByText('Innbetalt med Vipps')).toBeInTheDocument();
+        expect(row('Innbetalt med Vipps')).toHaveTextContent('12 990');
+    });
+
+    it('hides the row when the API sends no captured revenue', async () => {
+        email.get.mockResolvedValue({ days: 30, requests: 0, delivered: 0, hardBounces: 0, softBounces: 0, spamReports: 0, blocked: 0, invalid: 0 });
+        renderPage('no');
+
+        expect(await screen.findByText(getDictionary('no').admin.revenue)).toBeInTheDocument();
+        expect(screen.queryByText('Innbetalt med Vipps')).not.toBeInTheDocument();
     });
 });

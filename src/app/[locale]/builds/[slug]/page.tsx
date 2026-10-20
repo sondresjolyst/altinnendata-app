@@ -5,7 +5,9 @@ import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import BuildGallery from '@/components/BuildGallery';
 import { Markdown } from '@sjolystinnovation/app-kit/markdown';
 import { BuildDetail, coverImageSrc } from '@/services/buildService';
-import { publicGet } from '@/lib/publicApi';
+import BuyButton from '@/components/shop/BuyButton';
+import type { ShopConfig } from '@/services/shopService';
+import { publicGet, publicGetOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
 import { REVALIDATE_TARGETS } from '@/lib/cacheTags';
 import { formatDate, formatPrice } from '@/lib/format';
@@ -42,6 +44,9 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
 
     const build = await fetchBuild(slug, locale);
     if (!build) notFound();
+
+    // A failed fetch means no buy button, never a failed page.
+    const shop = await publicGetOptional<ShopConfig>(`/shop/config?locale=${locale}`, { tags: [REVALIDATE_TARGETS.shop] });
 
     const dict = getDictionary(locale);
     const status = build.availability.toLowerCase() as 'available' | 'reserved' | 'sold';
@@ -118,6 +123,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                         >
                             {status === 'sold' ? dict.builds.askSimilar : dict.builds.askAbout}
                         </Link>
+                        <BuyButton build={build} mode={shop?.buyButton} hasDelivery={(shop?.delivery.length ?? 0) > 0} locale={locale} />
                         {build.finnUrl && (
                             <a
                                 href={build.finnUrl}
@@ -164,7 +170,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
             {build.description && build.description !== build.summary && (
                 <section className="mt-12 max-w-3xl">
                     <h2 className="text-lg font-bold text-gray-900">{dict.builds.description}</h2>
-                    <div className="mt-3 space-y-4 text-sm text-gray-700 break-words">
+                    <div className="mt-3 space-y-4 text-sm text-gray-700">
                         <Markdown>{build.description}</Markdown>
                     </div>
                 </section>

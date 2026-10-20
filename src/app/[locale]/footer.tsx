@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useBranding } from '@sjolystinnovation/app-kit/branding';
-import { formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
+import { brregUrl, formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
@@ -13,6 +13,7 @@ export default function Footer({ company }: { company: CompanyInfo }) {
     const { locale, dict } = useDictionary();
     const { status } = useSession();
     const href = (path: string) => localeHref(locale, path);
+    const legalName = company.legalName || company.name;
 
     return (
         <footer className="border-t border-gray-200 bg-white">
@@ -21,9 +22,6 @@ export default function Footer({ company }: { company: CompanyInfo }) {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={logoUrl ?? '/logo.png'} alt="" className="h-7 w-7 rounded-md object-cover" />
                     <span className="text-sm font-semibold text-gray-900">{company.name}</span>
-                    {company.orgNumber && (
-                        <span className="text-xs text-gray-500">{dict.footer.orgNumber} {formatOrgNumber(company)}</span>
-                    )}
                 </div>
 
                 <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-gray-600">
@@ -36,17 +34,42 @@ export default function Footer({ company }: { company: CompanyInfo }) {
                     )}
                 </nav>
 
-                <p className="text-xs text-gray-400">
-                    © {year} {company.name} · {dict.footer.createdBy}{' '}
-                    <a
-                        href="https://www.sjolystinnovation.no/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-500 hover:text-gray-900 hover:underline"
-                    >
-                        Sjølyst Innovation AS
-                    </a>
-                </p>
+                <div className="space-y-0.5 text-center text-xs text-gray-600 sm:text-right">
+                    <p>
+                        © {year} {legalName}
+                        <span aria-hidden="true"> · </span>
+                        {dict.footer.createdBy}{' '}
+                        <a
+                            href="https://www.sjolystinnovation.no/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-4 hover:text-gray-900"
+                        >
+                            Sjølyst Innovation AS
+                        </a>
+                    </p>
+                    {(company.orgNumber || company.address) && (
+                        <p>
+                            {/* Foretaksregisterloven § 10-2 wants the register next to the org number. */}
+                            {company.orgNumber && (
+                                <>
+                                    {dict.footer.orgNumber}{' '}
+                                    <a
+                                        href={brregUrl(company.orgNumber)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="underline underline-offset-4 hover:text-gray-900"
+                                    >
+                                        {formatOrgNumber(company)}
+                                    </a>{' '}
+                                    {dict.footer.register}
+                                </>
+                            )}
+                            {company.orgNumber && company.address && <span aria-hidden="true"> · </span>}
+                            {company.address}
+                        </p>
+                    )}
+                </div>
             </div>
         </footer>
     );
