@@ -8,7 +8,7 @@ import AdminOrderPage from '@/app/[locale]/(protected)/admin/shop/orders/[id]/pa
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { AdminOrder } from '@/services/shopService';
 
-const service = vi.hoisted(() => ({ getOrder: vi.fn(), capture: vi.fn(), cancel: vi.fn(), refund: vi.fn(), setInvoiceNumber: vi.fn() }));
+const service = vi.hoisted(() => ({ getOrder: vi.fn(), capture: vi.fn(), cancel: vi.fn(), refund: vi.fn(), setInvoiceNumber: vi.fn(), markShipped: vi.fn() }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 vi.mock('next/navigation', async () => (await import('@sjolystinnovation/app-kit/testing')).nextNavigationMock());
@@ -41,6 +41,11 @@ const reserved: AdminOrder = {
     captureGuaranteedUntil: '2099-01-01T00:00:00Z',
     invoiceNumber: null,
     termsAcceptedAt: '2026-10-18T10:00:00Z',
+    termsVersion: '2026-10-01T09:30:00.123456Z',
+    termsAcceptedIp: '203.0.113.0',
+    confirmationSentAt: '2026-10-18T10:06:00Z',
+    shippedAt: null,
+    shippingNote: null,
     authorizedAt: '2026-10-18T10:05:00Z',
     capturedAt: null,
     cancelledAt: null,
@@ -422,6 +427,145 @@ describe('the admin order page', () => {
         await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
 
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen.'));
+    });
+
+    describe('marking the order as sent', () => {
+        const shipped: AdminOrder = { ...reserved, shippedAt: '2026-10-19T12:00:00Z', shippingNote: 'Sporingsnummer 123' };
+
+        const open = async (user: ReturnType<typeof userEvent.setup>, name = 'Marker som sendt') => {
+            await user.click(await screen.findByRole('button', { name }));
+            return within(screen.getByRole('dialog'));
+        };
+
+        it('asks before it emails the customer, sends the note and shows the date and the note', async () => {
+            service.getOrder.mockResolvedValue(reserved);
+            service.markShipped.mockResolvedValue(shipped);
+            const user = userEvent.setup();
+            renderPage();
+
+            expect(await screen.findByText('Kunden får en e-post.')).toBeInTheDocument();
+            const dialog = await open(user);
+            expect(dialog.getByText('Send e-post til kunden om at ordren er sendt?')).toBeInTheDocument();
+            await user.type(dialog.getByLabelText('Melding til kunden'), '  Sporingsnummer 123 ');
+            await user.click(dialog.getByRole('button', { name: 'Marker som sendt' }));
+
+            await waitFor(() => expect(service.markShipped).toHaveBeenCalledWith(7, 'Sporingsnummer 123'));
+            expect(toastSpies.success).toHaveBeenCalledWith('Ordren er markert som sendt');
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+            expect(screen.getByText('Sendt').nextElementSibling).toHaveTextContent('19.10.2026');
+            expect(screen.getByText('Sporingsnummer 123')).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: 'Marker som sendt' })).toBeDisabled();
+            expect(screen.getByText('Ordren er allerede markert som sendt.')).toBeInTheDocument();
+        });
+
+        it('sends no note when the field is left empty', async () => {
+            service.getOrder.mockResolvedValue(reserved);
+            service.markShipped.mockResolvedValue(shipped);
+            const user = userEvent.setup();
+            renderPage();
+
+            const dialog = await open(user);
+            await user.click(dialog.getByRole('button', { name: 'Marker som sendt' }));
+
+            await waitFor(() => expect(service.markShipped).toHaveBeenCalledWith(7, null));
+        });
+
+        it('says klar for henting for a pickup order', async () => {
+            service.getOrder.mockResolvedValue({ ...reserved, deliveryMethod: 'Pickup' });
+            service.markShipped.mockResolvedValue({ ...shipped, deliveryMethod: 'Pickup' });
+            const user = userEvent.setup();
+            renderPage();
+
+            const dialog = await open(user, 'Marker som klar for henting');
+            expect(dialog.getByText('Send e-post til kunden om at ordren er klar for henting?')).toBeInTheDocument();
+            await user.click(dialog.getByRole('button', { name: 'Marker som klar for henting' }));
+
+            await waitFor(() => expect(toastSpies.success).toHaveBeenCalledWith('Ordren er markert som klar for henting'));
+            expect(screen.getByText('Klar for henting').nextElementSibling).toHaveTextContent('19.10.2026');
+            expect(screen.getByText('Ordren er allerede markert som klar for henting.')).toBeInTheDocument();
+        });
+
+        it('allows a paid order', async () => {
+            service.getOrder.mockResolvedValue(paid);
+            renderPage();
+
+            expect(await screen.findByRole('button', { name: 'Marker som sendt' })).toBeEnabled();
+        });
+
+        it.each(['Pending', 'Failed', 'Cancelled', 'Refunded'] as const)('keeps the button in place but off for a %s order, with the reason', async status => {
+            service.getOrder.mockResolvedValue({ ...reserved, status });
+            renderPage();
+
+            const button = await screen.findByRole('button', { name: 'Marker som sendt' });
+            expect(button).toBeDisabled();
+            expect(button).toHaveAccessibleDescription('Bare reserverte og betalte ordrer kan markeres.');
+        });
+
+        it('turns the confirm button off and says Bruk 500 eller færre tegn. for a note over 500 characters', async () => {
+            service.getOrder.mockResolvedValue(reserved);
+            const user = userEvent.setup();
+            renderPage();
+
+            const dialog = await open(user);
+            const note = dialog.getByLabelText('Melding til kunden');
+            await user.click(note);
+            await user.paste('a'.repeat(501));
+
+            expect(dialog.getByText('Bruk 500 eller færre tegn.')).toBeInTheDocument();
+            expect(dialog.getByRole('button', { name: 'Marker som sendt' })).toBeDisabled();
+            await user.type(note, '{Backspace}');
+            expect(dialog.getByRole('button', { name: 'Marker som sendt' })).toBeEnabled();
+        });
+
+        it('keeps the dialog open with the length text when the API refuses the note', async () => {
+            service.getOrder.mockResolvedValue(reserved);
+            service.markShipped.mockRejectedValue(await refused(400, { errors: { note: ['Use 500 or fewer characters.'] } }));
+            const user = userEvent.setup();
+            renderPage();
+
+            const dialog = await open(user);
+            await user.type(dialog.getByLabelText('Melding til kunden'), 'Hei');
+            await user.click(dialog.getByRole('button', { name: 'Marker som sendt' }));
+
+            expect(await dialog.findByText('Bruk 500 eller færre tegn.')).toBeInTheDocument();
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+            expect(screen.queryByText('Use 500 or fewer characters.')).not.toBeInTheDocument();
+        });
+
+        it.each([
+            [409, { message: 'x', code: 'alreadyShipped' }, 'Ordren er allerede markert. Last siden på nytt.'],
+            [409, { message: 'x', code: 'wrongStatus' }, 'Ordren har endret status. Last siden på nytt.'],
+            [502, { message: 'Bad gateway' }, 'Kunne ikke markere ordren'],
+        ])('shows the Norwegian text when the API answers %i', async (status, body, message) => {
+            service.getOrder.mockResolvedValue(reserved);
+            service.markShipped.mockRejectedValue(await refused(status, body));
+            const user = userEvent.setup();
+            renderPage();
+
+            const dialog = await open(user);
+            await user.click(dialog.getByRole('button', { name: 'Marker som sendt' }));
+
+            await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith(message));
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        });
+    });
+
+    it('shows when the order confirmation went out, the accepted terms version and the shortened IP address', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        renderPage();
+
+        expect((await screen.findByText('Ordrebekreftelse')).nextElementSibling).toHaveTextContent('Sendt 18.10.2026');
+        expect(screen.getByText('Vilkår godtatt').nextElementSibling).toHaveTextContent('18.10.2026, versjon 2026-10-01T09:30:00.123456Z');
+        expect(screen.getByText('IP-adresse ved godkjenning (forkortet)').nextElementSibling).toHaveTextContent('203.0.113.0');
+    });
+
+    it('says the order confirmation is not sent yet and that no terms were published', async () => {
+        service.getOrder.mockResolvedValue({ ...reserved, confirmationSentAt: null, termsVersion: 'none', termsAcceptedIp: null });
+        renderPage();
+
+        expect((await screen.findByText('Ordrebekreftelse')).nextElementSibling).toHaveTextContent('Ikke sendt ennå');
+        expect(screen.getByText('Vilkår godtatt').nextElementSibling).toHaveTextContent('18.10.2026, ingen vilkår publisert');
+        expect(screen.queryByText('IP-adresse ved godkjenning (forkortet)')).not.toBeInTheDocument();
     });
 
     it('shows the phone as a plain eight digit number', async () => {

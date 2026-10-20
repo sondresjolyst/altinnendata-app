@@ -114,6 +114,13 @@ export interface AdminOrder {
     captureGuaranteedUntil: string | null;
     invoiceNumber: string | null;
     termsAcceptedAt: string;
+    /** The terms version the buyer accepted, or "none" when no terms page was published. */
+    termsVersion: string | null;
+    /** The buyer's IP address with the host part cut off, or null when unknown. */
+    termsAcceptedIp: string | null;
+    confirmationSentAt: string | null;
+    shippedAt: string | null;
+    shippingNote: string | null;
     authorizedAt: string | null;
     capturedAt: string | null;
     cancelledAt: string | null;
@@ -154,6 +161,10 @@ const ShopService = {
     /** `expectedRefundedInOre` is the refunded total the page loaded, so the API can refuse a refund made on a stale order. */
     refund: (id: number, amountInOre: number, expectedRefundedInOre: number) =>
         act(id, 'refund', 'Failed to refund the order', { amountInOre, expectedRefundedInOre }),
+
+    /** Marks the order as sent, or ready for pickup, and emails the buyer with the note. */
+    markShipped: (id: number, note: string | null) =>
+        request(() => axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/shipped`, { note }), 'Failed to mark the order'),
 
     setInvoiceNumber: (id: number, invoiceNumber: string | null) =>
         request(() => axiosInstance.put<AdminOrder>(`/admin/shop/orders/${id}/invoice-number`, { invoiceNumber }), 'Failed to save the invoice number'),
