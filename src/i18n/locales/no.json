@@ -142,7 +142,8 @@
       "buildUnavailable": "Datamaskinen er ikke lenger tilgjengelig. Noen andre har kjøpt eller reservert den.",
       "shopClosed": "Kjøp er ikke åpnet ennå.",
       "deliveryUnavailable": "Leveringsmåten er ikke lenger tilgjengelig. Velg en annen.",
-      "paymentProviderUnavailable": "Vipps svarer ikke. Prøv igjen om litt."
+      "paymentProviderUnavailable": "Vipps svarer ikke. Prøv igjen om litt.",
+      "termsChanged": "Vilkårene er endret. Les dem på nytt og godta før du betaler."
     },
     "return": {
       "title": "Betaling",

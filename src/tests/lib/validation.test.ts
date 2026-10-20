@@ -67,6 +67,7 @@ describe('checkoutSchema', () => {
         withinDistance: false,
         pickupNote: null,
         acceptTerms: true,
+        termsVersion: '2026-10-19T12:00:00.000000Z',
         locale: 'no',
     };
 
@@ -130,6 +131,12 @@ describe('checkoutSchema', () => {
         expect(messages(home).withinDistance).toBe('Du må bekrefte at adressen er innenfor 30 km.');
         expect(checkoutSchema.safeParse({ ...home, withinDistance: true }).success).toBe(true);
         expect(checkoutSchema.safeParse(checkout).success).toBe(true);
+    });
+
+    it('wants the terms version from the shop config, at most 40 characters as the API takes', () => {
+        expect(checkoutSchema.safeParse({ ...checkout, termsVersion: '' }).success).toBe(false);
+        expect(checkoutSchema.safeParse({ ...checkout, termsVersion: 'a'.repeat(41) }).success).toBe(false);
+        expect(checkoutSchema.safeParse({ ...checkout, termsVersion: 'none' }).success).toBe(true);
     });
 
     it('trims the name and refuses a blank one', () => {

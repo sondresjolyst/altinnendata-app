@@ -51,6 +51,18 @@ describe('ShopService.orderStatus', () => {
     });
 });
 
+describe('ShopService.config', () => {
+    beforeEach(() => get.mockReset());
+
+    it('reads the public shop config for the locale, for the current terms version', async () => {
+        const config = { buyButton: 'Everyone', delivery: [], termsVersion: '2026-10-20T08:00:00.000000Z' };
+        get.mockResolvedValueOnce({ status: 200, data: config });
+
+        await expect(ShopService.config('en')).resolves.toEqual(config);
+        expect(get).toHaveBeenCalledWith('/shop/config?locale=en');
+    });
+});
+
 describe('the order actions', () => {
     beforeEach(() => {
         post.mockReset();

@@ -142,7 +142,8 @@
       "buildUnavailable": "The computer is no longer available. Someone else has bought or reserved it.",
       "shopClosed": "Buying has not opened yet.",
       "deliveryUnavailable": "That delivery method is no longer available. Choose another.",
-      "paymentProviderUnavailable": "Vipps is not responding. Try again shortly."
+      "paymentProviderUnavailable": "Vipps is not responding. Try again shortly.",
+      "termsChanged": "The terms have changed. Read them again and accept before you pay."
     },
     "return": {
       "title": "Payment",

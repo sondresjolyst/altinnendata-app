@@ -37,6 +37,8 @@ export interface PublicDeliveryOption {
 export interface ShopConfig {
     buyButton: BuyButtonMode;
     delivery: PublicDeliveryOption[];
+    /** The version of the terms the buyer accepts. Checkout sends it back, and the API refuses a stale one. */
+    termsVersion: string;
 }
 
 export interface CheckoutRequest {
@@ -51,6 +53,7 @@ export interface CheckoutRequest {
     withinDistance: boolean;
     pickupNote: string | null;
     acceptTerms: boolean;
+    termsVersion: string;
     locale: string;
 }
 
@@ -168,6 +171,10 @@ const ShopService = {
         }).catch(() => undefined);
         return started;
     },
+
+    /** The public shop settings, read fresh for the current terms version. */
+    config: (locale: string) =>
+        request(() => publicClient.get<ShopConfig>(`/shop/config?locale=${encodeURIComponent(locale)}`), 'Failed to load the shop'),
 
     /** The public status of an order by its token, or null when no order has it. */
     orderStatus: async (token: string) => {

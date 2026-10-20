@@ -41,6 +41,7 @@ export const checkoutSchema = z.object({
     withinDistance: z.boolean(),
     pickupNote: z.string().trim().max(500).nullable(),
     acceptTerms: z.boolean().refine(accepted => accepted, { message: 'terms' }),
+    termsVersion: z.string().min(1).max(40),
     locale: z.string().min(1),
 }).superRefine((order, ctx) => {
     if (order.deliveryMethod !== 'Pickup') {

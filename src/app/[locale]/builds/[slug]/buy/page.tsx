@@ -94,7 +94,7 @@ export default async function BuyPage({ params }: { params: Params }) {
             <BuildSummary build={build} locale={locale} />
 
             <div className="mt-8">
-                <CheckoutForm build={build} delivery={shop.delivery} mode={shop.buyButton} locale={locale} />
+                <CheckoutForm build={build} delivery={shop.delivery} mode={shop.buyButton} termsVersion={shop.termsVersion} locale={locale} />
             </div>
         </div>
     );

@@ -8,7 +8,7 @@ import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { BuildDetail } from '@/services/buildService';
 import type { PublicDeliveryOption } from '@/services/shopService';
 
-const service = vi.hoisted(() => ({ checkout: vi.fn() }));
+const service = vi.hoisted(() => ({ checkout: vi.fn(), config: vi.fn() }));
 const session = vi.hoisted(() => ({ roles: ['Admin'] as string[] }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
@@ -28,7 +28,7 @@ const delivery: PublicDeliveryOption[] = [
 const renderForm = (mode: 'AdminsOnly' | 'Everyone' | 'Off' = 'AdminsOnly') =>
     render(
         <DictionaryProvider locale="no">
-            <CheckoutForm build={build} delivery={delivery} mode={mode} locale="no" />
+            <CheckoutForm build={build} delivery={delivery} mode={mode} termsVersion="2026-10-19T12:00:00.000000Z" locale="no" />
         </DictionaryProvider>,
     );
 
@@ -47,6 +47,7 @@ const fillContact = async (user: ReturnType<typeof userEvent.setup>) => {
 beforeEach(() => {
     resetTestMocks();
     service.checkout.mockReset();
+    service.config.mockReset();
     session.roles = ['Admin'];
 });
 
@@ -138,6 +139,7 @@ describe('CheckoutForm', () => {
             withinDistance: false,
             pickupNote: null,
             acceptTerms: true,
+            termsVersion: '2026-10-19T12:00:00.000000Z',
             locale: 'no',
         });
         vi.unstubAllGlobals();
@@ -206,6 +208,29 @@ describe('CheckoutForm', () => {
         expect(screen.queryByText(message)).not.toBeInTheDocument();
     });
 
+    it('unticks the terms and says they changed on 409 termsChanged, then sends the new version', async () => {
+        const user = userEvent.setup();
+        vi.stubGlobal('location', { ...window.location, assign: vi.fn() });
+        service.checkout.mockRejectedValueOnce(await refused(409, { message: 'x', code: 'termsChanged' }));
+        service.config.mockResolvedValue({ buyButton: 'AdminsOnly', delivery, termsVersion: '2026-10-20T08:00:00.000000Z' });
+        renderForm();
+        await submitPickup(user);
+
+        expect(await screen.findByText('Vilkårene er endret. Les dem på nytt og godta før du betaler.')).toBeInTheDocument();
+        const terms = screen.getByRole('checkbox', { name: /Jeg godtar salgsvilkårene/ });
+        expect(terms).not.toBeChecked();
+        expect(service.config).toHaveBeenCalledWith('no');
+
+        service.checkout.mockResolvedValue({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        await user.click(terms);
+        await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
+
+        await waitFor(() => expect(service.checkout).toHaveBeenCalledTimes(2));
+        expect(service.checkout.mock.calls[0][0].termsVersion).toBe('2026-10-19T12:00:00.000000Z');
+        expect(service.checkout.mock.calls[1][0].termsVersion).toBe('2026-10-20T08:00:00.000000Z');
+        vi.unstubAllGlobals();
+    });
+
     it('shows the failed text on a 502 from the payment provider', async () => {
         const user = userEvent.setup();
         service.checkout.mockRejectedValue(await refused(502, { message: 'Bad gateway', code: 'paymentProviderUnavailable' }));
@@ -238,7 +263,7 @@ describe('CheckoutForm', () => {
     ] as const)('submits with the official Vipps artwork in %s', (locale, name, src) => {
         render(
             <DictionaryProvider locale={locale}>
-                <CheckoutForm build={build} delivery={delivery} mode="Everyone" locale={locale} />
+                <CheckoutForm build={build} delivery={delivery} mode="Everyone" termsVersion="none" locale={locale} />
             </DictionaryProvider>,
         );
 
@@ -253,7 +278,7 @@ describe('CheckoutForm', () => {
     ] as const)('says where it delivers and links the privacy notice under the terms in %s', (locale, note, link, href) => {
         render(
             <DictionaryProvider locale={locale}>
-                <CheckoutForm build={build} delivery={delivery} mode="Everyone" locale={locale} />
+                <CheckoutForm build={build} delivery={delivery} mode="Everyone" termsVersion="none" locale={locale} />
             </DictionaryProvider>,
         );
 

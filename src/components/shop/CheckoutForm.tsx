@@ -19,6 +19,8 @@ interface CheckoutFormProps {
     build: BuildDetail;
     delivery: PublicDeliveryOption[];
     mode: BuyButtonMode | undefined;
+    /** The terms version from the shop config, sent back so the API can tell when the terms changed. */
+    termsVersion: string;
     locale: Locale;
 }
 
@@ -48,7 +50,7 @@ const EMPTY: FormState = {
 
 const CHECKBOX = 'mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300';
 
-export default function CheckoutForm({ build, delivery, mode, locale }: CheckoutFormProps) {
+export default function CheckoutForm({ build, delivery, mode, termsVersion: loadedTermsVersion, locale }: CheckoutFormProps) {
     const dict = getDictionary(locale);
     const text = dict.shop;
     const { data: session, status } = useSession();
@@ -58,6 +60,7 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
     const [failure, setFailure] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [failedSubmits, setFailedSubmits] = useState(0);
+    const [termsVersion, setTermsVersion] = useState(loadedTermsVersion);
     const formRef = useRef<HTMLFormElement>(null);
 
     // Back from the Vipps page can restore this page from the bfcache with the form still waiting.
@@ -127,6 +130,7 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
             withinDistance: selected.method === 'HomeDelivery' && form.withinDistance,
             pickupNote: selected.method === 'Pickup' && form.pickupNote.trim() !== '' ? form.pickupNote : null,
             acceptTerms: form.acceptTerms,
+            termsVersion,
             locale,
         });
 
@@ -151,7 +155,12 @@ export default function CheckoutForm({ build, delivery, mode, locale }: Checkout
             window.location.assign(redirectUrl);
         } catch (err) {
             const shown = apiFieldMessages(err);
-            if (Object.keys(shown).length > 0) {
+            if (apiErrorCode(err) === 'termsChanged') {
+                // The buyer has to read and accept the new terms, and the next submit sends their version.
+                set('acceptTerms', false);
+                setFailure(text.apiErrors.termsChanged);
+                ShopService.config(locale).then(config => setTermsVersion(config.termsVersion)).catch(() => undefined);
+            } else if (Object.keys(shown).length > 0) {
                 setErrors(shown);
                 setFailedSubmits(n => n + 1);
             } else {

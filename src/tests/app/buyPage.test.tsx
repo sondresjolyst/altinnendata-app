@@ -7,7 +7,7 @@ import type { ShopConfig } from '@/services/shopService';
 
 vi.mock('@/lib/publicApi', () => ({ publicGetLive: vi.fn(), publicGetLiveOptional: vi.fn() }));
 vi.mock('@/components/shop/CheckoutForm', () => ({
-    default: ({ mode }: { mode: string }) => <div data-testid="checkout-form">{mode}</div>,
+    default: ({ mode, termsVersion }: { mode: string, termsVersion: string }) => <div data-testid="checkout-form" data-terms-version={termsVersion}>{mode}</div>,
 }));
 
 const build = (overrides: Partial<BuildDetail> = {}) =>
@@ -16,6 +16,7 @@ const build = (overrides: Partial<BuildDetail> = {}) =>
 const config: ShopConfig = {
     buyButton: 'Everyone',
     delivery: [{ method: 'Pickup', priceNok: 0, label: 'Henting', description: null, maxDistanceKm: null }],
+    termsVersion: '2026-10-19T12:00:00.000000Z',
 };
 const params = Promise.resolve({ locale: 'no', slug: 'gaming-pc' });
 
@@ -44,6 +45,7 @@ describe('buy page', () => {
         expect(screen.getByRole('heading', { name: 'Kjøp Gaming PC' })).toBeInTheDocument();
         expect(screen.getByText(/9\s?990/)).toBeInTheDocument();
         expect(screen.getByTestId('checkout-form')).toHaveTextContent('Everyone');
+        expect(screen.getByTestId('checkout-form')).toHaveAttribute('data-terms-version', '2026-10-19T12:00:00.000000Z');
     });
 
     it('shows the condition and the main parts above the checkout form', async () => {
