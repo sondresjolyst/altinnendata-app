@@ -342,6 +342,7 @@
       "loadFailed": "Could not load the settings",
       "subNavigation": "Shop",
       "termsWarning": "The terms must be updated with sales terms before the buy button can show for everyone. Save the terms in Norwegian and English under Legal pages.",
+      "vippsTestEveryone": "Turn off Vipps test mode before you show the buy button to everyone.",
       "validation": {
         "required": "Enter {field}.",
         "tooLong": "Use {max} characters or fewer.",

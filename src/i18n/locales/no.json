@@ -342,6 +342,7 @@
       "loadFailed": "Kunne ikke hente innstillingene",
       "subNavigation": "Butikk",
       "termsWarning": "Vilkårene må oppdateres med salgsvilkår før kjøpsknappen kan vises for alle. Lagre vilkårene på norsk og engelsk under Juridiske sider.",
+      "vippsTestEveryone": "Slå av testmodus for Vipps før du viser kjøpsknappen for alle.",
       "validation": {
         "required": "Du må fylle ut {field}.",
         "tooLong": "Bruk {max} eller færre tegn.",

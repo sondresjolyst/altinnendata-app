@@ -184,6 +184,27 @@ describe('the admin shop settings page', () => {
         expect(service.updateSettings).not.toHaveBeenCalled();
     });
 
+    it('says Slå av testmodus for Vipps under Kjøpsknapp for For alle in test mode, without calling the API', async () => {
+        renderPage('no');
+        await userEvent.click(await screen.findByRole('radio', { name: 'For alle' }));
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre' }));
+
+        expect(screen.getByText('Slå av testmodus for Vipps før du viser kjøpsknappen for alle.')).toBeInTheDocument();
+        expect(group('Kjøpsknapp')).toHaveAccessibleDescription('Slå av testmodus for Vipps før du viser kjøpsknappen for alle.');
+        expect(service.updateSettings).not.toHaveBeenCalled();
+    });
+
+    it('shows the Norwegian text under Kjøpsknapp when the API refuses buyButtonMode', async () => {
+        service.updateSettings.mockRejectedValueOnce(
+            await refused(400, { errors: { buyButtonMode: ['Turn off Vipps test mode before the buy button is shown to everyone.'] } }),
+        );
+        renderPage('no');
+        await userEvent.click(await screen.findByRole('button', { name: 'Lagre' }));
+
+        expect(await screen.findByText('Slå av testmodus for Vipps før du viser kjøpsknappen for alle.')).toBeInTheDocument();
+        expect(screen.queryByText(/Turn off Vipps test mode/)).not.toBeInTheDocument();
+    });
+
     it('shows the API message under a field the client cannot check', async () => {
         service.updateSettings.mockRejectedValueOnce(
             await refused(400, { errors: { 'Delivery[2].DescriptionEn': ['Refused by the API.'] } }),

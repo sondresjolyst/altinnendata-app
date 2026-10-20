@@ -160,6 +160,8 @@ export default function AdminShopSettingsPage() {
         draft.delivery.forEach((o, index) => {
             for (const [field, message] of Object.entries(validate(o))) invalid.set(`${index}.${field}`, message);
         });
+        // The API refuses real buyers while Vipps only takes test money.
+        if (draft.buyButton === 'Everyone' && draft.vippsTestMode) invalid.set('buyButton', text.vippsTestEveryone);
         setErrors(invalid);
         if (invalid.size > 0) return;
 
@@ -179,6 +181,7 @@ export default function AdminShopSettingsPage() {
             // What the client cannot check comes back from the API with its own message.
             const apiErrors = new Map(Object.entries(apiFieldErrors(err) ?? {}).map(([key, list]) => [key.toLowerCase(), list]));
             const shown = new Map<string, string>();
+            if (apiErrors.has('buybuttonmode')) shown.set('buyButton', text.vippsTestEveryone);
             draft.delivery.forEach((_, index) => {
                 for (const field of FIELD_NAMES) {
                     const messages = apiErrors.get(`delivery[${index}].${API_FIELD[field]}`.toLowerCase());
@@ -209,13 +212,18 @@ export default function AdminShopSettingsPage() {
                 void save();
             }}
         >
-            <fieldset className="space-y-3 rounded-2xl border border-gray-200 p-5">
+            <fieldset
+                className="space-y-3 rounded-2xl border border-gray-200 p-5"
+                aria-invalid={errors.has('buyButton') ? true : undefined}
+                aria-describedby={errors.has('buyButton') ? 'buyButton-error' : undefined}
+            >
                 <legend className="px-2 text-sm font-bold text-gray-900">{text.buyButton}</legend>
                 {BUY_BUTTON_MODES.map(mode =>
                     <div key={mode}>
                         {radio('buyButton', buyLabels[mode], draft.buyButton === mode, () => setDraft({ ...draft, buyButton: mode }), mode === 'Everyone' && termsMissing)}
                     </div>,
                 )}
+                {errors.has('buyButton') && <p id="buyButton-error" className="text-xs text-red-600">{errors.get('buyButton')}</p>}
                 {termsMissing && <Alert variant="warning" role="status">{text.termsWarning}</Alert>}
             </fieldset>
 
