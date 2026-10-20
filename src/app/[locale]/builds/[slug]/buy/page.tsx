@@ -104,7 +104,6 @@ export default async function BuyPage({ params }: { params: Params }) {
 
 function BuildSummary({ build, locale }: { build: BuildDetail; locale: Locale }) {
     const dict = getDictionary(locale);
-    const conditions = build.conditions.map(c => c.name);
     const parts = mainParts(build.components ?? []);
 
     return (
@@ -126,14 +125,8 @@ function BuildSummary({ build, locale }: { build: BuildDetail; locale: Locale })
                 </div>
             </div>
             {/* Angrerettloven § 16 wants the main characteristics right before the order. */}
-            {(conditions.length > 0 || parts.length > 0) && (
+            {parts.length > 0 && (
                 <dl className="mt-4 space-y-1 border-t border-gray-200 pt-4 text-sm">
-                    {conditions.length > 0 && (
-                        <div className="flex gap-2">
-                            <dt className="shrink-0 text-gray-600">{dict.builds.condition}:</dt>
-                            <dd className="min-w-0 text-gray-900">{conditions.join(', ')}</dd>
-                        </div>
-                    )}
                     {parts.map(part => (
                         <div key={part.id} className="flex gap-2">
                             <dt className="shrink-0 text-gray-600">{part.categoryName ?? part.categoryKey}:</dt>

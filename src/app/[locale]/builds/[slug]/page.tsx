@@ -57,7 +57,6 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
     }[status];
 
     const gallery = build.imageIds;
-    const conditions = build.conditions.map(c => c.name);
     const pageUrl = absoluteLocaleUrl(locale, `/builds/${slug}`);
 
     return (
@@ -101,12 +100,6 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                     )}
 
                     <dl className="mt-6 space-y-1 text-sm text-gray-500">
-                        {conditions.length > 0 && (
-                            <div className="flex gap-2">
-                                <dt>{dict.builds.condition}:</dt>
-                                <dd className="text-gray-900">{conditions.join(', ')}</dd>
-                            </div>
-                        )}
                         {build.builtOn && (
                             <div className="flex gap-2">
                                 <dt>{dict.builds.builtOn}:</dt>

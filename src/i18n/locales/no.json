@@ -434,6 +434,7 @@
       "cancelDone": "Ordren er kansellert",
       "refundDone": "Beløpet er betalt tilbake",
       "copy": "Kopier {label}",
+      "copyShort": "Kopier",
       "copied": "Kopiert",
       "invoiceDetails": "Fakturadetaljer",
       "invoiceNote": "Lag fakturaen i regnskapssystemet. Marker den som betalt med Vipps.",
@@ -450,8 +451,8 @@
         "total": "Sum",
         "orderDate": "Ordredato",
         "reservedDate": "Betaling reservert",
-        "capturedDate": "Beløp trukket",
-        "refunded": "Betalt tilbake",
+        "capturedDate": "Dato trukket",
+        "refunded": "Betalt tilbake totalt",
         "reference": "Vipps-referanse",
         "deliveryDate": "Leveringsdato",
         "deliveryPlace": "Leveringssted"
@@ -484,7 +485,7 @@
       },
       "refunds": "Tilbakebetalinger",
       "creditNoteNote": "Lag en kreditnota i regnskapssystemet for hver tilbakebetaling.",
-      "refundRow": "Nr. {number}, {date}",
+      "refundRow": "Tilbakebetaling {number}, {date}",
       "missingInvoiceNumber": "Mangler fakturanummer"
     },
     "vat": {

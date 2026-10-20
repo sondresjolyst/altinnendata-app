@@ -59,7 +59,7 @@ describe('buy page', () => {
         expect(screen.queryByTestId('checkout-form')).not.toBeInTheDocument();
     });
 
-    it('shows the condition and the main parts above the checkout form', async () => {
+    it('shows the main parts with their condition above the checkout form', async () => {
         const part = (id: number, categoryKey: string, categoryName: string, name: string, condition: string | null) => ({
             id, componentPartId: null, componentCategoryId: null, categoryKey, categoryName, manufacturerName: null, name, details: null,
             condition: condition ? { id: condition === 'Ny' ? 2 : 1, key: condition.toLowerCase(), name: condition } : null, sortOrder: id,
@@ -79,7 +79,6 @@ describe('buy page', () => {
 
         const rows = [...container.querySelectorAll('dl > div')].map(row => row.textContent);
         expect(rows).toEqual([
-            'Tilstand:Ny, Brukt',
             'Prosessor:Ryzen 5 5600X (Brukt)',
             'Skjermkort:RTX 4070 (Brukt)',
             'Minne:16 GB DDR4',

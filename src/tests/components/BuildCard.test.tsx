@@ -45,14 +45,9 @@ describe('BuildCard', () => {
         expect(screen.queryByText(/kr/)).not.toBeInTheDocument();
     });
 
-    it('shows the conditions of the parts in the visitor language', () => {
+    it('shows no condition line, the build page lists the condition of each part', () => {
         const conditions = [{ id: 1, key: 'used', name: 'Brukt' }, { id: 2, key: 'new', name: 'Ny' }];
         render(<BuildCard build={{ ...base, conditions }} locale="no" />);
-        expect(screen.getByText('Brukt, Ny').parentElement).toHaveTextContent('Tilstand: Brukt, Ny');
-    });
-
-    it('leaves the condition line out when no part has one', () => {
-        render(<BuildCard build={base} locale="no" />);
         expect(screen.queryByText(/Tilstand/)).not.toBeInTheDocument();
     });
 });

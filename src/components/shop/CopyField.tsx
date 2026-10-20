@@ -26,9 +26,10 @@ export default function CopyField({ label, value }: { label: string; value: stri
             <button
                 type="button"
                 onClick={() => void copy()}
+                aria-label={text.copy.replace('{label}', label)}
                 className="shrink-0 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-900 hover:bg-gray-50"
             >
-                {text.copy.replace('{label}', label)}
+                {text.copyShort}
             </button>
         </div>
     );

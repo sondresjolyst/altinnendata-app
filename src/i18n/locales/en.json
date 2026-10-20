@@ -434,6 +434,7 @@
       "cancelDone": "The order has been cancelled",
       "refundDone": "The amount has been refunded",
       "copy": "Copy {label}",
+      "copyShort": "Copy",
       "copied": "Copied",
       "invoiceDetails": "Invoice details",
       "invoiceNote": "Create the invoice in your accounting system. Mark it as paid with Vipps.",
@@ -450,8 +451,8 @@
         "total": "Total",
         "orderDate": "Order date",
         "reservedDate": "Payment reserved",
-        "capturedDate": "Amount taken",
-        "refunded": "Refunded",
+        "capturedDate": "Date taken",
+        "refunded": "Refunded in total",
         "reference": "Vipps reference",
         "deliveryDate": "Delivery date",
         "deliveryPlace": "Place of delivery"
@@ -484,7 +485,7 @@
       },
       "refunds": "Refunds",
       "creditNoteNote": "Make a credit note in the accounting system for each refund.",
-      "refundRow": "No. {number}, {date}",
+      "refundRow": "Refund {number}, {date}",
       "missingInvoiceNumber": "Missing invoice number"
     },
     "vat": {

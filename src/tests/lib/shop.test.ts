@@ -206,9 +206,9 @@ describe('invoiceDetails after a refund', () => {
         const details = invoiceDetails({ ...order, status: 'Refunded', refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, no);
         const keys = details.map(d => d.key);
         expect(keys.slice(keys.indexOf('capturedDate'), keys.indexOf('deliveryPlace'))).toEqual(['capturedDate', 'refunded']);
-        expect(details.find(d => d.key === 'refunded')).toMatchObject({ label: 'Betalt tilbake', value: '12990,00' });
+        expect(details.find(d => d.key === 'refunded')).toMatchObject({ label: 'Betalt tilbake totalt', value: '12990,00' });
         expect(keys).not.toContain('refundedDate');
-        expect(invoiceDetails({ ...order, refundedInOre: 1299000 }, en).find(d => d.key === 'refunded')?.label).toBe('Refunded');
+        expect(invoiceDetails({ ...order, refundedInOre: 1299000 }, en).find(d => d.key === 'refunded')?.label).toBe('Refunded in total');
     });
 
     it('adds the amount for a partial refund and nothing before any refund', () => {

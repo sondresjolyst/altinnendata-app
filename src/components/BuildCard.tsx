@@ -46,11 +46,6 @@ export default function BuildCard({ build, locale }: { build: BuildSummary; loca
                     </span>
                 </div>
                 {build.summary && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{build.summary}</p>}
-                {build.conditions.length > 0 && (
-                    <p className="mt-1 text-sm text-gray-500">
-                        {dict.builds.condition}: <span className="text-gray-900">{build.conditions.map(c => c.name).join(', ')}</span>
-                    </p>
-                )}
                 {/* Bottom of the card: prices line up across a row whatever the class block above them does. */}
                 <div className="mt-auto flex items-end justify-between gap-3 pt-3">
                     {build.priceNok != null && (
