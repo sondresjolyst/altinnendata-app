@@ -498,7 +498,7 @@
         "alreadyShipped": "The order has already been marked. Reload the page.",
         "buildNotHeld": "The order no longer holds the computer."
       },
-      "reservationEnded": "Vipps ended the reservation on {date}",
+      "reservationEnded": "Vipps cancelled the reservation on {date}",
       "reservationEndedHint": "The computer is still reserved for this order. Contact the buyer, or release the computer so others can buy it.",
       "releaseBuild": "Release the computer",
       "confirmRelease": "The computer will be for sale again.",
@@ -514,7 +514,7 @@
       "paymentLinkDone": "The payment link has been sent",
       "paymentLinkSent": "Payment link sent {sent}, valid until {date} at {time}",
       "paymentLinkReasons": {
-        "wrongStatus": "Only orders whose reservation Vipps ended can get a new payment link.",
+        "wrongStatus": "Only orders whose reservation Vipps cancelled can get a new payment link.",
         "buildNotHeld": "The order no longer holds the computer."
       },
       "vippsPayments": "Vipps payments",

@@ -560,14 +560,14 @@ describe('the admin order page', () => {
         });
     });
 
-    describe('releasing the build after Vipps ended the reservation', () => {
+    describe('releasing the build after Vipps cancelled the reservation', () => {
         const ended: AdminOrder = { ...reserved, status: 'Failed', reservationEndedAt: '2026-10-19T21:30:00Z', holdsBuild: true, releaseBuildBlockedReason: null };
         const released: AdminOrder = { ...ended, holdsBuild: false, releaseBuildBlockedReason: 'buildNotHeld' };
 
-        it('says when Vipps ended the reservation', async () => {
+        it('says when Vipps cancelled the reservation', async () => {
             service.getOrder.mockResolvedValue(ended);
             renderPage();
-            expect(await screen.findByText('Vipps avsluttet reservasjonen 19.10.2026')).toBeInTheDocument();
+            expect(await screen.findByText('Vipps opphevet reservasjonen 19.10.2026')).toBeInTheDocument();
             expect(screen.getByText(/Datamaskinen er fortsatt reservert for denne ordren/)).toBeInTheDocument();
         });
 
@@ -575,7 +575,7 @@ describe('the admin order page', () => {
             service.getOrder.mockResolvedValue(reserved);
             renderPage();
             await screen.findByRole('button', { name: 'Trekk beløpet' });
-            expect(screen.queryByText(/Vipps avsluttet reservasjonen/)).not.toBeInTheDocument();
+            expect(screen.queryByText(/^Vipps opphevet reservasjonen \d/)).not.toBeInTheDocument();
         });
 
         it('keeps Frigi datamaskinen in place but off with the reason on a reserved order', async () => {
@@ -640,7 +640,7 @@ describe('the admin order page', () => {
         });
     });
 
-    describe('sending a new payment link after Vipps ended the reservation', () => {
+    describe('sending a new payment link after Vipps cancelled the reservation', () => {
         const ended: AdminOrder = { ...reserved, status: 'Failed', reservationEndedAt: '2026-10-19T21:30:00Z', holdsBuild: true, releaseBuildBlockedReason: null, paymentLinkBlockedReason: null };
         const sent: AdminOrder = { ...ended, paymentLinkSentAt: '2026-10-20T08:00:00Z', paymentLinkExpiresAt: '2026-10-23T08:00:00Z' };
 

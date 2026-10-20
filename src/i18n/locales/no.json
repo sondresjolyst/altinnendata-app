@@ -498,7 +498,7 @@
         "alreadyShipped": "Ordren er allerede markert. Last siden på nytt.",
         "buildNotHeld": "Ordren holder ikke lenger datamaskinen."
       },
-      "reservationEnded": "Vipps avsluttet reservasjonen {date}",
+      "reservationEnded": "Vipps opphevet reservasjonen {date}",
       "reservationEndedHint": "Datamaskinen er fortsatt reservert for denne ordren. Kontakt kunden, eller frigi datamaskinen så andre kan kjøpe den.",
       "releaseBuild": "Frigi datamaskinen",
       "confirmRelease": "Datamaskinen blir tilgjengelig for salg igjen.",
