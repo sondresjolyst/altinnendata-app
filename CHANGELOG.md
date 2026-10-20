@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.10.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.10.0...v1.10.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* **builds:** translate the admin build form's buttons, labels and options ([#180](https://github.com/sondresjolyst/altinnendata-app/issues/180)) ([e0256a0](https://github.com/sondresjolyst/altinnendata-app/commit/e0256a0d3621683537bc4889c73c368dd8b8fe40)), closes [#179](https://github.com/sondresjolyst/altinnendata-app/issues/179)
+* **home:** wrap long words in the hero text instead of clipping them ([#183](https://github.com/sondresjolyst/altinnendata-app/issues/183)) ([f914a81](https://github.com/sondresjolyst/altinnendata-app/commit/f914a81d3c3abeb4b974736ca09ec7e1bbf132f3)), closes [#181](https://github.com/sondresjolyst/altinnendata-app/issues/181)
+
 ## [1.10.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.9.8...v1.10.0) (2026-10-18)
 
 
