@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
-import { publicGet, publicGetLive, publicGetOptional, publicGetLiveOptional, publicGetWithMeta, PublicApiError } from '@/lib/publicApi';
+import { publicGet, publicGetOptional, publicGetWithMeta, PublicApiError } from '@/lib/publicApi';
 
 const respond = (body: unknown, init: { status?: number; headers?: Record<string, string> } = {}) =>
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
@@ -109,20 +109,22 @@ describe('during next build', () => {
     });
 });
 
-describe('the live reads', () => {
-    it('ask Next for no cache, where the normal reads cache for a minute', async () => {
+describe('a live read', () => {
+    it('asks Next for no cache with revalidate 0, where the normal reads cache for a minute', async () => {
         const fetched = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => Response.json({ ok: true }));
 
         await publicGet('/shop/config');
-        await publicGetLive('/shop/config');
+        await publicGet('/shop/config', { revalidate: 0 });
+        await publicGetOptional('/shop/config', { revalidate: 0 });
 
         expect(fetched.mock.calls[0]![1]).toEqual({ next: { revalidate: 60 } });
         expect(fetched.mock.calls[1]![1]).toEqual({ next: { revalidate: 0 } });
+        expect(fetched.mock.calls[2]![1]).toEqual({ next: { revalidate: 0 } });
     });
 
-    it('give null for a failing API when optional', async () => {
+    it('gives null for a failing API when optional', async () => {
         respond({}, { status: 500 });
 
-        expect(await publicGetLiveOptional('/shop/config')).toBeNull();
+        expect(await publicGetOptional('/shop/config', { revalidate: 0 })).toBeNull();
     });
 });

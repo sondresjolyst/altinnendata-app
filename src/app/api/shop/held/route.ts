@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { publicGetLiveOptional } from '@/lib/publicApi';
+import { publicGetOptional } from '@/lib/publicApi';
 import { REVALIDATE_TARGETS, TARGET_PATHS } from '@/lib/cacheTags';
 import type { BuildDetail } from '@/services/buildService';
 
@@ -37,7 +37,7 @@ export function resetHeldThrottle() {
 /** Reads the build and purges the build pages when it is Reserved right now. Any failure or other answer purges nothing. */
 async function purgeIfReserved(slug: string): Promise<boolean> {
     // A read that takes longer than the limit counts as not Reserved.
-    const read = publicGetLiveOptional<Pick<BuildDetail, 'availability'>>(`/builds/${slug}?locale=no`).catch(() => null);
+    const read = publicGetOptional<Pick<BuildDetail, 'availability'>>(`/builds/${slug}?locale=no`, { revalidate: 0 }).catch(() => null);
     const limit = after<null>(READ_TIMEOUT_MS, null);
     const build = await Promise.race([read, limit.promise]).finally(limit.cancel);
     if (build?.availability !== 'Reserved') return false;

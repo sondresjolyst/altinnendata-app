@@ -5,7 +5,7 @@ import { ContentImage } from '@sjolystinnovation/app-kit/ui';
 import CheckoutForm from '@/components/shop/CheckoutForm';
 import { BuildDetail } from '@/services/buildService';
 import type { ShopConfig } from '@/services/shopService';
-import { publicGetLive, publicGetLiveOptional } from '@/lib/publicApi';
+import { publicGet, publicGetOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
 import { fillTemplate, formatPrice } from '@/lib/format';
 import { isBuyable, lacksConditions } from '@/lib/shop';
@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic';
 type Params = Promise<{ locale: string; slug: string }>;
 
 const fetchBuild = (slug: string, locale: Locale) =>
-    publicGetLive<BuildDetail>(`/builds/${slugSegment(slug)}?locale=${locale}`);
+    publicGet<BuildDetail>(`/builds/${slugSegment(slug)}?locale=${locale}`, { revalidate: 0 });
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
     const { locale, slug } = await params;
@@ -43,7 +43,7 @@ export default async function BuyPage({ params }: { params: Params }) {
     const build = await fetchBuild(slug, locale);
     if (!build) notFound();
 
-    const shop = await publicGetLiveOptional<ShopConfig>(`/shop/config?locale=${locale}`);
+    const shop = await publicGetOptional<ShopConfig>(`/shop/config?locale=${locale}`, { revalidate: 0 });
     const text = getDictionary(locale).shop;
     const buildHref = localeHref(locale, `/builds/${build.slug}`);
 

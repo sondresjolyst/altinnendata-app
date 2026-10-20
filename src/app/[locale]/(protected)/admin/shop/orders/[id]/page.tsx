@@ -2,7 +2,7 @@
 
 import { use, useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { apiErrorCode, apiFieldErrors } from '@sjolystinnovation/app-kit/api';
+import { apiErrorCode, apiFieldErrors, errorText } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { Alert, TextArea, TextInput } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type AdminOrder } from '@/services/shopService';
@@ -68,11 +68,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         return <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>;
     }
 
-    const failureText = (err: unknown, fallback: string) => {
-        const code = apiErrorCode(err);
-        const known = code !== undefined && Object.hasOwn(text.apiErrors, code) ? text.apiErrors[code as keyof typeof text.apiErrors] : undefined;
-        return known ?? (err instanceof Error && err.message ? err.message : fallback);
-    };
+    const failureText = (err: unknown, fallback: string) => errorText(err, text.apiErrors, fallback);
 
     const remaining = remainingInOre(order);
     // The API refusing the amount counts as too high until the amount is edited.

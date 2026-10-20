@@ -5,6 +5,7 @@ import { nbLegalPageKeyLabels, nbLegalPagesEditorStrings } from '@sjolystinnovat
 import LegalService from '@/services/legalService';
 import { LOCALES, LOCALE_LABELS } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { intlLocale } from '@/lib/format';
 
 export default function AdminLegalPage() {
     const { locale } = useDictionary();
@@ -15,6 +16,7 @@ export default function AdminLegalPage() {
             keyLabels={locale === 'no' ? nbLegalPageKeyLabels : undefined}
             locales={LOCALES}
             localeLabels={LOCALE_LABELS}
+            dateLocale={intlLocale(locale)}
             strings={locale === 'no' ? nbLegalPagesEditorStrings : undefined}
         />
     );
