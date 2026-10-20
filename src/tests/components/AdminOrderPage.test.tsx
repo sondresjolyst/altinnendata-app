@@ -16,7 +16,7 @@ vi.mock('@/services/shopService', () => ({ default: service }));
 
 const reserved: AdminOrder = {
     id: 7,
-    reference: 'ref-7',
+    reference: 'AID-000007-1A2B3C4D',
     status: 'Reserved',
     locale: 'no',
     buyerName: 'Kari Nordmann',

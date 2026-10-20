@@ -9,7 +9,7 @@ vi.mock('@/services/publicClient', () => ({ default: { get } }));
 vi.mock('@/services/axiosInstance', () => ({ default: { post } }));
 vi.mock('@/lib/cacheTags', async importActual => ({ ...(await importActual<typeof import('@/lib/cacheTags')>()), revalidateTarget: revalidate }));
 
-const status: OrderStatusInfo = { status: 'Reserved', reference: 'AD-1001', buildTitle: 'Gaming PC', totalInOre: 1299000, deliveryMethod: 'Shipping' };
+const status: OrderStatusInfo = { status: 'Reserved', reference: 'AID-001001-9C0D1E2F', buildTitle: 'Gaming PC', totalInOre: 1299000, deliveryMethod: 'Shipping' };
 
 describe('ShopService.orderStatus', () => {
     beforeEach(() => get.mockReset());

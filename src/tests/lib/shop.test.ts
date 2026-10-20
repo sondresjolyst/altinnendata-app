@@ -8,7 +8,7 @@ const en = getDictionary('en');
 
 const order: AdminOrder = {
     id: 7,
-    reference: 'ref-7',
+    reference: 'AID-000007-1A2B3C4D',
     status: 'Paid',
     locale: 'no',
     buyerName: 'Kari Nordmann',
@@ -103,7 +103,7 @@ describe('invoiceDetails', () => {
         expect(details.find(d => d.key === 'line2Amount')?.value).toBe('300,00');
         expect(details.find(d => d.key === 'total')?.value).toBe('12990,00');
         expect(details.find(d => d.key === 'orderDate')?.value).toBe('18.10.2026');
-        expect(details.find(d => d.key === 'reference')?.value).toBe('ref-7');
+        expect(details.find(d => d.key === 'reference')?.value).toBe('AID-000007-1A2B3C4D');
     });
 
     it('takes the order date from the creation', () => {

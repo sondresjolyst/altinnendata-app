@@ -13,7 +13,7 @@ vi.mock('@/services/shopService', () => ({ default: service }));
 
 const summary = (overrides: Partial<AdminOrderSummary>): AdminOrderSummary => ({
     id: 1,
-    reference: 'ref-1',
+    reference: 'AID-000001-5E6F7A8B',
     status: 'Reserved',
     buyerName: 'Kari Nordmann',
     buildTitle: 'Spillmaskin',

@@ -14,7 +14,7 @@ const orderStatus = vi.mocked(ShopService.orderStatus);
 
 const info = (overrides: Partial<OrderStatusInfo> = {}): OrderStatusInfo => ({
     status: 'Reserved',
-    reference: 'AD-1001',
+    reference: 'AID-001001-9C0D1E2F',
     buildTitle: 'Gaming PC',
     totalInOre: 1299000,
     deliveryMethod: 'Shipping',
@@ -38,7 +38,7 @@ describe('ShopReturn', () => {
 
         expect(screen.getByRole('heading', { name: 'Betalingen er reservert' })).toBeInTheDocument();
         expect(screen.getByText(/Vi har reservert (kr\s)?12\s990(\skr)? i Vipps for Gaming PC\./)).toBeInTheDocument();
-        expect(screen.getByText('Ordrenummer AD-1001. Du får en ordrebekreftelse på e-post.')).toBeInTheDocument();
+        expect(screen.getByText('Ordrenummer AID-001001-9C0D1E2F. Du får en ordrebekreftelse på e-post.')).toBeInTheDocument();
         expect(screen.getByText(/Vi har reservert .* i Vipps for Gaming PC\.$/)).toBeInTheDocument();
         expect(document.body.textContent).not.toMatch(/trekkes|levering|henting/i);
         expect(screen.getByRole('link', { name: 'Til datamaskinene' })).toHaveAttribute('href', '/no/builds');
