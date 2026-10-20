@@ -107,7 +107,7 @@ describe('ShopReturn', () => {
         await settle();
 
         expect(screen.getByRole('heading', { name: 'Betalingen ble ikke fullført' })).toBeInTheDocument();
-        expect(screen.getByText('Betalingen ble ikke fullført. Ingen penger er trukket. Ta kontakt med oss hvis du lurer på noe.')).toBeInTheDocument();
+        expect(screen.getByText('Ingen penger er trukket. Ta kontakt med oss hvis du lurer på noe.')).toBeInTheDocument();
         expect(document.body.textContent).not.toMatch(/ledig/);
         expect(screen.getByRole('link', { name: 'Til datamaskinene' })).toHaveAttribute('href', '/no/builds');
     });

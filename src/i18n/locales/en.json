@@ -165,7 +165,7 @@
       },
       "failed": {
         "title": "The payment was not completed",
-        "body": "The payment was not completed. No money has been taken. Get in touch if you have questions."
+        "body": "No money has been taken. Get in touch if you have questions."
       },
       "refunded": {
         "title": "Refunded",

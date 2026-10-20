@@ -165,7 +165,7 @@
       },
       "failed": {
         "title": "Betalingen ble ikke fullført",
-        "body": "Betalingen ble ikke fullført. Ingen penger er trukket. Ta kontakt med oss hvis du lurer på noe."
+        "body": "Ingen penger er trukket. Ta kontakt med oss hvis du lurer på noe."
       },
       "refunded": {
         "title": "Betalt tilbake",
