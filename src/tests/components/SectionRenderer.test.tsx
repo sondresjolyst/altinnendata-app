@@ -39,7 +39,29 @@ describe('SectionRenderer', () => {
     it('gives the hero a definite width so its minimum height cannot widen it', () => {
         const section: Section = { ...base, type: 'hero', heading: 'H', subheading: '', primaryLabel: '', primaryHref: '', secondaryLabel: '', secondaryHref: '', backgroundImageId: null };
         render(<SectionRenderer section={section} locale="no" />);
-        expect(screen.getByRole('heading', { level: 1 }).closest('section')).toHaveClass('w-full', 'sm:min-h-[420px]', 'xl:aspect-[16/5]');
+        expect(screen.getByRole('heading', { level: 1 }).closest('section')).toHaveClass('w-full', 'xl:aspect-[16/5]');
+    });
+
+    it('wraps long words in the hero text instead of clipping them', () => {
+        const section: Section = { ...base, type: 'hero', heading: 'Heading', subheading: 'Sub', primaryLabel: '', primaryHref: '', secondaryLabel: '', secondaryHref: '', backgroundImageId: null };
+        render(<SectionRenderer section={section} locale="no" />);
+        const heading = screen.getByRole('heading', { level: 1 });
+        const hero = heading.closest('section')!;
+        expect(hero).not.toHaveClass('overflow-hidden');
+        expect(heading).toHaveClass('break-words');
+        expect(screen.getByText('Sub')).toHaveClass('wrap-anywhere');
+        expect(heading.parentElement).toHaveClass('w-full', 'min-w-0', 'sm:min-h-[420px]');
+        expect(hero).not.toHaveClass('sm:min-h-[420px]');
+        expect(heading.parentElement).not.toHaveClass('overflow-hidden');
+    });
+
+    it('clips only the hero image layer', () => {
+        const section: Section = { ...base, type: 'hero', heading: 'H', subheading: '', primaryLabel: '', primaryHref: '', secondaryLabel: '', secondaryHref: '', backgroundImageId: null };
+        const { container } = render(<SectionRenderer section={section} locale="no" />);
+        const layer = container.querySelector('img')!.parentElement!;
+        expect(layer).toHaveClass('absolute', 'inset-0', '-z-10', 'overflow-hidden');
+        expect(layer.parentElement).toBe(container.querySelector('section'));
+        expect(layer).not.toContainElement(screen.getByRole('heading', { level: 1 }));
     });
 
     it('renders the hero background from the uploaded image', () => {
