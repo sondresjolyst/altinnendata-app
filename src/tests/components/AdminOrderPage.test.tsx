@@ -8,7 +8,7 @@ import AdminOrderPage from '@/app/[locale]/(protected)/admin/shop/orders/[id]/pa
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { AdminOrder } from '@/services/shopService';
 
-const service = vi.hoisted(() => ({ getOrder: vi.fn(), capture: vi.fn(), cancel: vi.fn(), refund: vi.fn(), setInvoiceNumber: vi.fn(), markShipped: vi.fn() }));
+const service = vi.hoisted(() => ({ getOrder: vi.fn(), capture: vi.fn(), cancel: vi.fn(), refund: vi.fn(), setInvoiceNumber: vi.fn(), markShipped: vi.fn(), releaseBuild: vi.fn() }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 vi.mock('next/navigation', async () => (await import('@sjolystinnovation/app-kit/testing')).nextNavigationMock());
@@ -52,6 +52,9 @@ const reserved: AdminOrder = {
     refundedAt: null,
     createdAt: '2026-10-18T10:00:00Z',
     updatedAt: '2026-10-18T10:05:00Z',
+    reservationEndedAt: null,
+    holdsBuild: true,
+    releaseBuildBlockedReason: 'wrongStatus',
 };
 
 const paid: AdminOrder = { ...reserved, status: 'Paid', capturedInOre: 1299000, capturedAt: '2026-10-20T08:00:00Z' };
@@ -547,6 +550,86 @@ describe('the admin order page', () => {
 
             await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith(message));
             expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        });
+    });
+
+    describe('releasing the build after Vipps ended the reservation', () => {
+        const ended: AdminOrder = { ...reserved, status: 'Failed', reservationEndedAt: '2026-10-19T21:30:00Z', holdsBuild: true, releaseBuildBlockedReason: null };
+        const released: AdminOrder = { ...ended, holdsBuild: false, releaseBuildBlockedReason: 'buildNotHeld' };
+
+        it('says when Vipps ended the reservation', async () => {
+            service.getOrder.mockResolvedValue(ended);
+            renderPage();
+            expect(await screen.findByText('Vipps avsluttet reservasjonen 19.10.2026')).toBeInTheDocument();
+            expect(screen.getByText(/Datamaskinen er fortsatt reservert for denne ordren/)).toBeInTheDocument();
+        });
+
+        it('says nothing about an ended reservation when Vipps did not end it', async () => {
+            service.getOrder.mockResolvedValue(reserved);
+            renderPage();
+            await screen.findByRole('button', { name: 'Trekk beløpet' });
+            expect(screen.queryByText(/Vipps avsluttet reservasjonen/)).not.toBeInTheDocument();
+        });
+
+        it('keeps Frigi datamaskinen in place but off with the reason on a reserved order', async () => {
+            service.getOrder.mockResolvedValue(reserved);
+            renderPage();
+            const button = await screen.findByRole('button', { name: 'Frigi datamaskinen' });
+            expect(button).toBeDisabled();
+            expect(button).toHaveAccessibleDescription('Bare mislykkede og kansellerte ordrer kan frigi datamaskinen.');
+        });
+
+        it('keeps the button off with its reason when the order no longer holds the build', async () => {
+            service.getOrder.mockResolvedValue(released);
+            renderPage();
+            const button = await screen.findByRole('button', { name: 'Frigi datamaskinen' });
+            expect(button).toBeDisabled();
+            expect(button).toHaveAccessibleDescription('Ordren holder ikke lenger datamaskinen.');
+        });
+
+        it('asks first, then releases and turns the button off', async () => {
+            service.getOrder.mockResolvedValue(ended);
+            service.releaseBuild.mockResolvedValue(released);
+            const user = userEvent.setup();
+            renderPage();
+
+            const button = await screen.findByRole('button', { name: 'Frigi datamaskinen' });
+            expect(button).toBeEnabled();
+            await user.click(button);
+            const dialog = within(screen.getByRole('dialog'));
+            expect(dialog.getByText('Datamaskinen blir tilgjengelig for salg igjen.')).toBeInTheDocument();
+            await user.click(dialog.getByRole('button', { name: 'Frigi datamaskinen' }));
+
+            await waitFor(() => expect(service.releaseBuild).toHaveBeenCalledWith(7));
+            expect(toastSpies.success).toHaveBeenCalledWith('Datamaskinen er frigitt');
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+            expect(screen.getByRole('button', { name: 'Frigi datamaskinen' })).toBeDisabled();
+        });
+
+        it('does not release when the dialog is cancelled', async () => {
+            service.getOrder.mockResolvedValue(ended);
+            const user = userEvent.setup();
+            renderPage();
+            await user.click(await screen.findByRole('button', { name: 'Frigi datamaskinen' }));
+            await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Avbryt' }));
+            expect(service.releaseBuild).not.toHaveBeenCalled();
+        });
+
+        it.each([
+            ['buildNotHeld', 'Ordren holder ikke lenger datamaskinen.'],
+            ['wrongStatus', 'Ordren har endret status. Last siden på nytt.'],
+        ])('shows the %s text on a 409 and loads the order again', async (code, message) => {
+            service.getOrder.mockResolvedValueOnce(ended).mockResolvedValue(released);
+            service.releaseBuild.mockRejectedValue(await refused(409, { message: 'No', code }));
+            const user = userEvent.setup();
+            renderPage();
+
+            await user.click(await screen.findByRole('button', { name: 'Frigi datamaskinen' }));
+            await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Frigi datamaskinen' }));
+
+            await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith(message));
+            await waitFor(() => expect(screen.getByRole('button', { name: 'Frigi datamaskinen' })).toBeDisabled());
+            expect(service.getOrder).toHaveBeenCalledTimes(2);
         });
     });
 

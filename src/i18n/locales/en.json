@@ -466,7 +466,18 @@
         "refundPending": "Wait until Vipps has confirmed the last refund.",
         "refundRefused": "Vipps refused the refund. Nothing was paid back.",
         "paymentProviderUnavailable": "Vipps did not confirm the change. Check the payment in the Vipps portal before you try again.",
-        "alreadyShipped": "The order has already been marked. Reload the page."
+        "alreadyShipped": "The order has already been marked. Reload the page.",
+        "buildNotHeld": "The order no longer holds the computer."
+      },
+      "reservationEnded": "Vipps ended the reservation on {date}",
+      "reservationEndedHint": "The computer is still reserved for this order. Contact the buyer, or release the computer so others can buy it.",
+      "releaseBuild": "Release the computer",
+      "confirmRelease": "The computer will be for sale again.",
+      "releaseHint": "The computer will be for sale again.",
+      "releaseDone": "The computer has been released",
+      "releaseReasons": {
+        "wrongStatus": "Only failed and cancelled orders can release the computer.",
+        "buildNotHeld": "The order no longer holds the computer."
       }
     },
     "vat": {

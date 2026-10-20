@@ -13,7 +13,7 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { fillTemplate, formatOre } from '@/lib/format';
 import { formatAddress, invoiceDetails, kroner, osloDate, osloDateTime, parseKroner, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
 
-type Action = 'capture' | 'cancel' | 'refund' | 'ship';
+type Action = 'capture' | 'cancel' | 'refund' | 'release' | 'ship';
 
 // The API caps the invoice number at this many characters.
 const MAX_INVOICE_NUMBER = 50;
@@ -125,11 +125,13 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         try {
             const updated = action === 'refund'
                 ? await ShopService.refund(order.id, amountInOre, order.refundedInOre)
-                : await ShopService[action](order.id);
+                : action === 'release'
+                    ? await ShopService.releaseBuild(order.id)
+                    : await ShopService[action](order.id);
             setOrder(updated);
             setConfirming(null);
             setActed(n => n + 1);
-            toast.success({ capture: text.captureDone, cancel: text.cancelDone, refund: text.refundDone }[action]);
+            toast.success({ capture: text.captureDone, cancel: text.cancelDone, refund: text.refundDone, release: text.releaseDone }[action]);
         } catch (err) {
             if (action === 'refund' && apiFieldErrors(err)?.amountInOre) {
                 // The dialog stays open so the amount can be fixed.
@@ -137,6 +139,8 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             } else {
                 setConfirming(null);
                 toast.error(failureText(err, text.actionFailed));
+                // A refused release means the order or the build changed, so the button shows why from fresh data.
+                if (action === 'release') ShopService.getOrder(order.id).then(setOrder).catch(() => undefined);
             }
         } finally {
             setBusy(false);
@@ -169,9 +173,12 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         actions.push({ action: 'refund', label: text.refund, title: text.refund, confirm, style: SECONDARY });
     }
     const shipLabel = pickup ? text.markReady : text.markShipped;
+    const releaseReason = order.releaseBuildBlockedReason ? text.releaseReasons[order.releaseBuildBlockedReason] : null;
     const pending = confirming === 'ship'
         ? { action: 'ship' as const, label: shipLabel, title: shipLabel, confirm: pickup ? text.confirmReady : text.confirmShipped }
-        : actions.find(a => a.action === confirming);
+        : confirming === 'release'
+            ? { action: 'release' as const, label: text.releaseBuild, title: text.releaseBuild, confirm: text.confirmRelease }
+            : actions.find(a => a.action === confirming);
 
     const address = formatAddress(order);
     const date = (iso: string | null) => (iso ? osloDate(iso) : null);
@@ -230,6 +237,12 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
 
             <section aria-labelledby="order-heading" className="space-y-4 rounded-2xl border border-gray-200 p-5">
                 <h2 id="order-heading" ref={heading} tabIndex={-1} className="font-bold text-gray-900 outline-none">{text.order}</h2>
+                {order.reservationEndedAt && (
+                    <Alert variant="warning">
+                        <p className="font-semibold">{fillTemplate(text.reservationEnded, { date: osloDate(order.reservationEndedAt) })}</p>
+                        {order.holdsBuild && <p className="mt-1">{text.reservationEndedHint}</p>}
+                    </Alert>
+                )}
                 <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                     {fields.filter(([, value]) => value !== null && value !== '').map(([label, value]) => (
                         <div key={label}>
@@ -264,6 +277,21 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                         {shipLabel}
                     </button>
                     <p id="ship-note" className="text-sm text-gray-600">{shipReason ?? text.shipHint}</p>
+                </div>
+                {/* The actions for a reservation Vipps ended. Each button keeps its own reason under it, so more fit in the row. */}
+                <div className="flex flex-wrap gap-x-6 gap-y-4 border-t border-gray-100 pt-4">
+                    <div className="max-w-sm space-y-1">
+                        <button
+                            type="button"
+                            disabled={busy || releaseReason !== null}
+                            aria-describedby="release-note"
+                            onClick={() => openAction('release')}
+                            className={`${BUTTON} ${SECONDARY} disabled:cursor-not-allowed`}
+                        >
+                            {text.releaseBuild}
+                        </button>
+                        <p id="release-note" className="text-sm text-gray-600">{releaseReason ?? text.releaseHint}</p>
+                    </div>
                 </div>
             </section>
 

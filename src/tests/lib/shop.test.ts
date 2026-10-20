@@ -44,6 +44,9 @@ const order: AdminOrder = {
     refundedAt: null,
     createdAt: '2026-10-18T10:00:00Z',
     updatedAt: '2026-10-20T08:00:00Z',
+    reservationEndedAt: null,
+    holdsBuild: false,
+    releaseBuildBlockedReason: 'wrongStatus',
 };
 
 const pickupOrder: AdminOrder = {

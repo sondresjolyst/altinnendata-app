@@ -127,7 +127,15 @@ export interface AdminOrder {
     refundedAt: string | null;
     createdAt: string;
     updatedAt: string;
+    /** When Vipps ended the reservation itself, so the build stays held until the admin releases it. */
+    reservationEndedAt: string | null;
+    /** Whether the build is still reserved for this order. */
+    holdsBuild: boolean;
+    /** Why the build cannot be released from this order now, or null when it can. */
+    releaseBuildBlockedReason: ReleaseBuildBlockedReason | null;
 }
+
+export type ReleaseBuildBlockedReason = 'wrongStatus' | 'buildNotHeld';
 
 export interface VatMonth {
     /** yyyy-MM */
@@ -153,7 +161,7 @@ export interface VatThreshold {
 export type ShopSettingsInput = Omit<ShopSettings, 'termsUpdatedSinceShop' | 'shopCreatedAt'>;
 
 // Each of these changes whether the build can be sold, so the public build pages are purged.
-const act = async (id: number, action: 'capture' | 'cancel' | 'refund', fallback: string, body?: object) => {
+const act = async (id: number, action: 'capture' | 'cancel' | 'refund' | 'release-build', fallback: string, body?: object) => {
     const order = await request(() => (body ? axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/${action}`, body) : axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/${action}`)), fallback);
     await revalidateTarget(REVALIDATE_TARGETS.builds);
     return order;
@@ -189,6 +197,9 @@ const ShopService = {
     /** `expectedRefundedInOre` is the refunded total the page loaded, so the API can refuse a refund made on a stale order. */
     refund: (id: number, amountInOre: number, expectedRefundedInOre: number) =>
         act(id, 'refund', 'Failed to refund the order', { amountInOre, expectedRefundedInOre }),
+
+    /** Makes the build the order still holds available again, after Vipps ended the reservation. */
+    releaseBuild: (id: number) => act(id, 'release-build', 'Failed to release the build'),
 
     /** Marks the order as sent, or ready for pickup, and emails the buyer with the note. */
     markShipped: (id: number, note: string | null) =>

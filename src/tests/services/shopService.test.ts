@@ -85,6 +85,15 @@ describe('the order actions', () => {
 
         expect(revalidate).not.toHaveBeenCalled();
     });
+
+    it('releases the build with an empty POST and purges the build pages', async () => {
+        post.mockResolvedValueOnce({ data: { id: 7 } });
+
+        await ShopService.releaseBuild(7);
+
+        expect(post).toHaveBeenCalledWith('/admin/shop/orders/7/release-build');
+        expect(revalidate).toHaveBeenCalledWith('builds');
+    });
 });
 
 describe('ShopService.refund', () => {
