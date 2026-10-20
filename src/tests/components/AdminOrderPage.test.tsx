@@ -649,9 +649,9 @@ describe('the admin order page', () => {
         renderPage();
         expect(await screen.findByRole('heading', { name: 'Tilbakebetalinger' })).toBeInTheDocument();
         expect(screen.getByText('Lag en kreditnota i regnskapssystemet for hver tilbakebetaling.')).toBeInTheDocument();
-        expect(screen.getByText('Tilbakebetaling 1, 21.10.2026').nextElementSibling).toHaveTextContent('3000,00');
-        expect(screen.getByText('Tilbakebetaling 2, 22.10.2026').nextElementSibling).toHaveTextContent('9990,00');
-        expect(screen.getByRole('button', { name: 'Kopier Tilbakebetaling 2, 22.10.2026' })).toBeInTheDocument();
+        expect(screen.getByText('Nr. 1, 21.10.2026').nextElementSibling).toHaveTextContent('3000,00');
+        expect(screen.getByText('Nr. 2, 22.10.2026').nextElementSibling).toHaveTextContent('9990,00');
+        expect(screen.getByRole('button', { name: 'Kopier Nr. 2, 22.10.2026' })).toBeInTheDocument();
     });
 
     it('has no refund list before any refund', async () => {

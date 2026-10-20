@@ -483,7 +483,7 @@
       },
       "refunds": "Refunds",
       "creditNoteNote": "Make a credit note in the accounting system for each refund.",
-      "refundRow": "Refund {number}, {date}",
+      "refundRow": "No. {number}, {date}",
       "missingInvoiceNumber": "Missing invoice number"
     },
     "vat": {

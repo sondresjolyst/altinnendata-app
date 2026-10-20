@@ -483,7 +483,7 @@
       },
       "refunds": "Tilbakebetalinger",
       "creditNoteNote": "Lag en kreditnota i regnskapssystemet for hver tilbakebetaling.",
-      "refundRow": "Tilbakebetaling {number}, {date}",
+      "refundRow": "Nr. {number}, {date}",
       "missingInvoiceNumber": "Mangler fakturanummer"
     },
     "vat": {
