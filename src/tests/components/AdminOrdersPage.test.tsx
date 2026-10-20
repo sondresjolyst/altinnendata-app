@@ -26,6 +26,7 @@ const summary = (overrides: Partial<AdminOrderSummary>): AdminOrderSummary => ({
     captureGuaranteedUntil: '2099-01-01T00:00:00Z',
     invoiceNumber: null,
     createdAt: '2026-10-18T10:00:00Z',
+    capturedAt: null,
     ...overrides,
 });
 

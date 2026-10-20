@@ -85,8 +85,8 @@ export interface AdminOrderSummary {
     capturedInOre: number;
     refundedInOre: number;
     createdAt: string;
-    /** When the payment was captured. Older APIs leave it out. */
-    capturedAt?: string | null;
+    /** When the payment was captured. */
+    capturedAt: string | null;
 }
 
 export interface VippsReferenceInfo {
@@ -135,20 +135,26 @@ export interface AdminOrder {
     refundedAt: string | null;
     createdAt: string;
     updatedAt: string;
-    /** When Vipps ended the reservation itself, so the build stays held until the admin releases it. */
     /** Each refund, oldest first. Each one needs a credit note in the accounts. */
     refunds: OrderRefund[];
     /** When the order was sent or made ready for pickup, the delivery date on the invoice. */
     deliveryDate: string | null;
     /** The buyer's address, or the seller's for pickup, as one line. */
     deliveryPlace: string;
+    /** When Vipps ended the reservation itself, so the build stays held until the admin releases it. */
     reservationEndedAt: string | null;
     /** Whether the build is still reserved for this order. */
     holdsBuild: boolean;
     /** Why the build cannot be released from this order now, or null when it can. */
     releaseBuildBlockedReason: ReleaseBuildBlockedReason | null;
-    /** Every Vipps payment of the order, oldest first. Older APIs leave it out. */
-    vippsReferences?: VippsReferenceInfo[];
+    /** When the last payment link went out to the buyer. It stays after the buyer pays. */
+    paymentLinkSentAt: string | null;
+    /** When the last payment link stops working. */
+    paymentLinkExpiresAt: string | null;
+    /** Why the admin cannot send a payment link now, or null when it can. */
+    paymentLinkBlockedReason: PaymentLinkBlockedReason | null;
+    /** Every Vipps payment of the order, oldest first. */
+    vippsReferences: VippsReferenceInfo[];
 }
 
 export interface OrderRefund {
@@ -158,6 +164,8 @@ export interface OrderRefund {
 }
 
 export type ReleaseBuildBlockedReason = 'wrongStatus' | 'buildNotHeld';
+
+export type PaymentLinkBlockedReason = 'wrongStatus' | 'buildNotHeld';
 
 export interface VatMonth {
     /** yyyy-MM */
@@ -222,6 +230,10 @@ const ShopService = {
 
     /** Makes the build the order still holds available again, after Vipps ended the reservation. */
     releaseBuild: (id: number) => act(id, 'release-build', 'Failed to release the build'),
+
+    /** Emails the buyer a link to the shop's pay page, after Vipps ended the reservation. The build stays held. */
+    sendPaymentLink: (id: number) =>
+        request(() => axiosInstance.post<AdminOrder>(`/admin/shop/orders/${id}/payment-link`), 'Failed to send the payment link'),
 
     /** Marks the order as sent, or ready for pickup, and emails the buyer with the note. */
     markShipped: (id: number, note: string | null) =>

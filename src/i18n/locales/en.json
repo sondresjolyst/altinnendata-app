@@ -492,6 +492,26 @@
         "wrongStatus": "Only failed and cancelled orders can release the computer.",
         "buildNotHeld": "The order no longer holds the computer."
       },
+      "sendPaymentLink": "Send a new payment link",
+      "confirmPaymentLink": "Email the customer a new payment link?",
+      "paymentLinkHint": "The customer gets a link by email and can pay for the order again.",
+      "paymentLinkDone": "The payment link has been sent",
+      "paymentLinkSent": "Payment link sent {sent}, valid until {date} at {time}",
+      "paymentLinkReasons": {
+        "wrongStatus": "Only orders whose reservation Vipps ended can get a new payment link.",
+        "buildNotHeld": "The order no longer holds the computer."
+      },
+      "vippsPayments": "Vipps payments",
+      "vippsStates": {
+        "CREATED": "created",
+        "AUTHORIZED": "reserved",
+        "CAPTURED": "captured",
+        "CANCELLED": "cancelled",
+        "REFUNDED": "refunded",
+        "ABORTED": "aborted",
+        "EXPIRED": "expired",
+        "TERMINATED": "ended"
+      },
       "refunds": "Refunds",
       "creditNoteNote": "Make a credit note in the accounting system for each refund.",
       "refundRow": "Refund {number}, {date}",

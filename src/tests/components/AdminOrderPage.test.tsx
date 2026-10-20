@@ -8,7 +8,7 @@ import AdminOrderPage from '@/app/[locale]/(protected)/admin/shop/orders/[id]/pa
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { AdminOrder } from '@/services/shopService';
 
-const service = vi.hoisted(() => ({ getOrder: vi.fn(), capture: vi.fn(), cancel: vi.fn(), refund: vi.fn(), setInvoiceNumber: vi.fn(), markShipped: vi.fn(), releaseBuild: vi.fn() }));
+const service = vi.hoisted(() => ({ getOrder: vi.fn(), capture: vi.fn(), cancel: vi.fn(), refund: vi.fn(), setInvoiceNumber: vi.fn(), markShipped: vi.fn(), releaseBuild: vi.fn(), sendPaymentLink: vi.fn() }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 vi.mock('next/navigation', async () => (await import('@sjolystinnovation/app-kit/testing')).nextNavigationMock());
@@ -58,6 +58,10 @@ const reserved: AdminOrder = {
     reservationEndedAt: null,
     holdsBuild: true,
     releaseBuildBlockedReason: 'wrongStatus',
+    paymentLinkSentAt: null,
+    paymentLinkExpiresAt: null,
+    paymentLinkBlockedReason: 'wrongStatus',
+    vippsReferences: [],
 };
 
 const paid: AdminOrder = { ...reserved, status: 'Paid', capturedInOre: 1299000, capturedAt: '2026-10-20T08:00:00Z' };
@@ -634,6 +638,100 @@ describe('the admin order page', () => {
             await waitFor(() => expect(screen.getByRole('button', { name: 'Frigi datamaskinen' })).toBeDisabled());
             expect(service.getOrder).toHaveBeenCalledTimes(2);
         });
+    });
+
+    describe('sending a new payment link after Vipps ended the reservation', () => {
+        const ended: AdminOrder = { ...reserved, status: 'Failed', reservationEndedAt: '2026-10-19T21:30:00Z', holdsBuild: true, releaseBuildBlockedReason: null, paymentLinkBlockedReason: null };
+        const sent: AdminOrder = { ...ended, paymentLinkSentAt: '2026-10-20T08:00:00Z', paymentLinkExpiresAt: '2026-10-23T08:00:00Z' };
+
+        it('keeps Send ny betalingslenke in place but off with the reason on a reserved order', async () => {
+            service.getOrder.mockResolvedValue(reserved);
+            renderPage();
+            const button = await screen.findByRole('button', { name: 'Send ny betalingslenke' });
+            expect(button).toBeDisabled();
+            expect(button).toHaveAccessibleDescription('Bare ordrer der Vipps opphevet reservasjonen kan få ny betalingslenke.');
+        });
+
+        it('keeps the button off with its reason when the order no longer holds the build', async () => {
+            service.getOrder.mockResolvedValue({ ...ended, holdsBuild: false, paymentLinkBlockedReason: 'buildNotHeld' });
+            renderPage();
+            const button = await screen.findByRole('button', { name: 'Send ny betalingslenke' });
+            expect(button).toBeDisabled();
+            expect(button).toHaveAccessibleDescription('Ordren holder ikke lenger datamaskinen.');
+        });
+
+        it('asks first, then sends the link and says when it was sent and how long it works', async () => {
+            service.getOrder.mockResolvedValue(ended);
+            service.sendPaymentLink.mockResolvedValue(sent);
+            const user = userEvent.setup();
+            renderPage();
+
+            const button = await screen.findByRole('button', { name: 'Send ny betalingslenke' });
+            expect(button).toBeEnabled();
+            expect(button).toHaveAccessibleDescription('Kunden får en lenke på e-post og kan betale ordren på nytt.');
+            expect(screen.queryByText(/Betalingslenke sendt/)).not.toBeInTheDocument();
+            await user.click(button);
+            const dialog = within(screen.getByRole('dialog'));
+            expect(dialog.getByText('Send kunden en ny betalingslenke på e-post?')).toBeInTheDocument();
+            await user.click(dialog.getByRole('button', { name: 'Send ny betalingslenke' }));
+
+            await waitFor(() => expect(service.sendPaymentLink).toHaveBeenCalledWith(7));
+            expect(toastSpies.success).toHaveBeenCalledWith('Betalingslenken er sendt');
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+            expect(screen.getByText('Betalingslenke sendt 20.10.2026, gyldig til 23.10.2026 kl. 10:00')).toBeInTheDocument();
+            expect(service.releaseBuild).not.toHaveBeenCalled();
+        });
+
+        it('does not send when the dialog is cancelled', async () => {
+            service.getOrder.mockResolvedValue(ended);
+            const user = userEvent.setup();
+            renderPage();
+            await user.click(await screen.findByRole('button', { name: 'Send ny betalingslenke' }));
+            await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Avbryt' }));
+            expect(service.sendPaymentLink).not.toHaveBeenCalled();
+        });
+
+        it.each([
+            [409, 'buildNotHeld', 'Ordren holder ikke lenger datamaskinen.'],
+            [409, 'wrongStatus', 'Ordren har endret status. Last siden på nytt.'],
+            [502, 'paymentProviderUnavailable', 'Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen.'],
+        ])('shows the %s %s text and loads the order again', async (status, code, message) => {
+            const blocked: AdminOrder = { ...ended, holdsBuild: false, paymentLinkBlockedReason: 'buildNotHeld' };
+            service.getOrder.mockResolvedValueOnce(ended).mockResolvedValue(blocked);
+            service.sendPaymentLink.mockRejectedValue(await refused(status, { message: 'No', code }));
+            const user = userEvent.setup();
+            renderPage();
+
+            await user.click(await screen.findByRole('button', { name: 'Send ny betalingslenke' }));
+            await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Send ny betalingslenke' }));
+
+            await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith(message));
+            await waitFor(() => expect(screen.getByRole('button', { name: 'Send ny betalingslenke' })).toBeDisabled());
+            expect(service.getOrder).toHaveBeenCalledTimes(2);
+        });
+    });
+
+    it('lists each Vipps payment of the order with its state', async () => {
+        service.getOrder.mockResolvedValue({
+            ...reserved,
+            vippsReferences: [
+                { reference: 'AID-000007-1A2B3C4D', state: 'EXPIRED', createdAt: '2026-10-18T10:00:00Z' },
+                { reference: 'AID-000007-1A2B3C4D-2', state: 'AUTHORIZED', createdAt: '2026-10-20T10:00:00Z' },
+                { reference: 'AID-000007-1A2B3C4D-3', state: 'SOMETHING_NEW', createdAt: '2026-10-20T11:00:00Z' },
+            ],
+        });
+        renderPage();
+
+        const list = within((await screen.findByText('Vipps-betalinger')).nextElementSibling as HTMLElement);
+        const items = list.getAllByRole('listitem').map(item => item.textContent);
+        expect(items).toEqual(['AID-000007-1A2B3C4D (utløpt)', 'AID-000007-1A2B3C4D-2 (reservert)', 'AID-000007-1A2B3C4D-3 (SOMETHING_NEW)']);
+    });
+
+    it('has no Vipps payments row before the first payment', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        renderPage();
+        await screen.findByRole('button', { name: 'Trekk beløpet' });
+        expect(screen.queryByText('Vipps-betalinger')).not.toBeInTheDocument();
     });
 
     it('lists each refund with its date and amount and asks for a credit note for each', async () => {

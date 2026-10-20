@@ -492,6 +492,26 @@
         "wrongStatus": "Bare mislykkede og kansellerte ordrer kan frigi datamaskinen.",
         "buildNotHeld": "Ordren holder ikke lenger datamaskinen."
       },
+      "sendPaymentLink": "Send ny betalingslenke",
+      "confirmPaymentLink": "Send kunden en ny betalingslenke på e-post?",
+      "paymentLinkHint": "Kunden får en lenke på e-post og kan betale ordren på nytt.",
+      "paymentLinkDone": "Betalingslenken er sendt",
+      "paymentLinkSent": "Betalingslenke sendt {sent}, gyldig til {date} kl. {time}",
+      "paymentLinkReasons": {
+        "wrongStatus": "Bare ordrer der Vipps opphevet reservasjonen kan få ny betalingslenke.",
+        "buildNotHeld": "Ordren holder ikke lenger datamaskinen."
+      },
+      "vippsPayments": "Vipps-betalinger",
+      "vippsStates": {
+        "CREATED": "opprettet",
+        "AUTHORIZED": "reservert",
+        "CAPTURED": "trukket",
+        "CANCELLED": "kansellert",
+        "REFUNDED": "betalt tilbake",
+        "ABORTED": "avbrutt",
+        "EXPIRED": "utløpt",
+        "TERMINATED": "avsluttet"
+      },
       "refunds": "Tilbakebetalinger",
       "creditNoteNote": "Lag en kreditnota i regnskapssystemet for hver tilbakebetaling.",
       "refundRow": "Tilbakebetaling {number}, {date}",

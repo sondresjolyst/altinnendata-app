@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canBuy, captureWarning, invoiceDetails, missingInvoiceNumber, isBuyable, lacksConditions, kroner, osloDate, osloDateTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { canBuy, captureWarning, invoiceDetails, missingInvoiceNumber, isBuyable, lacksConditions, kroner, osloDate, osloDateTime, osloTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { AdminOrder } from '@/services/shopService';
 
@@ -50,6 +50,10 @@ const order: AdminOrder = {
     reservationEndedAt: null,
     holdsBuild: false,
     releaseBuildBlockedReason: 'wrongStatus',
+    paymentLinkSentAt: null,
+    paymentLinkExpiresAt: null,
+    paymentLinkBlockedReason: 'wrongStatus',
+    vippsReferences: [],
 };
 
 const pickupOrder: AdminOrder = {
@@ -262,7 +266,13 @@ describe('missingInvoiceNumber', () => {
         expect(missingInvoiceNumber({ ...paid, invoiceNumber: '1001' }, now)).toBe(false);
         expect(missingInvoiceNumber({ ...paid, status: 'Refunded' }, now)).toBe(false);
         expect(missingInvoiceNumber({ ...paid, capturedAt: null }, now)).toBe(false);
-        expect(missingInvoiceNumber({ status: 'Paid', invoiceNumber: null }, now)).toBe(false);
+    });
+});
+
+describe('osloTime', () => {
+    it('shows an instant as hours and minutes on the Oslo clock, summer and winter', () => {
+        expect(osloTime('2026-10-20T14:32:08Z')).toBe('16:32');
+        expect(osloTime('2026-12-31T23:05:00Z')).toBe('00:05');
     });
 });
 

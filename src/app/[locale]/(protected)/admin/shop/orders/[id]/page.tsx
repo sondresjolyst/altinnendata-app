@@ -11,9 +11,9 @@ import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { fillTemplate, formatOre } from '@/lib/format';
-import { formatAddress, invoiceDetails, kroner, osloDate, osloDateTime, parseKroner, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { formatAddress, invoiceDetails, kroner, osloDate, osloDateTime, osloTime, parseKroner, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
 
-type Action = 'capture' | 'cancel' | 'refund' | 'release' | 'ship';
+type Action = 'capture' | 'cancel' | 'refund' | 'release' | 'paymentLink' | 'ship';
 
 // The API caps the invoice number at this many characters.
 const MAX_INVOICE_NUMBER = 50;
@@ -123,11 +123,13 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                 ? await ShopService.refund(order.id, amountInOre, order.refundedInOre)
                 : action === 'release'
                     ? await ShopService.releaseBuild(order.id)
-                    : await ShopService[action](order.id);
+                    : action === 'paymentLink'
+                        ? await ShopService.sendPaymentLink(order.id)
+                        : await ShopService[action](order.id);
             setOrder(updated);
             setConfirming(null);
             setActed(n => n + 1);
-            toast.success({ capture: text.captureDone, cancel: text.cancelDone, refund: text.refundDone, release: text.releaseDone }[action]);
+            toast.success({ capture: text.captureDone, cancel: text.cancelDone, refund: text.refundDone, release: text.releaseDone, paymentLink: text.paymentLinkDone }[action]);
         } catch (err) {
             if (action === 'refund' && apiFieldErrors(err)?.amountInOre) {
                 // The dialog stays open so the amount can be fixed.
@@ -135,8 +137,8 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             } else {
                 setConfirming(null);
                 toast.error(failureText(err, text.actionFailed));
-                // A refused release means the order or the build changed, so the button shows why from fresh data.
-                if (action === 'release') ShopService.getOrder(order.id).then(setOrder).catch(() => undefined);
+                // A refused release or link means the order or the build changed, so the buttons show why from fresh data.
+                if (action === 'release' || action === 'paymentLink') ShopService.getOrder(order.id).then(setOrder).catch(() => undefined);
             }
         } finally {
             setBusy(false);
@@ -170,11 +172,18 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
     }
     const shipLabel = pickup ? text.markReady : text.markShipped;
     const releaseReason = order.releaseBuildBlockedReason ? text.releaseReasons[order.releaseBuildBlockedReason] : null;
+    const paymentLinkReason = order.paymentLinkBlockedReason ? text.paymentLinkReasons[order.paymentLinkBlockedReason] : null;
+    const paymentLinkSent = order.paymentLinkSentAt && order.paymentLinkExpiresAt
+        ? fillTemplate(text.paymentLinkSent, { sent: osloDate(order.paymentLinkSentAt), date: osloDate(order.paymentLinkExpiresAt), time: osloTime(order.paymentLinkExpiresAt) })
+        : null;
     const pending = confirming === 'ship'
         ? { action: 'ship' as const, label: shipLabel, title: shipLabel, confirm: pickup ? text.confirmReady : text.confirmShipped }
         : confirming === 'release'
             ? { action: 'release' as const, label: text.releaseBuild, title: text.releaseBuild, confirm: text.confirmRelease }
-            : actions.find(a => a.action === confirming);
+            : confirming === 'paymentLink'
+                ? { action: 'paymentLink' as const, label: text.sendPaymentLink, title: text.sendPaymentLink, confirm: text.confirmPaymentLink }
+                : actions.find(a => a.action === confirming);
+    const vippsState = (state: string) => (Object.hasOwn(text.vippsStates, state) ? text.vippsStates[state as keyof typeof text.vippsStates] : state);
 
     const address = formatAddress(order);
     const date = (iso: string | null) => (iso ? osloDate(iso) : null);
@@ -200,6 +209,20 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
         [text.captured, order.capturedInOre > 0 ? formatOre(order.capturedInOre, locale) : null],
         [text.columns.deadline, date(order.captureGuaranteedUntil) ?? text.unknown],
         [text.created, date(order.createdAt)],
+        [
+            text.vippsPayments,
+            order.vippsReferences.length > 0
+                ? (
+                    <ul className="space-y-0.5">
+                        {order.vippsReferences.map(payment => (
+                            <li key={payment.reference} className="break-all">
+                                {payment.reference} <span className="text-gray-600">({vippsState(payment.state)})</span>
+                            </li>
+                        ))}
+                    </ul>
+                )
+                : null,
+        ],
         [
             text.termsAccepted,
             order.termsVersion === 'none'
@@ -287,6 +310,19 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                             {text.releaseBuild}
                         </button>
                         <p id="release-note" className="text-sm text-gray-600">{releaseReason ?? text.releaseHint}</p>
+                    </div>
+                    <div className="max-w-sm space-y-1">
+                        <button
+                            type="button"
+                            disabled={busy || paymentLinkReason !== null}
+                            aria-describedby="payment-link-note"
+                            onClick={() => openAction('paymentLink')}
+                            className={`${BUTTON} ${SECONDARY} disabled:cursor-not-allowed`}
+                        >
+                            {text.sendPaymentLink}
+                        </button>
+                        <p id="payment-link-note" className="text-sm text-gray-600">{paymentLinkReason ?? text.paymentLinkHint}</p>
+                        {paymentLinkSent && <p className="text-sm font-semibold text-gray-900">{paymentLinkSent}</p>}
                     </div>
                 </div>
             </section>

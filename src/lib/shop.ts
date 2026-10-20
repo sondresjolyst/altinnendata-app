@@ -43,6 +43,13 @@ export function osloDateTime(iso: string): string {
     return `${osloDate(iso)} ${osloTimeFormat.format(new Date(iso))}`;
 }
 
+const osloClockFormat = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Oslo', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
+/** An ISO instant as HH:mm on the Oslo clock. */
+export function osloTime(iso: string): string {
+    return osloClockFormat.format(new Date(iso));
+}
+
 /** How near the date is that Vipps guarantees a capture until. Under 48 hours left, or past, is soon. */
 export function captureWarning(until: string | null, now: Date): 'unknown' | 'soon' | 'ok' {
     if (until === null) return 'unknown';
