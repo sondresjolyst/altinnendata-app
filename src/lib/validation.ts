@@ -107,9 +107,13 @@ export function checkoutApiFieldMessage(field: CheckoutField, value: string, nam
     return text.required.replace('{field}', name);
 }
 
+/** The contact form's text for a field `contactSchema` refused, worded the way Altinn words it. */
 export function issueMessage(issue: z.core.$ZodIssue, dict: Dictionary): string {
-    if (issue.code === 'invalid_format' && issue.format === 'email') return dict.validation.email;
-    if (issue.code === 'too_big') return dict.validation.tooLong;
-    return dict.validation.required;
+    const text = dict.validation;
+    if (issue.code === 'invalid_format' && issue.format === 'email') return text.email;
+    if (issue.code === 'too_big') return text.tooLong.replace('{max}', String(issue.maximum));
+    const field = String(issue.path[0] ?? '');
+    const name = Object.hasOwn(text.fieldNames, field) ? text.fieldNames[field as keyof typeof text.fieldNames] : field;
+    return text.required.replace('{field}', name);
 }
 

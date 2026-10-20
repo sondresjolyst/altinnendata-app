@@ -50,7 +50,7 @@ describe('admin legal page', () => {
 
     it.each([
         ['no', ['Vilkår', 'Personvern', 'Informasjonskapsler']],
-        ['en', ['Terms', 'Privacy', 'Cookies']],
+        ['en', ['Terms', 'Privacy notice', 'Cookies']],
     ] as const)('offers the three legal pages in order (%s)', async (locale, labels) => {
         renderPage(locale);
         await screen.findByRole('button', { name: labels[0], pressed: true });

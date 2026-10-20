@@ -112,7 +112,7 @@
     "city": "City",
     "withinDistance": "The address is within {km} km of us",
     "pickupNote": "When would you like to collect it?",
-    "pickupHint": "We agree the time afterwards.",
+    "pickupHint": "We will agree a time with you afterwards.",
     "acceptTerms": "I accept the",
     "termsLink": "terms of sale",
     "deliveryNote": "We only deliver in Norway. Also read the",
@@ -165,7 +165,11 @@
       },
       "failed": {
         "title": "The payment was not completed",
-        "body": "No money has been taken. The computer is available again unless someone else has bought it."
+        "body": "The payment was not completed. No money has been taken. Get in touch if you have questions."
+      },
+      "refunded": {
+        "title": "Refunded",
+        "body": "The amount has been refunded."
       },
       "toBuilds": "To the computers"
     },
@@ -174,9 +178,13 @@
     "missingConditionsAdmin": "The condition of the parts is missing. Add a condition to every part in admin."
   },
   "validation": {
-    "required": "This field is required",
-    "email": "Enter a valid email address",
-    "tooLong": "This text is too long"
+    "required": "Enter {field}.",
+    "email": "Enter a valid email address.",
+    "tooLong": "Use {max} characters or fewer.",
+    "fieldNames": {
+      "name": "your name",
+      "message": "a message"
+    }
   },
   "auth": {
     "sessionRestored": "You're signed in again. Try saving again."
@@ -185,7 +193,7 @@
     "orgNumber": "Org. no.",
     "register": "Register of Business Enterprises",
     "terms": "Terms",
-    "privacy": "Privacy",
+    "privacy": "Privacy notice",
     "cookies": "Cookies",
     "rights": "All rights reserved.",
     "createdBy": "Created by"
@@ -376,7 +384,7 @@
       "openOrder": "Open order",
       "backToOrders": "Back to the orders",
       "order": "Order",
-      "reference": "Reference",
+      "reference": "Order number",
       "buyerName": "Name",
       "email": "Email",
       "phone": "Phone",
@@ -452,13 +460,14 @@
         "orderDate": "Order date",
         "reservedDate": "Payment reserved",
         "capturedDate": "Date taken",
-        "refunded": "Refunded in total",
-        "reference": "Vipps reference",
+        "refunded": "Total refunded",
+        "reference": "Order number",
+        "vippsReference": "Vipps reference",
         "deliveryDate": "Delivery date",
         "deliveryPlace": "Place of delivery"
       },
       "vatLabel": "VAT",
-      "vatNote": "Not VAT registered, no VAT.",
+      "vatNote": "Not registered in the VAT Register.",
       "invoiceNumber": "Invoice number",
       "invoiceSaved": "The invoice number has been saved",
       "invoiceFailed": "Could not save the invoice number",

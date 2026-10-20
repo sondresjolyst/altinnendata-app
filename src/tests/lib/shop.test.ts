@@ -133,8 +133,23 @@ describe('invoiceDetails', () => {
     });
 
     it('says the seller is not VAT registered in both languages', () => {
-        expect(invoiceDetails(order, no).find(d => d.key === 'vat')?.value).toBe('Ikke merverdiavgiftsregistrert, ingen mva.');
-        expect(invoiceDetails(order, en).find(d => d.key === 'vat')?.value).toBe('Not VAT registered, no VAT.');
+        expect(invoiceDetails(order, no).find(d => d.key === 'vat')?.value).toBe('Ikke registrert i Merverdiavgiftsregisteret.');
+        expect(invoiceDetails(order, en).find(d => d.key === 'vat')?.value).toBe('Not registered in the VAT Register.');
+    });
+
+    it('shows the order number, and the latest Vipps reference as its own row when the API gives one', () => {
+        const without = invoiceDetails(order, no);
+        expect(without.find(d => d.key === 'reference')).toMatchObject({ label: 'Ordrenummer', value: order.reference });
+        expect(without.some(d => d.key === 'vippsReference')).toBe(false);
+
+        const vippsReferences = [
+            { reference: `${order.reference}-1`, state: 'ABORTED', createdAt: '2026-10-18T10:00:00Z' },
+            { reference: `${order.reference}-2`, state: 'AUTHORIZED', createdAt: '2026-10-19T10:00:00Z' },
+        ];
+        const keys = invoiceDetails({ ...order, vippsReferences }, no).map(d => d.key);
+        expect(invoiceDetails({ ...order, vippsReferences }, no).find(d => d.key === 'vippsReference'))
+            .toMatchObject({ label: 'Vipps-referanse', value: `${order.reference}-2` });
+        expect(keys.indexOf('vippsReference')).toBe(keys.indexOf('reference') + 1);
     });
 });
 
@@ -206,9 +221,9 @@ describe('invoiceDetails after a refund', () => {
         const details = invoiceDetails({ ...order, status: 'Refunded', refundedInOre: 1299000, refundedAt: '2026-10-21T08:00:00Z' }, no);
         const keys = details.map(d => d.key);
         expect(keys.slice(keys.indexOf('capturedDate'), keys.indexOf('deliveryPlace'))).toEqual(['capturedDate', 'refunded']);
-        expect(details.find(d => d.key === 'refunded')).toMatchObject({ label: 'Betalt tilbake totalt', value: '12990,00' });
+        expect(details.find(d => d.key === 'refunded')).toMatchObject({ label: 'Totalt tilbakebetalt', value: '12990,00' });
         expect(keys).not.toContain('refundedDate');
-        expect(invoiceDetails({ ...order, refundedInOre: 1299000 }, en).find(d => d.key === 'refunded')?.label).toBe('Refunded in total');
+        expect(invoiceDetails({ ...order, refundedInOre: 1299000 }, en).find(d => d.key === 'refunded')?.label).toBe('Total refunded');
     });
 
     it('adds the amount for a partial refund and nothing before any refund', () => {

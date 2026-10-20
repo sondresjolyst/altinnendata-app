@@ -137,7 +137,11 @@ export function invoiceDetails(order: AdminOrder, dict: Dictionary): InvoiceDeta
 
     details.push(
         { key: 'reference', label: labels.reference, value: order.reference },
-        { key: 'vat', label: dict.admin.shop.vatLabel, value: text.vatNote },
     );
+
+    const vippsReference = order.vippsReferences?.at(-1)?.reference;
+    if (vippsReference) details.push({ key: 'vippsReference', label: labels.vippsReference, value: vippsReference });
+
+    details.push({ key: 'vat', label: dict.admin.shop.vatLabel, value: text.vatNote });
     return details;
 }

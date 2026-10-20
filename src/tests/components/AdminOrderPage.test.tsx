@@ -93,7 +93,7 @@ describe('the admin order page', () => {
         service.getOrder.mockResolvedValue(reserved);
         const first = renderPage();
         expect(await screen.findByRole('button', { name: 'Trekk beløpet' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Kanseller' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Kanseller ordre' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Betal tilbake' })).not.toBeInTheDocument();
         first.unmount();
 
@@ -101,7 +101,7 @@ describe('the admin order page', () => {
         renderPage();
         expect(await screen.findByRole('button', { name: 'Betal tilbake' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Trekk beløpet' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Kanseller' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Kanseller ordre' })).not.toBeInTheDocument();
     });
 
     it('links to the build page', async () => {
@@ -163,7 +163,7 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Kanseller' }));
+        await user.click(await screen.findByRole('button', { name: 'Kanseller ordre' }));
         await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Avbryt' }));
 
         expect(service.cancel).not.toHaveBeenCalled();
@@ -188,7 +188,7 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        const trigger = await screen.findByRole('button', { name: 'Kanseller' });
+        const trigger = await screen.findByRole('button', { name: 'Kanseller ordre' });
         await user.click(trigger);
         expect(screen.getByRole('dialog')).toContainElement(document.activeElement as HTMLElement);
 
@@ -204,7 +204,7 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage(true);
 
-        await user.click(await screen.findByRole('button', { name: 'Kanseller' }));
+        await user.click(await screen.findByRole('button', { name: 'Kanseller ordre' }));
         await new Promise(resolve => setTimeout(resolve, 0));
 
         expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -281,8 +281,8 @@ describe('the admin order page', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.click(await screen.findByRole('button', { name: 'Kanseller' }));
-        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Kanseller' }));
+        await user.click(await screen.findByRole('button', { name: 'Kanseller ordre' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Kanseller ordre' }));
 
         await waitFor(() => expect(service.cancel).toHaveBeenCalledWith(7));
         await waitFor(() => expect(toastSpies.success).toHaveBeenCalledWith('Ordren er kansellert'));

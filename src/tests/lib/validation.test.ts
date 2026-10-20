@@ -48,9 +48,21 @@ describe('issueMessage', () => {
         if (result.success) return;
 
         const errors = zodFieldErrors(result.error, { message: (issue) => issueMessage(issue, dict) });
-        expect(errors.email).toBe(dict.validation.email);
-        expect(errors.message).toBe(dict.validation.required);
+        expect(errors.email).toBe('Skriv inn en gyldig e-postadresse.');
+        expect(errors.message).toBe('Du må fylle ut melding.');
         expect(errors.name).toBeUndefined();
+    });
+
+    it('names the field and the limit, in English too', () => {
+        const en = getDictionary('en');
+        const result = contactSchema.safeParse({ ...valid, name: '', useCase: 'x'.repeat(161) });
+        expect(result.success).toBe(false);
+        if (result.success) return;
+
+        const errors = zodFieldErrors(result.error, { message: (issue) => issueMessage(issue, en) });
+        expect(errors.name).toBe('Enter your name.');
+        expect(errors.useCase).toBe('Use 160 characters or fewer.');
+        expect(zodFieldErrors(result.error, { message: (issue) => issueMessage(issue, dict) }).useCase).toBe('Bruk 160 eller færre tegn.');
     });
 });
 

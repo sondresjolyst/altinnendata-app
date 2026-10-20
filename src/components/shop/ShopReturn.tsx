@@ -36,6 +36,7 @@ export default function ShopReturn({ locale }: { locale: Locale }) {
     else if (order.status === 'Reserved' || order.status === 'Paid') state = 'success';
     else if (order.status === 'Pending') state = 'pending';
     else state = 'failed';
+    const ended = order?.status === 'Refunded' ? text.refunded : text.failed;
 
     const builds = localeHref(locale, '/builds');
     const done = order?.status === 'Paid' ? text.paid : text.success;
@@ -51,7 +52,7 @@ export default function ShopReturn({ locale }: { locale: Locale }) {
                 cta: text.toBuilds,
             }}
             pending={{ title: text.pending.title, body: text.pending.body, href: localeHref(locale, '/contact'), cta: text.pending.cta }}
-            failed={{ title: text.failed.title, body: text.failed.body, href: builds, cta: text.toBuilds }}
+            failed={{ title: ended.title, body: ended.body, href: builds, cta: text.toBuilds }}
             onRefresh={refresh}
             refreshLabel={text.pending.refresh}
         />

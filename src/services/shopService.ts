@@ -89,6 +89,12 @@ export interface AdminOrderSummary {
     capturedAt?: string | null;
 }
 
+export interface VippsReferenceInfo {
+    reference: string;
+    state: string;
+    createdAt: string;
+}
+
 export interface AdminOrder {
     id: number;
     reference: string;
@@ -141,6 +147,8 @@ export interface AdminOrder {
     holdsBuild: boolean;
     /** Why the build cannot be released from this order now, or null when it can. */
     releaseBuildBlockedReason: ReleaseBuildBlockedReason | null;
+    /** Every Vipps payment of the order, oldest first. Older APIs leave it out. */
+    vippsReferences?: VippsReferenceInfo[];
 }
 
 export interface OrderRefund {

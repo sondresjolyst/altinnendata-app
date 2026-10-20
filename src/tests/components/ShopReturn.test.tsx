@@ -51,7 +51,7 @@ describe('ShopReturn', () => {
         await settle();
 
         expect(screen.getByRole('heading', { name: 'Betalingen er gjennomført' })).toBeInTheDocument();
-        expect(screen.getByText(/Vi har tatt .*12\s990.* i Vipps for Gaming PC\./)).toBeInTheDocument();
+        expect(screen.getByText(/Vi har trukket .*12\s990.* i Vipps for Gaming PC\./)).toBeInTheDocument();
         expect(screen.queryByText(/trekkes når du får maskinen/)).not.toBeInTheDocument();
     });
 
@@ -107,8 +107,21 @@ describe('ShopReturn', () => {
         await settle();
 
         expect(screen.getByRole('heading', { name: 'Betalingen ble ikke fullført' })).toBeInTheDocument();
-        expect(screen.getByText('Ingen penger er trukket. Datamaskinen er ledig igjen hvis ingen andre har kjøpt den.')).toBeInTheDocument();
+        expect(screen.getByText('Betalingen ble ikke fullført. Ingen penger er trukket. Ta kontakt med oss hvis du lurer på noe.')).toBeInTheDocument();
+        expect(document.body.textContent).not.toMatch(/ledig/);
         expect(screen.getByRole('link', { name: 'Til datamaskinene' })).toHaveAttribute('href', '/no/builds');
+    });
+
+    it.each([
+        ['no', 'Betalt tilbake', 'Beløpet er betalt tilbake.'],
+        ['en', 'Refunded', 'The amount has been refunded.'],
+    ] as const)('says the amount is refunded for a refunded order (%s)', async (locale, title, body) => {
+        orderStatus.mockResolvedValue(info({ status: 'Refunded' }));
+        render(<ShopReturn locale={locale} />);
+        await settle();
+
+        expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
+        expect(screen.getByText(body)).toBeInTheDocument();
     });
 
     it('shows the failed state when the token is unknown', async () => {

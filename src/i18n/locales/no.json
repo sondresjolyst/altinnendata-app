@@ -149,7 +149,7 @@
       "title": "Betaling",
       "paid": {
         "title": "Betalingen er gjennomført",
-        "body": "Vi har tatt {total} i Vipps for {build}. Vi tar kontakt om levering eller henting.",
+        "body": "Vi har trukket {total} i Vipps for {build}. Vi tar kontakt om levering eller henting.",
         "note": "Ordrenummer {reference}."
       },
       "success": {
@@ -165,7 +165,11 @@
       },
       "failed": {
         "title": "Betalingen ble ikke fullført",
-        "body": "Ingen penger er trukket. Datamaskinen er ledig igjen hvis ingen andre har kjøpt den."
+        "body": "Betalingen ble ikke fullført. Ingen penger er trukket. Ta kontakt med oss hvis du lurer på noe."
+      },
+      "refunded": {
+        "title": "Betalt tilbake",
+        "body": "Beløpet er betalt tilbake."
       },
       "toBuilds": "Til datamaskinene"
     },
@@ -174,9 +178,13 @@
     "missingConditionsAdmin": "Mangler tilstand på delene. Legg inn tilstand på alle delene i admin."
   },
   "validation": {
-    "required": "Feltet må fylles ut",
-    "email": "Skriv inn en gyldig e-postadresse",
-    "tooLong": "Teksten er for lang"
+    "required": "Du må fylle ut {field}.",
+    "email": "Skriv inn en gyldig e-postadresse.",
+    "tooLong": "Bruk {max} eller færre tegn.",
+    "fieldNames": {
+      "name": "navn",
+      "message": "melding"
+    }
   },
   "auth": {
     "sessionRestored": "Du er logget inn igjen. Prøv å lagre på nytt."
@@ -354,7 +362,7 @@
         "Pending": "Venter",
         "Reserved": "Reservert",
         "Paid": "Betalt",
-        "Failed": "Feilet",
+        "Failed": "Mislykket",
         "Cancelled": "Kansellert",
         "Refunded": "Tilbakebetalt"
       },
@@ -376,7 +384,7 @@
       "openOrder": "Åpne ordre",
       "backToOrders": "Tilbake til ordrene",
       "order": "Ordre",
-      "reference": "Referanse",
+      "reference": "Ordrenummer",
       "buyerName": "Navn",
       "email": "E-post",
       "phone": "Telefon",
@@ -415,7 +423,7 @@
       "shipFailed": "Kunne ikke markere ordren",
       "capture": "Trekk beløpet",
       "captureTitle": "Trekk {amount} fra kundens Vipps?",
-      "cancel": "Kanseller",
+      "cancel": "Kanseller ordre",
       "refund": "Betal tilbake",
       "confirmCapture": "Dette kan ikke angres.",
       "confirmCancel": "Vil du kansellere ordren? Reservasjonen frigjøres og datamaskinen blir tilgjengelig igjen.",
@@ -452,13 +460,14 @@
         "orderDate": "Ordredato",
         "reservedDate": "Betaling reservert",
         "capturedDate": "Dato trukket",
-        "refunded": "Betalt tilbake totalt",
-        "reference": "Vipps-referanse",
+        "refunded": "Totalt tilbakebetalt",
+        "reference": "Ordrenummer",
+        "vippsReference": "Vipps-referanse",
         "deliveryDate": "Leveringsdato",
         "deliveryPlace": "Leveringssted"
       },
       "vatLabel": "Merverdiavgift",
-      "vatNote": "Ikke merverdiavgiftsregistrert, ingen mva.",
+      "vatNote": "Ikke registrert i Merverdiavgiftsregisteret.",
       "invoiceNumber": "Fakturanummer",
       "invoiceSaved": "Fakturanummeret er lagret",
       "invoiceFailed": "Kunne ikke lagre fakturanummeret",
