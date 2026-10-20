@@ -48,14 +48,14 @@ describe('buy page', () => {
         expect(screen.getByTestId('checkout-form')).toHaveAttribute('data-terms-version', '2026-10-19T12:00:00.000000Z');
     });
 
-    it('keeps Kjøp in place, off, with Mangler tilstand på delene. for a build with a part without a condition', async () => {
+    it('keeps Kjøp in place, off, with a neutral note for a build with a part without a condition', async () => {
         vi.mocked(publicGet).mockResolvedValue(build({ allPartsHaveCondition: false }));
         vi.mocked(publicGetOptional).mockResolvedValue(config);
         render(await BuyPage({ params }));
 
         expect(screen.getByRole('heading', { name: 'Kjøp Gaming PC' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kjøp' })).toBeDisabled();
-        expect(screen.getByText('Mangler tilstand på delene.')).toBeInTheDocument();
+        expect(screen.getByText('Kan ikke kjøpes på nettsiden ennå. Ta kontakt med oss.')).toBeInTheDocument();
         expect(screen.queryByTestId('checkout-form')).not.toBeInTheDocument();
     });
 

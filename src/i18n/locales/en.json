@@ -170,7 +170,8 @@
       "toBuilds": "To the computers"
     },
     "failed": "The payment could not be started. Try again, or get in touch.",
-    "missingConditions": "The condition of the parts is missing."
+    "missingConditions": "Not available to buy on the website yet. Please contact us.",
+    "missingConditionsAdmin": "The condition of the parts is missing. Add a condition to every part in admin."
   },
   "validation": {
     "required": "This field is required",

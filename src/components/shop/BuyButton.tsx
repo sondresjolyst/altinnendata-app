@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
+import { ADMIN_ROLE } from '@/lib/roles';
 import { canBuy, isBuyable, lacksConditions } from '@/lib/shop';
 import type { BuildDetail } from '@/services/buildService';
 import type { BuyButtonMode } from '@/services/shopService';
@@ -40,7 +41,9 @@ export default function BuyButton({ build, mode, hasDelivery, locale }: BuyButto
         );
     }
 
-    const note = lacksConditions(build) ? text.missingConditions : build.availability === 'Reserved' ? text.reserved : text.sold;
+    // Visitors get a neutral reason. Only an admin can add the missing conditions, so only an admin is told about them.
+    const conditionsNote = roles.includes(ADMIN_ROLE) ? text.missingConditionsAdmin : text.missingConditions;
+    const note = lacksConditions(build) ? conditionsNote : build.availability === 'Reserved' ? text.reserved : text.sold;
 
     return (
         <>

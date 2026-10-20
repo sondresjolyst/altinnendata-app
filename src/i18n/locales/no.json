@@ -170,7 +170,8 @@
       "toBuilds": "Til datamaskinene"
     },
     "failed": "Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt.",
-    "missingConditions": "Mangler tilstand på delene."
+    "missingConditions": "Kan ikke kjøpes på nettsiden ennå. Ta kontakt med oss.",
+    "missingConditionsAdmin": "Mangler tilstand på delene. Legg inn tilstand på alle delene i admin."
   },
   "validation": {
     "required": "Feltet må fylles ut",

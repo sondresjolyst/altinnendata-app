@@ -104,13 +104,22 @@ describe('BuyButton', () => {
         expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 
-    it('keeps Kjøp in place, off, with Mangler tilstand på delene. when a part has no condition', () => {
+    it('keeps Kjøp in place, off, with a neutral note for a visitor when a part has no condition', () => {
         session.roles = [];
         render(<BuyButton build={build({ allPartsHaveCondition: false })} mode="Everyone" locale="no" hasDelivery />);
 
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Kjøp' })).toBeDisabled();
-        expect(screen.getByText('Mangler tilstand på delene.')).toBeInTheDocument();
+        expect(screen.getByText('Kan ikke kjøpes på nettsiden ennå. Ta kontakt med oss.')).toBeInTheDocument();
+        expect(screen.queryByText(/Mangler tilstand/)).not.toBeInTheDocument();
+    });
+
+    it('tells an admin that the parts are missing a condition', () => {
+        session.roles = ['Admin'];
+        render(<BuyButton build={build({ allPartsHaveCondition: false })} mode="AdminsOnly" locale="no" hasDelivery />);
+
+        expect(screen.getByRole('button', { name: 'Kjøp' })).toBeDisabled();
+        expect(screen.getByText('Mangler tilstand på delene. Legg inn tilstand på alle delene i admin.')).toBeInTheDocument();
     });
 
     it('says the English text for a build missing conditions', () => {
@@ -118,6 +127,6 @@ describe('BuyButton', () => {
         render(<BuyButton build={build({ allPartsHaveCondition: false })} mode="Everyone" locale="en" hasDelivery />);
 
         expect(screen.getByRole('button', { name: 'Buy' })).toBeDisabled();
-        expect(screen.getByText('The condition of the parts is missing.')).toBeInTheDocument();
+        expect(screen.getByText('Not available to buy on the website yet. Please contact us.')).toBeInTheDocument();
     });
 });
