@@ -468,6 +468,29 @@
         "paymentProviderUnavailable": "Vipps did not confirm the change. Check the payment in the Vipps portal before you try again.",
         "alreadyShipped": "The order has already been marked. Reload the page."
       }
+    },
+    "vat": {
+      "title": "VAT registration threshold",
+      "turnover": "Turnover in the last 12 months",
+      "ofThreshold": "{turnover} of {threshold}",
+      "warning": "Turnover has passed {warnFrom}. Once it passes {threshold} within 12 months, the business must be registered in the VAT Register.",
+      "crossed": "Turnover passed {threshold} in {month}. The business must be registered in the VAT Register.",
+      "crossedBy": "The sale that passed the threshold is order {reference}.",
+      "outsideTitle": "Sales outside the shop",
+      "outsideHint": "Enter the sales outside the shop for one month. Enter 0 to remove the month.",
+      "month": "Month",
+      "amount": "Amount (kr)",
+      "shop": "Shop",
+      "outside": "Outside the shop",
+      "monthsCaption": "Turnover per month",
+      "saved": "The sales are saved",
+      "saveFailed": "Could not save the sales",
+      "loadFailed": "Could not load the turnover",
+      "validation": {
+        "month": "Enter the month.",
+        "amount": "Enter the amount in whole kroner or with one or two decimals.",
+        "tooHigh": "The amount cannot be more than {max}."
+      }
     }
   },
   "stats": {

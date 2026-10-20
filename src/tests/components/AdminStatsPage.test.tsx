@@ -12,6 +12,7 @@ const email = vi.hoisted(() => ({ get: vi.fn() }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 vi.mock('@/services/adminService', () => ({ default: admin, EmailStatsService: email }));
+vi.mock('@/components/shop/VatThresholdPanel', () => ({ default: () => <section data-testid="vat-panel" /> }));
 
 const stats = {
     totalUsers: 2, publishedBuilds: 3, draftBuilds: 1, soldBuilds: 0, catalogParts: 5, contentImages: 4,

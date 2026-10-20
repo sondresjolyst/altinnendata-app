@@ -468,6 +468,29 @@
         "paymentProviderUnavailable": "Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen.",
         "alreadyShipped": "Ordren er allerede markert. Last siden på nytt."
       }
+    },
+    "vat": {
+      "title": "Registreringsgrensen for merverdiavgift",
+      "turnover": "Omsetning siste 12 måneder",
+      "ofThreshold": "{turnover} av {threshold}",
+      "warning": "Omsetningen har passert {warnFrom}. Når den passerer {threshold} i løpet av 12 måneder, må virksomheten registreres i Merverdiavgiftsregisteret.",
+      "crossed": "Omsetningen passerte {threshold} i {month}. Virksomheten må registreres i Merverdiavgiftsregisteret.",
+      "crossedBy": "Salget som passerte grensen er ordre {reference}.",
+      "outsideTitle": "Salg utenfor nettbutikken",
+      "outsideHint": "Skriv inn salg utenfor nettbutikken for én måned. Skriv 0 for å fjerne måneden.",
+      "month": "Måned",
+      "amount": "Beløp (kr)",
+      "shop": "Nettbutikken",
+      "outside": "Utenfor nettbutikken",
+      "monthsCaption": "Omsetning per måned",
+      "saved": "Salget er lagret",
+      "saveFailed": "Kunne ikke lagre salget",
+      "loadFailed": "Kunne ikke hente omsetningen",
+      "validation": {
+        "month": "Du må fylle ut måned.",
+        "amount": "Skriv beløpet i hele kroner eller med én eller to desimaler.",
+        "tooHigh": "Beløpet kan ikke være større enn {max}."
+      }
     }
   },
   "stats": {

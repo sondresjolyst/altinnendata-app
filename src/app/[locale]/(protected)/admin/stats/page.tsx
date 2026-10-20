@@ -7,6 +7,7 @@ import { EmailStatsPanel, StatHistoryChart } from '@sjolystinnovation/app-kit/ad
 import { nbEmailStatsPanelStrings, nbStatHistoryChartStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import { formatPrice } from '@/lib/format';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import VatThresholdPanel from '@/components/shop/VatThresholdPanel';
 
 function formatBytes(n: number): string {
     if (n <= 0) return '0 B';
@@ -100,6 +101,8 @@ export default function AdminStatsPage() {
                     ) : <p className="text-sm text-gray-500">{dict.common.loading}</p>}
                 </div>
             </div>
+
+            <VatThresholdPanel />
 
             <div className="grid sm:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-gray-200 p-5">

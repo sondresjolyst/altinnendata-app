@@ -129,6 +129,27 @@ export interface AdminOrder {
     updatedAt: string;
 }
 
+export interface VatMonth {
+    /** yyyy-MM */
+    month: string;
+    shopInOre: number;
+    outsideInOre: number;
+}
+
+/** Turnover over the last 12 months against the VAT registration threshold. */
+export interface VatThreshold {
+    turnoverInOre: number;
+    thresholdInOre: number;
+    warnFromInOre: number;
+    warning: boolean;
+    /** The first month where the 12 months up to it passed the threshold, as yyyy-MM. */
+    crossedMonth: string | null;
+    /** The shop sale that passed it, or null when sales outside the shop did. */
+    crossingOrderReference: string | null;
+    crossedAt: string | null;
+    months: VatMonth[];
+}
+
 export type ShopSettingsInput = Omit<ShopSettings, 'termsUpdatedSinceShop' | 'shopCreatedAt'>;
 
 // Each of these changes whether the build can be sold, so the public build pages are purged.
@@ -147,6 +168,13 @@ const ShopService = {
         await revalidateTarget(REVALIDATE_TARGETS.shop);
         return saved;
     },
+
+    getVatThreshold: () =>
+        request(() => axiosInstance.get<VatThreshold>('/admin/shop/vat-threshold'), 'Failed to load the turnover'),
+
+    /** Sets the sales outside the shop for one yyyy-MM month. Zero removes the month. */
+    setOutsideSales: (month: string, amountInOre: number) =>
+        request(() => axiosInstance.put<VatThreshold>('/admin/shop/vat-threshold/outside-sales', { month, amountInOre }), 'Failed to save the sales'),
 
     getOrders: () =>
         request(() => axiosInstance.get<AdminOrderSummary[]>('/admin/shop/orders'), 'Failed to load the orders'),
