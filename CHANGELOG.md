@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.11.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.10.1...v1.11.0) (2026-10-20)
+
+
+### Features
+
+* **shop:** add the Kjøp med Vipps button, checkout and the Butikk admin area ([#177](https://github.com/sondresjolyst/altinnendata-app/issues/177)) ([fe7b922](https://github.com/sondresjolyst/altinnendata-app/commit/fe7b922625406df85dffb671321e4c59d32af5f5))
+
+
+### Dependencies
+
+* **npm:** bump `follow-redirects` from 1.16.0 to 1.16.1 ([#196](https://github.com/sondresjolyst/altinnendata-app/issues/196)) ([0e209c1](https://github.com/sondresjolyst/altinnendata-app/commit/0e209c1edd16b2d0742a9c3004ea169e8ec740e3))
+* **npm:** bump `vite` from 8.0.16 to 8.3.4 ([#197](https://github.com/sondresjolyst/altinnendata-app/issues/197)) ([bc61867](https://github.com/sondresjolyst/altinnendata-app/commit/bc618670c359d0e665530f548484f1d7b7cc8710))
+
 ## [1.10.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.10.0...v1.10.1) (2026-10-20)
 
 
