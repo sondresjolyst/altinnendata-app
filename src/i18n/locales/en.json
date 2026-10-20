@@ -87,7 +87,7 @@
     "message": "Message",
     "send": "Send",
     "sending": "Sending…",
-    "sent": "Thanks — we'll be in touch.",
+    "sent": "Thanks for your message. We will reply as soon as we can.",
     "failed": "The message was not sent. Try again, or give us a call.",
     "callUs": "Call us",
     "emailUs": "Email us"
@@ -342,7 +342,7 @@
       "loadFailed": "Could not load the settings",
       "subNavigation": "Shop",
       "termsWarning": "The terms must be updated with sales terms before the buy button can show for everyone. Save the terms in Norwegian and English under Legal pages.",
-      "vippsTestEveryone": "Turn off Vipps test mode before you show the buy button to everyone.",
+      "vippsTestEveryone": "You must turn off Vipps test mode before the buy button can be shown to everyone.",
       "validation": {
         "required": "Enter {field}.",
         "tooLong": "Use {max} characters or fewer.",
@@ -391,7 +391,7 @@
       "cancelled": "Cancelled",
       "refundedAt": "Refunded",
       "termsAccepted": "Terms accepted",
-      "termsAcceptedValue": "{date}, version {version}",
+      "termsAcceptedValue": "{date}, version from {version}",
       "termsNoPage": "{date}, no terms published",
       "termsIp": "IP address at acceptance (shortened)",
       "confirmation": "Order confirmation",

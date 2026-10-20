@@ -30,6 +30,14 @@ export function osloDate(iso: string): string {
     return `${part('day')}.${part('month')}.${part('year')}`;
 }
 
+const osloTimeFormat = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Oslo', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+
+/** An ISO instant as dd.mm.yyyy HH:mm:ss on the Oslo clock. Anything that is not a date comes back as it is. */
+export function osloDateTime(iso: string): string {
+    if (Number.isNaN(new Date(iso).getTime())) return iso;
+    return `${osloDate(iso)} ${osloTimeFormat.format(new Date(iso))}`;
+}
+
 /** How near the date is that Vipps guarantees a capture until. Under 48 hours left, or past, is soon. */
 export function captureWarning(until: string | null, now: Date): 'unknown' | 'soon' | 'ok' {
     if (until === null) return 'unknown';

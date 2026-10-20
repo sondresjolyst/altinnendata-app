@@ -555,7 +555,7 @@ describe('the admin order page', () => {
         renderPage();
 
         expect((await screen.findByText('Ordrebekreftelse')).nextElementSibling).toHaveTextContent('Sendt 18.10.2026');
-        expect(screen.getByText('Vilkår godtatt').nextElementSibling).toHaveTextContent('18.10.2026, versjon 2026-10-01T09:30:00.123456Z');
+        expect(screen.getByText('Vilkår godtatt').nextElementSibling).toHaveTextContent('18.10.2026, versjon fra 01.10.2026 11:30:00');
         expect(screen.getByText('IP-adresse ved godkjenning (forkortet)').nextElementSibling).toHaveTextContent('203.0.113.0');
     });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canBuy, captureWarning, invoiceDetails, isBuyable, kroner, osloDate, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { canBuy, captureWarning, invoiceDetails, isBuyable, kroner, osloDate, osloDateTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { AdminOrder } from '@/services/shopService';
 
@@ -198,5 +198,16 @@ describe('invoiceDetails after a refund', () => {
         expect(partial).toContain('refunded');
         expect(partial).not.toContain('refundedDate');
         expect(invoiceDetails(order, no).some(d => d.key === 'refunded')).toBe(false);
+    });
+});
+
+describe('osloDateTime', () => {
+    it('shows an instant as date and time on the Oslo clock, summer and winter', () => {
+        expect(osloDateTime('2026-10-20T14:32:08.678406Z')).toBe('20.10.2026 16:32:08');
+        expect(osloDateTime('2026-12-31T23:30:00Z')).toBe('01.01.2027 00:30:00');
+    });
+
+    it('returns anything that is not a date as it is', () => {
+        expect(osloDateTime('v2')).toBe('v2');
     });
 });

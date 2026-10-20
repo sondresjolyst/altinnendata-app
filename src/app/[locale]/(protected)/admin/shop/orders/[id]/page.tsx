@@ -11,7 +11,7 @@ import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { fillTemplate, formatOre } from '@/lib/format';
-import { formatAddress, invoiceDetails, kroner, osloDate, parseKroner, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { formatAddress, invoiceDetails, kroner, osloDate, osloDateTime, parseKroner, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
 
 type Action = 'capture' | 'cancel' | 'refund' | 'ship';
 
@@ -202,7 +202,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
             order.termsVersion === 'none'
                 ? fillTemplate(text.termsNoPage, { date: osloDate(order.termsAcceptedAt) })
                 : order.termsVersion
-                    ? fillTemplate(text.termsAcceptedValue, { date: osloDate(order.termsAcceptedAt), version: order.termsVersion })
+                    ? fillTemplate(text.termsAcceptedValue, { date: osloDate(order.termsAcceptedAt), version: osloDateTime(order.termsVersion) })
                     : date(order.termsAcceptedAt),
         ],
         [text.termsIp, order.termsAcceptedIp],

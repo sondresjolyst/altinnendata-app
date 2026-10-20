@@ -87,7 +87,7 @@
     "message": "Melding",
     "send": "Send",
     "sending": "Sender…",
-    "sent": "Takk — du hører fra oss.",
+    "sent": "Takk for henvendelsen. Vi svarer så snart vi kan.",
     "failed": "Meldingen ble ikke sendt. Prøv igjen, eller ring oss.",
     "callUs": "Ring oss",
     "emailUs": "Send e-post"
@@ -342,7 +342,7 @@
       "loadFailed": "Kunne ikke hente innstillingene",
       "subNavigation": "Butikk",
       "termsWarning": "Vilkårene må oppdateres med salgsvilkår før kjøpsknappen kan vises for alle. Lagre vilkårene på norsk og engelsk under Juridiske sider.",
-      "vippsTestEveryone": "Slå av testmodus for Vipps før du viser kjøpsknappen for alle.",
+      "vippsTestEveryone": "Du må slå av testmodus for Vipps før kjøpsknappen kan vises for alle.",
       "validation": {
         "required": "Du må fylle ut {field}.",
         "tooLong": "Bruk {max} eller færre tegn.",
@@ -391,7 +391,7 @@
       "cancelled": "Kansellert",
       "refundedAt": "Tilbakebetalt",
       "termsAccepted": "Vilkår godtatt",
-      "termsAcceptedValue": "{date}, versjon {version}",
+      "termsAcceptedValue": "{date}, versjon fra {version}",
       "termsNoPage": "{date}, ingen vilkår publisert",
       "termsIp": "IP-adresse ved godkjenning (forkortet)",
       "confirmation": "Ordrebekreftelse",

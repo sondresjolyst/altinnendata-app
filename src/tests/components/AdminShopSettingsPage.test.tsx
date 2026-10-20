@@ -184,13 +184,13 @@ describe('the admin shop settings page', () => {
         expect(service.updateSettings).not.toHaveBeenCalled();
     });
 
-    it('says Slå av testmodus for Vipps under Kjøpsknapp for For alle in test mode, without calling the API', async () => {
+    it('says Du må slå av testmodus for Vipps under Kjøpsknapp for For alle in test mode, without calling the API', async () => {
         renderPage('no');
         await userEvent.click(await screen.findByRole('radio', { name: 'For alle' }));
         await userEvent.click(screen.getByRole('button', { name: 'Lagre' }));
 
-        expect(screen.getByText('Slå av testmodus for Vipps før du viser kjøpsknappen for alle.')).toBeInTheDocument();
-        expect(group('Kjøpsknapp')).toHaveAccessibleDescription('Slå av testmodus for Vipps før du viser kjøpsknappen for alle.');
+        expect(screen.getByText('Du må slå av testmodus for Vipps før kjøpsknappen kan vises for alle.')).toBeInTheDocument();
+        expect(group('Kjøpsknapp')).toHaveAccessibleDescription('Du må slå av testmodus for Vipps før kjøpsknappen kan vises for alle.');
         expect(service.updateSettings).not.toHaveBeenCalled();
     });
 
@@ -201,7 +201,7 @@ describe('the admin shop settings page', () => {
         renderPage('no');
         await userEvent.click(await screen.findByRole('button', { name: 'Lagre' }));
 
-        expect(await screen.findByText('Slå av testmodus for Vipps før du viser kjøpsknappen for alle.')).toBeInTheDocument();
+        expect(await screen.findByText('Du må slå av testmodus for Vipps før kjøpsknappen kan vises for alle.')).toBeInTheDocument();
         expect(screen.queryByText(/Turn off Vipps test mode/)).not.toBeInTheDocument();
     });
 
