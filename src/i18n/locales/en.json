@@ -173,6 +173,22 @@
       },
       "toBuilds": "To the computers"
     },
+    "payLink": {
+      "pageTitle": "Payment",
+      "title": "Pay for your order",
+      "intro": "The computer is still reserved for you.",
+      "build": "Computer",
+      "reference": "Order number",
+      "validUntil": "The link is valid until {date} at {time}.",
+      "invalid": "The link is no longer valid. Please contact us.",
+      "contact": "Contact us",
+      "apiErrors": {
+        "paymentInProgress": "The payment has already started. Finish it in Vipps, or try again in a few minutes.",
+        "wrongStatus": "The order has already been paid.",
+        "paymentProviderUnavailable": "We cannot reach Vipps right now. Try again shortly.",
+        "paymentLinkInvalid": "The link is no longer valid. Please contact us."
+      }
+    },
     "failed": "The payment could not be started. Try again, or get in touch.",
     "missingConditions": "Not available to buy on the website yet. Please contact us.",
     "missingConditionsAdmin": "The condition of the parts is missing. Add a condition to every part in admin."

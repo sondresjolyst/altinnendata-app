@@ -173,6 +173,22 @@
       },
       "toBuilds": "Til datamaskinene"
     },
+    "payLink": {
+      "pageTitle": "Betaling",
+      "title": "Betal ordren",
+      "intro": "Datamaskinen er fortsatt reservert for deg.",
+      "build": "Datamaskin",
+      "reference": "Ordrenummer",
+      "validUntil": "Lenken er gyldig til {date} kl. {time}.",
+      "invalid": "Lenken er ikke gyldig lenger. Ta kontakt med oss.",
+      "contact": "Kontakt oss",
+      "apiErrors": {
+        "paymentInProgress": "Betalingen er allerede startet. Fullfør den i Vipps, eller prøv igjen om noen minutter.",
+        "wrongStatus": "Ordren er allerede betalt.",
+        "paymentProviderUnavailable": "Vi får ikke kontakt med Vipps akkurat nå. Prøv igjen om litt.",
+        "paymentLinkInvalid": "Lenken er ikke gyldig lenger. Ta kontakt med oss."
+      }
+    },
     "failed": "Betalingen kunne ikke startes. Prøv igjen, eller ta kontakt.",
     "missingConditions": "Kan ikke kjøpes på nettsiden ennå. Ta kontakt med oss.",
     "missingConditionsAdmin": "Mangler tilstand på delene. Legg inn tilstand på alle delene i admin."

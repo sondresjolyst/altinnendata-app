@@ -167,6 +167,16 @@ export type ReleaseBuildBlockedReason = 'wrongStatus' | 'buildNotHeld';
 
 export type PaymentLinkBlockedReason = 'wrongStatus' | 'buildNotHeld';
 
+/** The order a payment link pays for, as the public pay page shows it. */
+export interface PayLinkInfo {
+    reference: string;
+    buildTitle: string;
+    totalInOre: number;
+    /** When the link stops working. */
+    expiresAt: string;
+    locale: string;
+}
+
 export interface VatMonth {
     /** yyyy-MM */
     month: string;
@@ -255,6 +265,10 @@ const ShopService = {
         }).catch(() => undefined);
         return started;
     },
+
+    /** Starts a new Vipps payment from a payment link. The answer is the Vipps page to send the buyer to. */
+    payWithLink: (token: string) =>
+        request(() => publicClient.post<CheckoutResponse>(`/shop/pay/${encodeURIComponent(token)}`), 'Failed to start the payment'),
 
     /** The public shop settings, read fresh for the current terms version. */
     config: (locale: string) =>
