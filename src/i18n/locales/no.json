@@ -535,10 +535,10 @@
     },
     "vat": {
       "title": "Registreringsgrensen for merverdiavgift",
-      "turnover": "Omsetning siste 12 måneder",
+      "turnover": "Omsetning de siste 12 månedene fram til i dag",
       "ofThreshold": "{turnover} av {threshold}",
       "warning": "Omsetningen har passert {warnFrom}. Når den passerer {threshold} i løpet av 12 måneder, må virksomheten registreres i Merverdiavgiftsregisteret.",
-      "crossed": "Omsetningen passerte {threshold} i {month}. Virksomheten må registreres i Merverdiavgiftsregisteret.",
+      "crossed": "Grensen ble passert {date}. Omsetningen var da over {threshold}, og virksomheten må registreres i Merverdiavgiftsregisteret.",
       "crossedBy": "Salget som passerte grensen er ordre {reference}.",
       "outsideTitle": "Salg utenfor nettbutikken",
       "outsideHint": "Skriv inn salg utenfor nettbutikken for én måned. Skriv 0 for å fjerne måneden.",

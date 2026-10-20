@@ -535,10 +535,10 @@
     },
     "vat": {
       "title": "VAT registration threshold",
-      "turnover": "Turnover in the last 12 months",
+      "turnover": "Turnover in the 12 months up to today",
       "ofThreshold": "{turnover} of {threshold}",
       "warning": "Turnover has passed {warnFrom}. Once it passes {threshold} within 12 months, the business must be registered in the VAT Register.",
-      "crossed": "Turnover passed {threshold} in {month}. The business must be registered in the VAT Register.",
+      "crossed": "The threshold was passed on {date}. Turnover was then over {threshold}, and the business must be registered in the VAT Register.",
       "crossedBy": "The sale that passed the threshold is order {reference}.",
       "outsideTitle": "Sales outside the shop",
       "outsideHint": "Enter the sales outside the shop for one month. Enter 0 to remove the month.",

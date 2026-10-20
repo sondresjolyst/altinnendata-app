@@ -184,17 +184,20 @@ export interface VatMonth {
     outsideInOre: number;
 }
 
-/** Turnover over the last 12 months against the VAT registration threshold. */
+/** Turnover over the 12 months up to today against the VAT registration threshold. */
 export interface VatThreshold {
     turnoverInOre: number;
     thresholdInOre: number;
     warnFromInOre: number;
     warning: boolean;
-    /** The first month where the 12 months up to it passed the threshold, as yyyy-MM. */
+    /** The first day where the 12 months up to it passed the threshold, as yyyy-MM-dd. */
+    crossedOn: string | null;
+    /** The month of crossedOn, as yyyy-MM. */
     crossedMonth: string | null;
     /** The shop sale that passed it, or null when sales outside the shop did. */
     crossingOrderReference: string | null;
     crossedAt: string | null;
+    /** Every month the current 12 month period touches, oldest first. The oldest is usually only partly counted. */
     months: VatMonth[];
 }
 

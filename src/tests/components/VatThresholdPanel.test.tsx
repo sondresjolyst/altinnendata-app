@@ -13,13 +13,15 @@ const service = vi.hoisted(() => ({ getVatThreshold: vi.fn(), setOutsideSales: v
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 vi.mock('@/services/shopService', () => ({ default: service }));
 
-const months = ['2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
+// The current period touches 13 months, the oldest only partly.
+const months = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
 
 const status = (overrides: Partial<VatThreshold> = {}): VatThreshold => ({
     turnoverInOre: 1_500_000,
     thresholdInOre: 5_000_000,
     warnFromInOre: 4_000_000,
     warning: false,
+    crossedOn: null,
     crossedMonth: null,
     crossingOrderReference: null,
     crossedAt: null,
@@ -48,12 +50,12 @@ beforeEach(() => {
 });
 
 describe('VatThresholdPanel', () => {
-    it('shows the turnover of the last 12 months against 50 000 kr, with no warning under 40 000 kr', async () => {
+    it('shows the turnover of the 12 months up to today against 50 000 kr, with no warning under 40 000 kr', async () => {
         service.getVatThreshold.mockResolvedValue(status());
         renderPanel();
 
         expect(await screen.findByText(/15\s000 kr av 50\s000 kr/)).toBeInTheDocument();
-        expect(screen.getByRole('meter', { name: 'Omsetning siste 12 måneder' })).toHaveAttribute('aria-valuenow', '15000');
+        expect(screen.getByRole('meter', { name: 'Omsetning de siste 12 månedene fram til i dag' })).toHaveAttribute('aria-valuenow', '15000');
         expect(screen.queryByRole('status')).not.toBeInTheDocument();
     });
 
@@ -64,12 +66,12 @@ describe('VatThresholdPanel', () => {
         expect(await screen.findByRole('status')).toHaveTextContent(/Omsetningen har passert 40\s000 kr\. Når den passerer 50\s000 kr i løpet av 12 måneder, må virksomheten registreres i Merverdiavgiftsregisteret\./);
     });
 
-    it('says which month and which order passed the threshold', async () => {
-        service.getVatThreshold.mockResolvedValue(status({ turnoverInOre: 5_200_000, warning: true, crossedMonth: '2026-10', crossingOrderReference: 'AID-000042-1A2B3C4D' }));
+    it('says which day and which order passed the threshold', async () => {
+        service.getVatThreshold.mockResolvedValue(status({ turnoverInOre: 5_200_000, warning: true, crossedOn: '2026-10-07', crossedMonth: '2026-10', crossingOrderReference: 'AID-000042-1A2B3C4D' }));
         renderPanel();
 
         const alert = await screen.findByRole('status');
-        expect(alert).toHaveTextContent(/Omsetningen passerte 50\s000 kr i oktober 2026\. Virksomheten må registreres i Merverdiavgiftsregisteret\./);
+        expect(alert).toHaveTextContent(/^Grensen ble passert 07\.10\.2026\. Omsetningen var da over 50\s000 kr, og virksomheten må registreres i Merverdiavgiftsregisteret\./);
         expect(alert).toHaveTextContent('Salget som passerte grensen er ordre AID-000042-1A2B3C4D.');
         expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '50000');
     });
@@ -80,7 +82,8 @@ describe('VatThresholdPanel', () => {
 
         const row = (await screen.findByRole('rowheader', { name: 'september 2026' })).closest('tr')!;
         expect(within(row).getAllByRole('cell')[1]).toHaveTextContent(/2\s010 kr/);
-        expect(screen.getAllByRole('rowheader')).toHaveLength(12);
+        expect(screen.getAllByRole('rowheader')).toHaveLength(13);
+        expect(screen.getAllByRole('rowheader')[0]).toHaveTextContent('oktober 2025');
     });
 
     it('prefills the current month and the amount stored for a chosen month', async () => {

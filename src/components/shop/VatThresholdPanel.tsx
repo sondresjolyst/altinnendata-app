@@ -26,13 +26,19 @@ function storedAmount(status: VatThreshold, month: string): string {
     return stored > 0 ? kroner(stored) : '';
 }
 
+/** A yyyy-MM-dd day as dd.mm.yyyy. It is a calendar day already, so no time zone applies. */
+function dayText(day: string): string {
+    const [year, month, date] = day.split('-');
+    return `${date}.${month}.${year}`;
+}
+
 function monthName(month: string, locale: Locale): string {
     const [year, number] = month.split('-').map(Number);
     return new Intl.DateTimeFormat(locale === 'no' ? 'nb-NO' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
         .format(new Date(Date.UTC(year, number - 1, 1)));
 }
 
-/** Turnover over the last 12 months against the VAT threshold, and the sales outside the shop per month. */
+/** Turnover over the 12 months up to today against the VAT threshold, and the sales outside the shop per month. */
 export default function VatThresholdPanel() {
     const { dict, locale } = useDictionary();
     const text = dict.admin.vat;
@@ -107,12 +113,12 @@ export default function VatThresholdPanel() {
                             aria-valuenow={Math.min(status.turnoverInOre, status.thresholdInOre) / 100}
                             className="h-2 overflow-hidden rounded-full bg-gray-100"
                         >
-                            <div className={`h-full ${status.warning || status.crossedMonth ? 'bg-amber-500' : 'bg-gray-900'}`} style={{ width: `${share}%` }} />
+                            <div className={`h-full ${status.warning || status.crossedOn ? 'bg-amber-500' : 'bg-gray-900'}`} style={{ width: `${share}%` }} />
                         </div>
                     </div>
-                    {status.crossedMonth ? (
+                    {status.crossedOn ? (
                         <Alert variant="warning" role="status">
-                            {fillTemplate(text.crossed, { threshold, month: monthName(status.crossedMonth, locale) })}
+                            {fillTemplate(text.crossed, { threshold, date: dayText(status.crossedOn) })}
                             {status.crossingOrderReference && ` ${fillTemplate(text.crossedBy, { reference: status.crossingOrderReference })}`}
                         </Alert>
                     ) : status.warning && (
