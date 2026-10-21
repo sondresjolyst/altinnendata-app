@@ -217,6 +217,7 @@
   "admin": {
     "title": "Admin",
     "dashboard": "Oversikt",
+    "breadcrumb": "Brødsmulesti",
     "builds": "Datamaskiner",
     "components": "Komponenter",
     "content": "Forside",
