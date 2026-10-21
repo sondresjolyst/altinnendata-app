@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.11.0...v1.11.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* **contact:** read the phone and email from the company settings ([#200](https://github.com/sondresjolyst/altinnendata-app/issues/200)) ([c591fdd](https://github.com/sondresjolyst/altinnendata-app/commit/c591fddc8be2b8c1c1604966207e688918b0bfde))
+
+
+### Dependencies
+
+* **npm:** bump @sjolystinnovation/app-kit to 1.3.0 ([#198](https://github.com/sondresjolyst/altinnendata-app/issues/198)) ([2de9e22](https://github.com/sondresjolyst/altinnendata-app/commit/2de9e223bb787fbd8b38619ea2c016a2c3d8345a))
+
 ## [1.11.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.10.1...v1.11.0) (2026-10-20)
 
 
