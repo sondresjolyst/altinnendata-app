@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ContactForm from '@/components/ContactForm';
-import { COMPANY } from '@/lib/company';
+import { getCompanyInfo } from '@/lib/companyInfo';
 import { isLocale, Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pageMetadata } from '@/lib/seo/site';
@@ -44,7 +44,10 @@ export default async function ContactPage({
     if (!isLocale(locale)) notFound();
     const dict = getDictionary(locale);
 
-    const build = await findBuild((await searchParams).build, locale);
+    const [build, company] = await Promise.all([
+        findBuild((await searchParams).build, locale),
+        getCompanyInfo(),
+    ]);
 
     return (
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
@@ -54,11 +57,11 @@ export default async function ContactPage({
             <ContactForm build={build} />
 
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-600">
-                <a href={`tel:${COMPANY.phone.replace(/\s/g, '')}`} className="hover:text-gray-900">
-                    {dict.contact.callUs}: {COMPANY.phone}
+                <a href={`tel:${company.phone.replace(/\s/g, '')}`} className="hover:text-gray-900">
+                    {dict.contact.callUs}: {company.phone}
                 </a>
-                <a href={`mailto:${COMPANY.email}`} className="hover:text-gray-900">
-                    {dict.contact.emailUs}: {COMPANY.email}
+                <a href={`mailto:${company.email}`} className="hover:text-gray-900">
+                    {dict.contact.emailUs}: {company.email}
                 </a>
             </div>
         </div>
