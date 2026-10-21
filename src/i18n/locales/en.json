@@ -217,6 +217,7 @@
   "admin": {
     "title": "Admin",
     "dashboard": "Overview",
+    "breadcrumb": "Breadcrumb",
     "builds": "Computers",
     "components": "Components",
     "content": "Front page",
