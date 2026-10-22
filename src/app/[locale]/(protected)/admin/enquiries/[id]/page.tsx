@@ -45,13 +45,12 @@ export default function AdminEnquiryPage({ params }: { params: Promise<{ id: str
                 setEnquiry(loaded);
                 setAssignees(admins);
             })
-            .catch(err => {
+            .catch(() => {
                 if (!current) return;
                 setLoadFailed(true);
-                toast.error(err instanceof Error ? err.message : detail.loadFailed);
             });
         return () => { current = false; };
-    }, [id, detail.loadFailed]);
+    }, [id]);
 
     const slug = enquiry?.buildSlug ?? null;
     useEffect(() => {
@@ -175,6 +174,7 @@ export default function AdminEnquiryPage({ params }: { params: Promise<{ id: str
                             className={SELECT}
                         >
                             <option value="">{text.noOwner}</option>
+                            {owner && !assignees.some(admin => admin.id === owner.id) && <option value={owner.id}>{owner.name}</option>}
                             {assignees.map(admin => <option key={admin.id} value={admin.id}>{admin.name}</option>)}
                         </select>
                         {enquiry.ownerRemoved && <span className="mt-1 block text-xs font-normal text-amber-800">{text.ownerRemoved}</span>}
@@ -192,7 +192,7 @@ export default function AdminEnquiryPage({ params }: { params: Promise<{ id: str
                         {otherOwner ? fillTemplate(detail.takeOver, { name: otherOwner.name }) : detail.take}
                     </button>
                     {takeReason && <p id="take-note" className="text-sm text-gray-600">{takeReason}</p>}
-                    <a href={`mailto:${enquiry.email}?subject=${encodeURIComponent(subject)}`} className={`${BUTTON} ${SECONDARY}`}>
+                    <a href={`mailto:${encodeURIComponent(enquiry.email).replace(/%40/g, '@')}?subject=${encodeURIComponent(subject)}`} className={`${BUTTON} ${SECONDARY}`}>
                         {detail.reply}
                     </a>
                     {otherOwner && <p className="text-sm text-gray-600">{fillTemplate(detail.ownedBy, { name: otherOwner.name })}</p>}

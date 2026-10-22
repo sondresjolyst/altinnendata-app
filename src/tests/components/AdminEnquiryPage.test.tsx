@@ -208,6 +208,38 @@ describe('the admin enquiry page', () => {
         expect(await screen.findByRole('link', { name: 'Reply by email' })).toHaveAttribute('href', 'mailto:kari@example.no?subject=Your%20enquiry%20to%20Altinnendata');
     });
 
+    it('uses the enquiry locale for the subject, not the UI locale', async () => {
+        service.get.mockResolvedValue(enquiry({ locale: 'en' }));
+        renderPage('no');
+
+        expect(await screen.findByRole('link', { name: 'Svar på e-post' })).toHaveAttribute('href', 'mailto:kari@example.no?subject=Your%20enquiry%20to%20Altinnendata');
+    });
+
+    it('encodes the address so it can never add recipients or a body', async () => {
+        service.get.mockResolvedValue(enquiry({ email: 'x?bcc=attacker%40evil.no&body=hi #y@kunde.no' }));
+        renderPage();
+
+        const href = (await screen.findByRole('link', { name: 'Svar på e-post' })).getAttribute('href') ?? '';
+        expect(href.split('?')).toHaveLength(2);
+        expect(href).not.toContain('#')
+        expect(href).toBe('mailto:x%3Fbcc%3Dattacker%2540evil.no%26body%3Dhi%20%23y@kunde.no?subject=Henvendelsen%20din%20til%20Altinnendata');
+    });
+
+    it('lists the current owner when the admin list lacks them', async () => {
+        service.get.mockResolvedValue(enquiry({ owner: { id: 'gone', name: 'Tidligere Admin' } }));
+        renderPage();
+
+        expect(await screen.findByRole('combobox', { name: 'Eier' })).toHaveValue('gone');
+    });
+
+    it('shows only the inline alert, with no toast, when the load fails', async () => {
+        service.get.mockRejectedValue(new Error('boom'));
+        renderPage();
+
+        expect(await screen.findByText('Kunne ikke laste henvendelsen.')).toBeInTheDocument();
+        expect(toastSpies.error).not.toHaveBeenCalled();
+    });
+
     it('names the other owner next to the reply link', async () => {
         service.get.mockResolvedValue(enquiry({ owner: other }));
         renderPage();

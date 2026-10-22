@@ -138,11 +138,11 @@ const BuildService = {
 
     /** The published build with the slug, or null when there is none. */
     findBySlug: async (slug: string, locale: Locale) => {
-        const response = await request(
-            () => publicClient.get<BuildDetail>(`/builds/${slug}`, { params: { locale }, validateStatus: status => status < 400 || status === 404 }).then(data => ({ data })),
+        const found = await request(
+            () => publicClient.get<BuildDetail>(`/builds/${slug}`, { params: { locale }, validateStatus: status => status < 400 || status === 404 }).then(response => ({ data: response })),
             'Failed to load build',
         );
-        return response.status === 404 ? null : response.data;
+        return found.status === 404 ? null : found.data;
     },
 
     getForEdit: (id: number) =>
