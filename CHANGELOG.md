@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.0...v1.12.1) (2026-10-22)
+
+
+### Dependencies
+
+* **npm:** bump next to 16.4.2 ([#203](https://github.com/sondresjolyst/altinnendata-app/issues/203)) ([17a5338](https://github.com/sondresjolyst/altinnendata-app/commit/17a5338a445dfe82daacfd5130d4bbc739909dbd))
+
 ## [1.12.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.11.1...v1.12.0) (2026-10-22)
 
 
