@@ -126,6 +126,56 @@ describe('the admin enquiries page', () => {
         await waitFor(() => expect(service.list).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })));
     });
 
+    it('asks for a status instead of calling the list empty when none is ticked', async () => {
+        renderPage();
+        await screen.findByText('Kari Nordmann');
+        for (const name of ['Ny', 'Under behandling', 'Besvart']) fireEvent.click(screen.getByRole('checkbox', { name }));
+
+        expect(await screen.findByText('Velg minst én status.')).toBeInTheDocument();
+        expect(screen.queryByText('Ingen henvendelser.')).not.toBeInTheDocument();
+        expect(service.list).toHaveBeenCalledTimes(3);
+    });
+
+    it('dims the rows while a new request loads and shows the error when a reload fails', async () => {
+        renderPage();
+        await screen.findByText('Kari Nordmann');
+
+        let fail: (reason: Error) => void = () => {};
+        service.list.mockReturnValueOnce(new Promise((_resolve, reject) => { fail = reject; }));
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Ferdig' }));
+
+        await waitFor(() => expect(screen.getByRole('table').parentElement).toHaveAttribute('aria-busy', 'true'));
+        expect(screen.getByRole('table').parentElement).toHaveClass('opacity-50');
+
+        fail(new Error('boom'));
+        expect(await screen.findByText('Kunne ikke laste henvendelsene.')).toBeInTheDocument();
+        expect(screen.queryByText('Kari Nordmann')).not.toBeInTheDocument();
+    });
+
+    it('goes to the last page when the total shrinks below the current page', async () => {
+        service.list.mockResolvedValue({ items: [summary({})], total: 120 });
+        renderPage();
+        await screen.findByText('Side 1 av 3');
+        service.list.mockImplementation(async ({ page }: { page: number }) =>
+            page === 3 ? { items: [], total: 60 } : { items: [summary({ name: `Side ${page}` })], total: 60 });
+        fireEvent.click(screen.getByRole('button', { name: 'Neste' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Neste' }));
+
+        expect(await screen.findByText('Side 2 av 2')).toBeInTheDocument();
+        expect(screen.getByText('Side 2')).toBeInTheDocument();
+    });
+
+    it('goes back to page 1 when a filter changes', async () => {
+        service.list.mockResolvedValue({ items: [summary({})], total: 120 });
+        renderPage();
+        await screen.findByText('Side 1 av 3');
+        fireEvent.click(screen.getByRole('button', { name: 'Neste' }));
+        await screen.findByText('Side 2 av 3');
+
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Mine' }));
+        await waitFor(() => expect(service.list).toHaveBeenLastCalledWith(expect.objectContaining({ mine: true, page: 1 })));
+    });
+
     it('renders in English', async () => {
         renderPage('en');
         expect(await screen.findByRole('columnheader', { name: 'Received' })).toBeInTheDocument();

@@ -558,6 +558,7 @@
       "ownerRemoved": "Owner removed",
       "open": "Open enquiry",
       "empty": "No enquiries.",
+      "pickStatus": "Select at least one status.",
       "loadFailed": "Could not load the enquiries.",
       "previous": "Previous",
       "next": "Next",

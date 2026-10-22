@@ -23,7 +23,9 @@ export default function AdminEnquiriesPage() {
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(1);
     const [loaded, setResult] = useState<EnquiryPage | null>(null);
+    const [loadedKey, setLoadedKey] = useState('');
     const [loadFailed, setLoadFailed] = useState(false);
+    const key = JSON.stringify([statuses, mine, query, page]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -41,7 +43,13 @@ export default function AdminEnquiriesPage() {
             .then(next => {
                 if (!current) return;
                 setLoadFailed(false);
+                if (next.items.length === 0 && next.total > 0 && page > 1) {
+                    // The total shrank while on a later page, so go to the last page.
+                    setPage(Math.ceil(next.total / PAGE_SIZE));
+                    return;
+                }
                 setResult(next);
+                setLoadedKey(key);
             })
             .catch(err => {
                 if (!current) return;
@@ -49,7 +57,7 @@ export default function AdminEnquiriesPage() {
                 toast.error(err instanceof Error ? err.message : text.loadFailed);
             });
         return () => { current = false; };
-    }, [statuses, mine, query, page, text.loadFailed]);
+    }, [statuses, mine, query, page, key, text.loadFailed]);
 
     const toggleStatus = (status: EnquiryStatus) => {
         setStatuses(current => STATUSES.filter(value => value === status ? !current.includes(value) : current.includes(value)));
@@ -57,6 +65,7 @@ export default function AdminEnquiriesPage() {
     };
 
     const result = statuses.length === 0 ? NOTHING : loaded;
+    const loading = statuses.length > 0 && !loadFailed && key !== loadedKey;
     const pages = result ? Math.ceil(result.total / PAGE_SIZE) : 0;
     const cell = 'px-3 py-3 align-top';
     const badge = 'ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800';
@@ -87,12 +96,12 @@ export default function AdminEnquiriesPage() {
                 />
             </div>
 
-            {!result && loadFailed && <Alert variant="error">{text.loadFailed}</Alert>}
-            {!result && !loadFailed && <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>}
-            {result && result.items.length === 0 && <div className="py-10 text-center text-gray-500">{text.empty}</div>}
+            {loadFailed && <Alert variant="error">{text.loadFailed}</Alert>}
+            {!loadFailed && !result && <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>}
+            {!loadFailed && result && result.items.length === 0 && <div className="py-10 text-center text-gray-500">{statuses.length === 0 ? text.pickStatus : text.empty}</div>}
 
-            {result && result.items.length > 0 && (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200">
+            {!loadFailed && result && result.items.length > 0 && (
+                <div aria-busy={loading} className={`overflow-x-auto rounded-2xl border border-gray-200${loading ? ' opacity-50' : ''}`}>
                     <table className="w-full text-left text-sm text-gray-900">
                         <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
                             <tr>

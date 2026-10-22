@@ -558,6 +558,7 @@
       "ownerRemoved": "Eier fjernet",
       "open": "Åpne henvendelse",
       "empty": "Ingen henvendelser.",
+      "pickStatus": "Velg minst én status.",
       "loadFailed": "Kunne ikke laste henvendelsene.",
       "previous": "Forrige",
       "next": "Neste",
