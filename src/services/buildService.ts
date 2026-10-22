@@ -136,6 +136,15 @@ const BuildService = {
     getBySlug: (slug: string, locale: Locale) =>
         request(() => publicClient.get<BuildDetail>(`/builds/${slug}`, { params: { locale } }), 'Failed to load build'),
 
+    /** The published build with the slug, or null when there is none. */
+    findBySlug: async (slug: string, locale: Locale) => {
+        const found = await request(
+            () => publicClient.get<BuildDetail>(`/builds/${encodeURIComponent(slug)}`, { params: { locale }, validateStatus: status => status < 400 || status === 404 }).then(response => ({ data: response })),
+            'Failed to load build',
+        );
+        return found.status === 404 ? null : found.data;
+    },
+
     getForEdit: (id: number) =>
         request(() => axiosInstance.get<BuildAdmin>(`/builds/${id}/edit`), 'Failed to load build'),
 
