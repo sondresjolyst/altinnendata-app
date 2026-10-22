@@ -7,6 +7,7 @@ import { Alert } from '@sjolystinnovation/app-kit/ui';
 import EnquiryService, { type EnquiryPage, type EnquiryStatus } from '@/services/enquiryService';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { fillTemplate } from '@/lib/format';
 import { osloDate } from '@/lib/shop';
 
 const STATUSES: EnquiryStatus[] = ['New', 'InProgress', 'Answered', 'Done'];
@@ -64,8 +65,9 @@ export default function AdminEnquiriesPage() {
         setPage(1);
     };
 
+    const failed = loadFailed && statuses.length > 0;
     const result = statuses.length === 0 ? NOTHING : loaded;
-    const loading = statuses.length > 0 && !loadFailed && key !== loadedKey;
+    const loading = statuses.length > 0 && !failed && key !== loadedKey;
     const pages = result ? Math.ceil(result.total / PAGE_SIZE) : 0;
     const cell = 'px-3 py-3 align-top';
     const badge = 'ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800';
@@ -96,20 +98,20 @@ export default function AdminEnquiriesPage() {
                 />
             </div>
 
-            {loadFailed && <Alert variant="error">{text.loadFailed}</Alert>}
-            {!loadFailed && !result && <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>}
-            {!loadFailed && result && result.items.length === 0 && <div className="py-10 text-center text-gray-500">{statuses.length === 0 ? text.pickStatus : text.empty}</div>}
+            {failed && <Alert variant="error">{text.loadFailed}</Alert>}
+            {!failed && !result && <div className="py-10 text-center text-gray-500">{dict.common.loading}</div>}
+            {!failed && result && result.items.length === 0 && <div className="py-10 text-center text-gray-500">{statuses.length === 0 ? text.pickStatus : text.empty}</div>}
 
-            {!loadFailed && result && result.items.length > 0 && (
+            {!failed && result && result.items.length > 0 && (
                 <div aria-busy={loading} className={`overflow-x-auto rounded-2xl border border-gray-200${loading ? ' opacity-50' : ''}`}>
                     <table className="w-full text-left text-sm text-gray-900">
                         <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
                             <tr>
                                 <th className={cell}>{text.columns.received}</th>
                                 <th className={cell}>{text.columns.name}</th>
-                                <th className={cell}>{text.columns.about}</th>
+                                <th className={`${cell} hidden sm:table-cell`}>{text.columns.about}</th>
                                 <th className={cell}>{text.columns.status}</th>
-                                <th className={cell}>{text.columns.owner}</th>
+                                <th className={`${cell} hidden sm:table-cell`}>{text.columns.owner}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
@@ -120,10 +122,14 @@ export default function AdminEnquiriesPage() {
                                         <Link href={localeHref(locale, `/admin/enquiries/${enquiry.id}`)} className="underline" title={text.open}>
                                             {enquiry.name}
                                         </Link>
+                                        <div className="mt-1 text-xs font-normal text-gray-600 sm:hidden">
+                                            {enquiry.owner ? enquiry.owner.name : text.noOwner}
+                                            {enquiry.ownerRemoved && <span className={badge}>{text.ownerRemoved}</span>}
+                                        </div>
                                     </td>
-                                    <td className={cell}>{enquiry.buildTitle ?? enquiry.useCase}</td>
+                                    <td className={`${cell} hidden sm:table-cell`}>{enquiry.buildTitle ?? enquiry.useCase}</td>
                                     <td className={cell}>{text.statuses[enquiry.status]}</td>
-                                    <td className={cell}>
+                                    <td className={`${cell} hidden sm:table-cell`}>
                                         {enquiry.owner ? enquiry.owner.name : text.noOwner}
                                         {enquiry.ownerRemoved && <span className={badge}>{text.ownerRemoved}</span>}
                                     </td>
@@ -139,7 +145,7 @@ export default function AdminEnquiriesPage() {
                     <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 disabled:opacity-50">
                         {text.previous}
                     </button>
-                    <span>{text.pageOf.replace('{page}', String(page)).replace('{pages}', String(pages))}</span>
+                    <span>{fillTemplate(text.pageOf, { page: String(page), pages: String(pages) })}</span>
                     <button type="button" disabled={page >= pages} onClick={() => setPage(page + 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 disabled:opacity-50">
                         {text.next}
                     </button>

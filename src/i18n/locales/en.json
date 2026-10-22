@@ -582,6 +582,7 @@
         "yours": "The case is yours",
         "waitingForLogin": "Waiting for the sign-in.",
         "confirmTakeOver": "{name} owns this case. Do you want to take it over?",
+        "confirmUnassign": "{name} owns this case. Remove the owner?",
         "ownedBy": "{name} owns this case",
         "reply": "Reply by email",
         "delete": "Delete",

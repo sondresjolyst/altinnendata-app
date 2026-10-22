@@ -582,6 +582,7 @@
         "yours": "Saken er din",
         "waitingForLogin": "Venter på innloggingen.",
         "confirmTakeOver": "{name} eier denne saken. Vil du ta den over?",
+        "confirmUnassign": "{name} eier denne saken. Vil du fjerne eieren?",
         "ownedBy": "{name} eier denne saken",
         "reply": "Svar på e-post",
         "delete": "Slett",

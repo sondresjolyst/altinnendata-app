@@ -18,6 +18,13 @@ describe('BuildService.findBySlug', () => {
         expect(await BuildService.findBySlug('spillmaskin', 'no')).toEqual({ slug: 'spillmaskin' });
     });
 
+    it('encodes the slug in the path', async () => {
+        get.mockResolvedValueOnce({ status: 200, data: {} });
+        await BuildService.findBySlug('a/b?c', 'no');
+
+        expect(get).toHaveBeenCalledWith('/builds/a%2Fb%3Fc', expect.anything());
+    });
+
     it('returns null on 404', async () => {
         get.mockResolvedValueOnce({ status: 404, data: null });
 

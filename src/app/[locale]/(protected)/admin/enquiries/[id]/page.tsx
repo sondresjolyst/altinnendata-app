@@ -39,28 +39,26 @@ export default function AdminEnquiryPage({ params }: { params: Promise<{ id: str
 
     useEffect(() => {
         let current = true;
-        Promise.all([EnquiryService.get(id), EnquiryService.assignees()])
-            .then(([loaded, admins]) => {
-                if (!current) return;
-                setEnquiry(loaded);
-                setAssignees(admins);
-            })
-            .catch(() => {
-                if (!current) return;
-                setLoadFailed(true);
-            });
+        EnquiryService.get(id)
+            .then(loaded => { if (current) setEnquiry(loaded); })
+            .catch(() => { if (current) setLoadFailed(true); });
+        // Without the list the page still works, with the current owner and None in the select.
+        EnquiryService.assignees()
+            .then(admins => { if (current) setAssignees(admins); })
+            .catch(() => {});
         return () => { current = false; };
     }, [id]);
 
     const slug = enquiry?.buildSlug ?? null;
+    const hasBuildTitle = Boolean(enquiry?.buildTitle);
     useEffect(() => {
-        if (!slug) return;
+        if (!slug || !hasBuildTitle) return;
         let current = true;
         BuildService.findBySlug(slug, locale)
             .then(build => { if (current) setBuildExists(build !== null); })
             .catch(() => { if (current) setBuildExists(false); });
         return () => { current = false; };
-    }, [slug, locale]);
+    }, [slug, hasBuildTitle, locale]);
 
     if (!enquiry && loadFailed) return <Alert variant="error">{detail.loadFailed}</Alert>;
 
@@ -93,7 +91,10 @@ export default function AdminEnquiryPage({ params }: { params: Promise<{ id: str
     };
 
     const changeOwner = (assignedUserId: string | null) => {
-        if (otherOwner && !window.confirm(fillTemplate(detail.confirmTakeOver, { name: otherOwner.name }))) return;
+        if (otherOwner) {
+            const question = assignedUserId === null ? detail.confirmUnassign : detail.confirmTakeOver;
+            if (!window.confirm(fillTemplate(question, { name: otherOwner.name }))) return;
+        }
         void save({ setOwner: true, assignedUserId, expectedAssignedUserId: owner?.id ?? null });
     };
 

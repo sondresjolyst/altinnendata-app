@@ -104,11 +104,28 @@ describe('the admin enquiries page', () => {
         renderPage();
 
         const rows = (await screen.findAllByRole('row')).slice(1);
-        expect(within(rows[0]).getByText('Ola Admin')).toBeInTheDocument();
+        expect(within(rows[0]).getAllByText('Ola Admin').length).toBeGreaterThan(0);
         expect(within(rows[0]).queryByText('Eier fjernet')).not.toBeInTheDocument();
-        expect(within(rows[1]).getByText('Ingen')).toBeInTheDocument();
+        expect(within(rows[1]).getAllByText('Ingen').length).toBeGreaterThan(0);
         expect(within(rows[1]).queryByText('Eier fjernet')).not.toBeInTheDocument();
-        expect(within(rows[2]).getByText('Eier fjernet')).toBeInTheDocument();
+        expect(within(rows[2]).getAllByText('Eier fjernet')[0]).toBeInTheDocument();
+    });
+
+    it('shows the owner under the name for small screens and hides the owner and about columns there', async () => {
+        service.list.mockResolvedValue({
+            items: [summary({ id: 1 }), summary({ id: 2, owner: null }), summary({ id: 3, owner: null, ownerRemoved: true })],
+            total: 3,
+        });
+        renderPage();
+
+        const rows = (await screen.findAllByRole('row')).slice(1);
+        const nameCell = (row: HTMLElement) => within(row).getByRole('link').closest('td') as HTMLElement;
+        expect(nameCell(rows[0]).querySelector('[class~="sm:hidden"]')).toHaveTextContent('Ola Admin');
+        expect(nameCell(rows[1]).querySelector('[class~="sm:hidden"]')).toHaveTextContent('Ingen');
+        expect(nameCell(rows[2]).querySelector('[class~="sm:hidden"]')).toHaveTextContent('Eier fjernet');
+        const headers = screen.getAllByRole('columnheader');
+        expect(headers.filter(header => header.classList.contains('hidden')).map(header => header.textContent)).toEqual(['Gjelder', 'Eier']);
+        expect(within(rows[0]).getAllByRole('cell').filter(cell => cell.classList.contains('hidden'))).toHaveLength(2);
     });
 
     it('pages only when there are more than 50', async () => {
@@ -134,6 +151,19 @@ describe('the admin enquiries page', () => {
         expect(await screen.findByText('Velg minst én status.')).toBeInTheDocument();
         expect(screen.queryByText('Ingen henvendelser.')).not.toBeInTheDocument();
         expect(service.list).toHaveBeenCalledTimes(3);
+    });
+
+    it('shows the status hint, not the error, when every status is unticked after a failed load', async () => {
+        renderPage();
+        await screen.findByText('Kari Nordmann');
+        service.list.mockRejectedValueOnce(new Error('boom'));
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Ferdig' }));
+        await screen.findByText('Kunne ikke laste henvendelsene.');
+
+        for (const name of ['Ny', 'Under behandling', 'Besvart', 'Ferdig']) fireEvent.click(screen.getByRole('checkbox', { name }));
+
+        expect(await screen.findByText('Velg minst én status.')).toBeInTheDocument();
+        expect(screen.queryByText('Kunne ikke laste henvendelsene.')).not.toBeInTheDocument();
     });
 
     it('dims the rows while a new request loads and shows the error when a reload fails', async () => {

@@ -154,6 +154,38 @@ describe('the admin enquiry page', () => {
         expect(service.update).not.toHaveBeenCalled();
     });
 
+    it('asks to remove the owner, not to take over, when None replaces another admin', async () => {
+        service.get.mockResolvedValue(enquiry({ owner: other }));
+        service.update.mockResolvedValue({ ok: true, enquiry: enquiry() });
+        const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.selectOptions(await screen.findByRole('combobox', { name: 'Eier' }), 'Ingen');
+
+        expect(confirm).toHaveBeenCalledWith('Ola Admin eier denne saken. Vil du fjerne eieren?');
+        expect(service.update).toHaveBeenCalledWith(4, { setOwner: true, assignedUserId: null, expectedAssignedUserId: 'a2' });
+    });
+
+    it('skips the build lookup when the enquiry has no build title', async () => {
+        service.get.mockResolvedValue(enquiry({ buildTitle: null, buildSlug: 'spillmaskin' }));
+        renderPage();
+
+        await screen.findByText('Kari Nordmann');
+        expect(builds.findBySlug).not.toHaveBeenCalled();
+    });
+
+    it('still shows the page with the current owner when the admin list fails', async () => {
+        service.get.mockResolvedValue(enquiry({ owner: other }));
+        service.assignees.mockRejectedValue(new Error('boom'));
+        renderPage();
+
+        const select = await screen.findByRole('combobox', { name: 'Eier' });
+        expect(select).toHaveValue('a2');
+        expect(screen.getByRole('option', { name: 'Ingen' })).toBeInTheDocument();
+        expect(screen.queryByText('Kunne ikke laste henvendelsen.')).not.toBeInTheDocument();
+    });
+
     it('clears the owner from the select, expecting the current one', async () => {
         service.get.mockResolvedValue(enquiry({ owner: me }));
         service.update.mockResolvedValue({ ok: true, enquiry: enquiry() });
