@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.11.1...v1.12.0) (2026-10-22)
+
+
+### Features
+
+* **admin:** handle contact enquiries in admin ([#201](https://github.com/sondresjolyst/altinnendata-app/issues/201)) ([45140fb](https://github.com/sondresjolyst/altinnendata-app/commit/45140fbb90e2bba93cbf05a124c09dcd7abff42c))
+
 ## [1.11.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.11.0...v1.11.1) (2026-10-21)
 
 
