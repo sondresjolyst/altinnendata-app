@@ -534,6 +534,35 @@
       "refundRow": "Refund {number}, {date}",
       "missingInvoiceNumber": "Missing invoice number"
     },
+    "enquiries": {
+      "title": "Enquiries",
+      "card": "Messages from the contact form.",
+      "cardNew": "{n} new",
+      "filterStatus": "Status",
+      "mine": "Mine",
+      "search": "Search by name or email",
+      "columns": {
+        "received": "Received",
+        "name": "Name",
+        "about": "Regarding",
+        "status": "Status",
+        "owner": "Owner"
+      },
+      "statuses": {
+        "New": "New",
+        "InProgress": "In progress",
+        "Answered": "Answered",
+        "Done": "Done"
+      },
+      "noOwner": "None",
+      "ownerRemoved": "Owner removed",
+      "open": "Open enquiry",
+      "empty": "No enquiries.",
+      "loadFailed": "Could not load the enquiries.",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {pages}"
+    },
     "vat": {
       "title": "VAT registration threshold",
       "turnover": "Turnover in the 12 months up to today",

@@ -534,6 +534,35 @@
       "refundRow": "Tilbakebetaling {number}, {date}",
       "missingInvoiceNumber": "Mangler fakturanummer"
     },
+    "enquiries": {
+      "title": "Henvendelser",
+      "card": "Henvendelser fra kontaktskjemaet.",
+      "cardNew": "{n} nye",
+      "filterStatus": "Status",
+      "mine": "Mine",
+      "search": "Søk på navn eller e-post",
+      "columns": {
+        "received": "Mottatt",
+        "name": "Navn",
+        "about": "Gjelder",
+        "status": "Status",
+        "owner": "Eier"
+      },
+      "statuses": {
+        "New": "Ny",
+        "InProgress": "Under behandling",
+        "Answered": "Besvart",
+        "Done": "Ferdig"
+      },
+      "noOwner": "Ingen",
+      "ownerRemoved": "Eier fjernet",
+      "open": "Åpne henvendelse",
+      "empty": "Ingen henvendelser.",
+      "loadFailed": "Kunne ikke laste henvendelsene.",
+      "previous": "Forrige",
+      "next": "Neste",
+      "pageOf": "Side {page} av {pages}"
+    },
     "vat": {
       "title": "Registreringsgrensen for merverdiavgift",
       "turnover": "Omsetning de siste 12 månedene fram til i dag",
