@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { CpuChipIcon, Cog6ToothIcon, Squares2X2Icon, PresentationChartLineIcon, CheckBadgeIcon, TagIcon, UsersIcon, ScaleIcon, WrenchScrewdriverIcon, ShoppingBagIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
-import { fillTemplate } from '@/lib/format';
+import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import EnquiryService from '@/services/enquiryService';
 
 export default function AdminOverview() {

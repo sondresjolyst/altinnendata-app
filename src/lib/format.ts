@@ -25,8 +25,3 @@ export function formatOre(ore: number, locale: Locale): string {
     if (ore % 100 === 0) return formatPrice(ore / 100, locale);
     return new Intl.NumberFormat(INTL_LOCALES[locale], { style: 'currency', currency: 'NOK' }).format(ore / 100);
 }
-
-/** Fills each `{name}` in `text` from `values`. A function replacer keeps `$` patterns in a value as typed. */
-export function fillTemplate(text: string, values: Record<string, string>): string {
-    return text.replace(/\{(\w+)\}/g, (placeholder, name: string) => (Object.hasOwn(values, name) ? values[name]! : placeholder));
-}

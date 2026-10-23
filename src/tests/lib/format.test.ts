@@ -1,19 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fillTemplate, formatOre } from '@/lib/format';
-
-describe('fillTemplate', () => {
-    it('fills every placeholder', () => {
-        expect(fillTemplate('{a} og {b}, {a}', { a: 'x', b: 'y' })).toBe('x og y, x');
-    });
-
-    it('keeps $ patterns in a value as typed', () => {
-        expect(fillTemplate('Kjøp {title}', { title: 'PC $& $1 $$' })).toBe('Kjøp PC $& $1 $$');
-    });
-
-    it('leaves an unknown placeholder as it is', () => {
-        expect(fillTemplate('{a} {c}', { a: 'x' })).toBe('x {c}');
-    });
-});
+import { formatOre } from '@/lib/format';
 
 describe('formatOre', () => {
     it('writes øre as grouped kroner, the way a price is shown', () => {
