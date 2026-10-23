@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.1...v1.12.2) (2026-10-23)
+
+
+### Miscellaneous Chores
+
+* release 1.12.2 ([#207](https://github.com/sondresjolyst/altinnendata-app/issues/207)) ([66990a1](https://github.com/sondresjolyst/altinnendata-app/commit/66990a137ffaca1f6ec5d6bbed16481cde84774a))
+
 ## [1.12.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.0...v1.12.1) (2026-10-22)
 
 
