@@ -427,6 +427,18 @@ describe('the admin order page', () => {
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith(message));
     });
 
+    it('shows the anonymised text when the API refuses an action on an anonymised order', async () => {
+        service.getOrder.mockResolvedValue(reserved);
+        service.capture.mockRejectedValue(await refused(409, { message: 'x', code: 'anonymised' }));
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(await screen.findByRole('button', { name: 'Trekk beløpet' }));
+        await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Trekk beløpet' }));
+
+        await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith('Kundens opplysninger er fjernet fra denne ordren etter oppbevaringstiden, så den kan ikke endres.'));
+    });
+
     it('shows the Vipps did not confirm text when Vipps cannot be reached after an action', async () => {
         service.getOrder.mockResolvedValue(reserved);
         service.capture.mockRejectedValue(await refused(502, { message: 'x', code: 'paymentProviderUnavailable' }));
@@ -658,6 +670,14 @@ describe('the admin order page', () => {
             const button = await screen.findByRole('button', { name: 'Send ny betalingslenke' });
             expect(button).toBeDisabled();
             expect(button).toHaveAccessibleDescription('Ordren holder ikke lenger datamaskinen.');
+        });
+
+        it('keeps the button off with its reason when the order is anonymised', async () => {
+            service.getOrder.mockResolvedValue({ ...ended, paymentLinkBlockedReason: 'anonymised' });
+            renderPage();
+            const button = await screen.findByRole('button', { name: 'Send ny betalingslenke' });
+            expect(button).toBeDisabled();
+            expect(button).toHaveAccessibleDescription('Kundens opplysninger er fjernet fra denne ordren, så den kan ikke få ny betalingslenke.');
         });
 
         it('asks first, then sends the link and says when it was sent and how long it works', async () => {

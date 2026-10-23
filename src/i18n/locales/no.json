@@ -496,7 +496,8 @@
         "refundRefused": "Vipps avviste tilbakebetalingen. Ingenting er betalt tilbake.",
         "paymentProviderUnavailable": "Vipps bekreftet ikke endringen. Sjekk betalingen i Vipps-portalen før du prøver igjen.",
         "alreadyShipped": "Ordren er allerede markert. Last siden på nytt.",
-        "buildNotHeld": "Ordren holder ikke lenger datamaskinen."
+        "buildNotHeld": "Ordren holder ikke lenger datamaskinen.",
+        "anonymised": "Kundens opplysninger er fjernet fra denne ordren etter oppbevaringstiden, så den kan ikke endres."
       },
       "reservationEnded": "Vipps opphevet reservasjonen {date}",
       "reservationEndedHint": "Datamaskinen er fortsatt reservert for denne ordren. Kontakt kunden, eller frigi datamaskinen så andre kan kjøpe den.",
@@ -515,7 +516,8 @@
       "paymentLinkSent": "Betalingslenke sendt {sent}, gyldig til {date} kl. {time}",
       "paymentLinkReasons": {
         "wrongStatus": "Bare ordrer der Vipps opphevet reservasjonen kan få ny betalingslenke.",
-        "buildNotHeld": "Ordren holder ikke lenger datamaskinen."
+        "buildNotHeld": "Ordren holder ikke lenger datamaskinen.",
+        "anonymised": "Kundens opplysninger er fjernet fra denne ordren, så den kan ikke få ny betalingslenke."
       },
       "vippsPayments": "Vipps-betalinger",
       "vippsStates": {

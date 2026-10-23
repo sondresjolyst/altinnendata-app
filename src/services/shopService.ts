@@ -165,7 +165,7 @@ export interface OrderRefund {
 
 export type ReleaseBuildBlockedReason = 'wrongStatus' | 'buildNotHeld';
 
-export type PaymentLinkBlockedReason = 'wrongStatus' | 'buildNotHeld';
+export type PaymentLinkBlockedReason = 'wrongStatus' | 'buildNotHeld' | 'anonymised';
 
 /** The order a payment link pays for, as the public pay page shows it. */
 export interface PayLinkInfo {

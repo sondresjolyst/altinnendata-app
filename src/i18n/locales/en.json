@@ -496,7 +496,8 @@
         "refundRefused": "Vipps refused the refund. Nothing was paid back.",
         "paymentProviderUnavailable": "Vipps did not confirm the change. Check the payment in the Vipps portal before you try again.",
         "alreadyShipped": "The order has already been marked. Reload the page.",
-        "buildNotHeld": "The order no longer holds the computer."
+        "buildNotHeld": "The order no longer holds the computer.",
+        "anonymised": "The customer's details were removed from this order after the retention period, so it can no longer be changed."
       },
       "reservationEnded": "Vipps cancelled the reservation on {date}",
       "reservationEndedHint": "The computer is still reserved for this order. Contact the buyer, or release the computer so others can buy it.",
@@ -515,7 +516,8 @@
       "paymentLinkSent": "Payment link sent {sent}, valid until {date} at {time}",
       "paymentLinkReasons": {
         "wrongStatus": "Only orders whose reservation Vipps cancelled can get a new payment link.",
-        "buildNotHeld": "The order no longer holds the computer."
+        "buildNotHeld": "The order no longer holds the computer.",
+        "anonymised": "The customer's details were removed from this order, so it cannot get a new payment link."
       },
       "vippsPayments": "Vipps payments",
       "vippsStates": {
