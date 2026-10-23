@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.12.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.2...v1.12.3) (2026-10-23)
+
+
+### Bug Fixes
+
+* **admin:** explain the anonymised order code ([#212](https://github.com/sondresjolyst/altinnendata-app/issues/212)) ([9f83174](https://github.com/sondresjolyst/altinnendata-app/commit/9f83174fbe695f51ffe6965cf3f3ccfbee14bc64))
+* **translate:** send long texts to LibreTranslate in batches of 20 lines ([#209](https://github.com/sondresjolyst/altinnendata-app/issues/209)) ([0ced278](https://github.com/sondresjolyst/altinnendata-app/commit/0ced2784c42f8c7d76cff7d0fdc41b263dbcd727))
+
 ## [1.12.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.1...v1.12.2) (2026-10-23)
 
 
