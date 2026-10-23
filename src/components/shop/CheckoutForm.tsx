@@ -10,7 +10,8 @@ import ShopService, { type BuyButtonMode, type DeliveryMethod, type PublicDelive
 import type { BuildDetail } from '@/services/buildService';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-import { fillTemplate, formatPrice } from '@/lib/format';
+import { formatPrice } from '@/lib/format';
+import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import { canBuy } from '@/lib/shop';
 import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from './VippsButtonArt';
 import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, type CheckoutField } from '@/lib/validation';

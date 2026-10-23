@@ -7,8 +7,9 @@ import { Alert, TextInput } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type VatThreshold } from '@/services/shopService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import type { Locale } from '@/i18n/config';
-import { fillTemplate, formatOre } from '@/lib/format';
-import { kroner, parseKroner } from '@/lib/shop';
+import { formatOre } from '@/lib/format';
+import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
+import { kroner, parseKroner } from '@sjolystinnovation/app-kit/payments';
 
 // The API takes at most 10 000 000 kr for one month.
 const MAX_OUTSIDE_IN_ORE = 1_000_000_000;

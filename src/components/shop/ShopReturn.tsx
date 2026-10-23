@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { PaymentReturn, usePollUntilFinal, type PaymentReturnState } from '@sjolystinnovation/app-kit/payments';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-import { fillTemplate, formatOre } from '@/lib/format';
+import { formatOre } from '@/lib/format';
+import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type OrderStatusInfo } from '@/services/shopService';
 
 const isFinal = (order: OrderStatusInfo | null) => order === null || order.status !== 'Pending';

@@ -10,7 +10,7 @@ import EnquiryService, { type Assignee, type Enquiry, type EnquiryStatus, type E
 import BuildService from '@/services/buildService';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import { fillTemplate } from '@/lib/format';
+import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import { osloDateTime } from '@/lib/shop';
 
 const STATUSES: EnquiryStatus[] = ['New', 'InProgress', 'Answered', 'Done'];

@@ -7,7 +7,7 @@ import { Alert } from '@sjolystinnovation/app-kit/ui';
 import EnquiryService, { type EnquiryPage, type EnquiryStatus } from '@/services/enquiryService';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import { fillTemplate } from '@/lib/format';
+import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import { osloDate } from '@/lib/shop';
 
 const STATUSES: EnquiryStatus[] = ['New', 'InProgress', 'Answered', 'Done'];
