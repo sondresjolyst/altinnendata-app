@@ -1,3 +1,4 @@
+import { kroner, parseKroner } from '@sjolystinnovation/app-kit/payments';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { ADMIN_ROLE } from '@/lib/roles';
 import type { BuildDetail } from '@/services/buildService';
@@ -20,11 +21,6 @@ export function isBuyable(build: BuildDetail): boolean {
 /** Whether the build would be for sale but for a part without a condition. */
 export function lacksConditions(build: BuildDetail): boolean {
     return build.availability === 'Available' && build.priceNok != null && build.published && !build.allPartsHaveCondition;
-}
-
-/** Øre as kroner the way an accounting system takes them: no grouping and a comma decimal. */
-export function kroner(ore: number): string {
-    return (ore / 100).toFixed(2).replace('.', ',');
 }
 
 const osloFormat = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Oslo', day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -64,13 +60,6 @@ export function remainingInOre(order: Pick<AdminOrder, 'capturedInOre' | 'refund
 /** Whether part of the captured amount, but not all of it, has been paid back. */
 export function isPartlyRefunded(order: Pick<AdminOrder, 'capturedInOre' | 'refundedInOre'>): boolean {
     return order.refundedInOre > 0 && order.refundedInOre < order.capturedInOre;
-}
-
-/** Whole kroner or kroner with one or two decimals, comma or dot, as øre. Anything else is null. */
-export function parseKroner(typed: string): number | null {
-    const match = /^(\d+)(?:[.,](\d{1,2}))?$/.exec(typed.trim());
-    if (!match) return null;
-    return Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0'));
 }
 
 export type RefundAmountIssue = 'required' | 'invalid' | 'tooLow' | 'tooHigh';

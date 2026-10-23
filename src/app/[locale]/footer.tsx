@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useBranding } from '@sjolystinnovation/app-kit/branding';
-import { brregUrl, formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
+import { brregUrl } from '@sjolystinnovation/app-kit/company';
+import { formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 

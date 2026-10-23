@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { normalizeNoPhone } from '@sjolystinnovation/app-kit/validation';
 import type { Dictionary } from '@/i18n/dictionaries';
 
 export const budgetRanges = ['5000-10000', '10000-15000', '15000-25000', '25000+'] as const;
@@ -16,13 +17,6 @@ export const contactSchema = z.object({
 
 export type ContactInput = z.infer<typeof contactSchema>;
 
-/** The digits of a Norwegian mobile number as Vipps takes them, or null. Mirrors AppKit.Vipps `VippsPhoneNumber.TryNormalize`. */
-function normalizeMobile(raw: string): string | null {
-    let digits = raw.replace(/[^0-9]/g, '');
-    if (digits.length === 8) digits = `47${digits}`;
-    return digits.length === 10 && digits.startsWith('47') ? digits : null;
-}
-
 const deliveryMethods = ['Shipping', 'HomeDelivery', 'Pickup'] as const;
 
 /** Mirrors the API's `CheckoutRequestValidator`. A custom issue carries the key of its message in `message`. */
@@ -33,7 +27,7 @@ export const checkoutSchema = z.object({
     email: z.string().trim().min(1).max(200).email(),
     phone: z.string().superRefine((value, ctx) => {
         if (value.trim() === '') ctx.addIssue({ code: 'custom', message: 'required' });
-        else if (normalizeMobile(value) === null) ctx.addIssue({ code: 'custom', message: 'phone' });
+        else if (normalizeNoPhone(value) === null) ctx.addIssue({ code: 'custom', message: 'phone' });
     }),
     streetAddress: z.string().trim().max(200).nullable(),
     postalCode: z.string().trim().nullable(),

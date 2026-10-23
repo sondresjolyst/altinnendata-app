@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canBuy, captureWarning, invoiceDetails, missingInvoiceNumber, isBuyable, lacksConditions, kroner, osloDate, osloDateTime, osloTime, parseKroner, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { canBuy, captureWarning, invoiceDetails, missingInvoiceNumber, isBuyable, lacksConditions, osloDate, osloDateTime, osloTime, refundAmountIssue, remainingInOre } from '@/lib/shop';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { AdminOrder } from '@/services/shopService';
 
@@ -68,14 +68,6 @@ const pickupOrder: AdminOrder = {
     totalInOre: 999000,
     capturedAt: null,
 };
-
-describe('kroner', () => {
-    it('writes whole kroner with a comma decimal and no grouping', () => {
-        expect(kroner(1299000)).toBe('12990,00');
-        expect(kroner(5)).toBe('0,05');
-        expect(kroner(0)).toBe('0,00');
-    });
-});
 
 describe('osloDate', () => {
     it('gives dd.mm.yyyy in Oslo time', () => {
@@ -197,14 +189,6 @@ describe('remainingInOre', () => {
         expect(remainingInOre({ capturedInOre: 1299000, refundedInOre: 300000 })).toBe(999000);
         expect(remainingInOre({ capturedInOre: 0, refundedInOre: 0 })).toBe(0);
     });
-});
-
-describe('parseKroner', () => {
-    it.each([
-        ['100', 10000], ['100,5', 10050], ['100,50', 10050], ['100.50', 10050], [' 12990,00 ', 1299000], ['0,05', 5], ['0', 0],
-    ])('reads %j as %d øre', (typed, ore) => expect(parseKroner(typed)).toBe(ore));
-
-    it.each(['', 'abc', '1,234', '-5', '1 000', '1,', ',5', '1e3'])('refuses %j', typed => expect(parseKroner(typed)).toBeNull());
 });
 
 describe('refundAmountIssue', () => {

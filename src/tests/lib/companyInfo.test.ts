@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { afterEach, vi } from 'vitest';
-import { brregUrl, formatOrgNumber, getCompanyInfo, CompanyInfo } from '@/lib/companyInfo';
+import { formatOrgNumber, getCompanyInfo, CompanyInfo } from '@/lib/companyInfo';
 import { COMPANY } from '@/lib/company';
 
 const base: CompanyInfo = {
@@ -65,11 +65,5 @@ describe('getCompanyInfo', () => {
         expect(info.name).toBe(COMPANY.name);
         expect(info.address).toBe(COMPANY.address);
         expect(info.streetAddress).toBe('');
-    });
-});
-
-describe('brregUrl', () => {
-    it('links the org number digits to the Brønnøysund page', () => {
-        expect(brregUrl('938 433 240')).toBe('https://virksomhet.brreg.no/nb/oppslag/enheter/938433240');
     });
 });
