@@ -4,6 +4,7 @@ import { ADMIN_ROLE } from '@/lib/roles';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 import { AdminShell } from '@sjolystinnovation/app-kit/admin';
+import { nbAdminShellStrings } from '@sjolystinnovation/app-kit/locales/nb';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const { locale, dict } = useDictionary();
@@ -27,7 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminShell
             role={ADMIN_ROLE}
             title={dict.admin.title}
-            strings={{ breadcrumb: dict.admin.breadcrumb }}
+            strings={locale === 'no' ? nbAdminShellStrings : undefined}
             tabs={tabs}
             fallback={<div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 text-center text-gray-500">{dict.common.loading}</div>}
             deniedHref={localeHref(locale, '/')}

@@ -4,14 +4,15 @@ import { use, useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { apiErrorCode, apiFieldErrors, errorText } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
-import { Alert, TextArea, TextInput } from '@sjolystinnovation/app-kit/ui';
+import { nbConfirmDialogStrings } from '@sjolystinnovation/app-kit/locales/nb';
+import { kroner, parseKroner } from '@sjolystinnovation/app-kit/payments';
+import { Alert, ConfirmDialog, fillTemplate, TextArea, TextInput } from '@sjolystinnovation/app-kit/ui';
 import ShopService, { type AdminOrder } from '@/services/shopService';
-import ConfirmDialog from '@/components/shop/ConfirmDialog';
 import CopyField from '@/components/shop/CopyField';
 import { localeHref } from '@/i18n/config';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import { fillTemplate, formatOre } from '@/lib/format';
-import { formatAddress, invoiceDetails, kroner, osloDate, osloDateTime, osloTime, parseKroner, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
+import { formatOre } from '@/lib/format';
+import { formatAddress, invoiceDetails, osloDate, osloDateTime, osloTime, plainPhone, refundAmountIssue, remainingInOre } from '@/lib/shop';
 
 type Action = 'capture' | 'cancel' | 'refund' | 'release' | 'paymentLink' | 'ship';
 
@@ -372,7 +373,7 @@ export default function AdminOrderPage({ params }: { params: Promise<{ id: strin
                     title={pending.title}
                     message={pending.confirm}
                     confirmLabel={pending.label}
-                    cancelLabel={dict.common.cancel}
+                    strings={locale === 'no' ? nbConfirmDialogStrings : undefined}
                     busy={busy}
                     confirmDisabled={(pending.action === 'refund' && refundIssue !== null) || (pending.action === 'ship' && noteTooLong)}
                     onConfirm={() => void (pending.action === 'ship' ? ship() : run(pending.action))}

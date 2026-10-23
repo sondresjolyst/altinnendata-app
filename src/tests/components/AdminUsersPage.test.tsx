@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
 import { defaultAdminUsersPanelStrings } from '@sjolystinnovation/app-kit/admin';
@@ -91,11 +91,11 @@ describe('admin users page', () => {
         ['lastAdmin', nb.deleteErrors.lastAdmin],
         ['accountChangeConflict', nb.deleteErrors.accountChangeConflict],
     ] as const)('says why a delete was refused in Norwegian (%s)', async (code, message) => {
-        vi.spyOn(window, 'confirm').mockReturnValue(true);
         service.deleteUser.mockRejectedValueOnce(await refused(409, { message: 'Refused.', code }));
         renderPage('no');
 
         await userEvent.click(await screen.findByTitle(nb.delete));
+        await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: nb.delete }));
 
         await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith(message));
     });
