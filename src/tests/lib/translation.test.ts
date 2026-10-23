@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('translateFields', () => {
-    it('sends every filled line of every field in one request, without the markdown markers', async () => {
+    it('sends the filled lines of every field without the markdown markers', async () => {
         const fetchMock = respond(['Gaming PC', 'Fast', 'Parts', 'RTX 5080 graphics card', '32 GB memory']);
 
         await translateFields(
@@ -44,6 +44,34 @@ describe('translateFields', () => {
             source: 'nb',
             target: 'en',
         });
+    });
+
+    it('sends a long text in batches of 20 lines, each request with its own timeout, and keeps the order', async () => {
+        const lines = Array.from({ length: 45 }, (_, n) => `linje ${n + 1}`);
+        const timeout = vi.spyOn(AbortSignal, 'timeout');
+        const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+            const { q } = JSON.parse(String(init?.body)) as { q: string[] };
+            return new Response(JSON.stringify({ translatedText: q.map(line => line.replace('linje', 'line')) }), {
+                headers: { 'content-type': 'application/json' },
+            });
+        });
+
+        const result = await translateFields({ title: null, summary: null, description: lines.join('\n') }, 'no', 'en');
+
+        expect(fetchMock.mock.calls.map(call => (JSON.parse(String(call[1]?.body)) as { q: string[] }).q.length)).toEqual([20, 20, 5]);
+        expect(timeout).toHaveBeenCalledTimes(3);
+        expect(result.description).toBe(lines.map(line => line.replace('linje', 'line')).join('\n'));
+    });
+
+    it('stops at the first batch that fails', async () => {
+        const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+            new Response(JSON.stringify({ error: 'busy' }), { status: 500, headers: { 'content-type': 'application/json' } }),
+        );
+
+        await expect(
+            translateFields({ title: null, summary: null, description: Array.from({ length: 30 }, (_, n) => `linje ${n}`).join('\n') }, 'no', 'en'),
+        ).rejects.toThrow('busy');
+        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     it('keeps blank lines and markdown markers so the structure survives', async () => {
