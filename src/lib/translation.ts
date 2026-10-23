@@ -11,6 +11,9 @@ const FIELDS = ['title', 'summary', 'description'] as const;
 // LibreTranslate carries no generic `no` model — Bokmål has its own code.
 const TRANSLATE_CODES: Record<Locale, string> = { no: 'nb', en: 'en' };
 
+// LibreTranslate takes about 0.65 seconds a line at 2 CPU, so a request of 20 lines finishes well inside its timeout
+// and a long text only takes more requests.
+const BATCH_SIZE = 20;
 const TIMEOUT_MS = 60_000;
 
 // LibreTranslate drops whatever sits outside the words of a line and answers a line without words
@@ -53,10 +56,19 @@ async function translate(lines: string[], from: Locale, to: Locale): Promise<str
     return translated;
 }
 
+/** Translates the lines in batches of {@link BATCH_SIZE}, one request after another, and stops at the first that fails. */
+async function translateInBatches(lines: string[], from: Locale, to: Locale): Promise<string[]> {
+    const translated: string[] = [];
+    for (let start = 0; start < lines.length; start += BATCH_SIZE) {
+        translated.push(...(await translate(lines.slice(start, start + BATCH_SIZE), from, to)));
+    }
+    return translated;
+}
+
 /**
  * Translates a line at a time: fed a whole markdown body, LibreTranslate reflows it as prose
- * and the list items and paragraph breaks are gone. Blank lines are left as they are, and all
- * the lines of all the fields go in one request.
+ * and the list items and paragraph breaks are gone. Blank lines are left as they are, and the
+ * lines of all the fields go in batches of {@link BATCH_SIZE}.
  */
 export async function translateFields(
     fields: TranslatableFields,
@@ -84,7 +96,7 @@ export async function translateFields(
     );
 
     if (filled.length > 0) {
-        const translated = await translate(filled.map(line => line.text), from, to);
+        const translated = await translateInBatches(filled.map(line => line.text), from, to);
         filled.forEach(({ field, index, prefix, suffix }, n) => {
             split[field][index] = prefix + translated[n] + suffix;
         });
