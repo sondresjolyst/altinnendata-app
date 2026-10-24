@@ -9,6 +9,13 @@ import { nbConsentSettingsLinkStrings } from '@sjolystinnovation/app-kit/locales
 import { formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
+import { mailtoHref, telHref } from '@/lib/contactLinks';
+
+const LINK = 'underline underline-offset-4 hover:text-gray-900';
+
+/** A link when the value has a usable href, otherwise plain text. */
+const contact = (href: string | null, value: string, className = '') =>
+    href ? <a href={href} className={`${LINK} ${className}`.trim()}>{value}</a> : <span className={className || undefined}>{value}</span>;
 
 /** `consentSettings` adds the cookie settings button, for when a marketing tool asks for consent. */
 export default function Footer({ company, consentSettings = false }: { company: CompanyInfo; consentSettings?: boolean }) {
@@ -78,6 +85,25 @@ export default function Footer({ company, consentSettings = false }: { company: 
                             )}
                             {company.orgNumber && company.address && <span aria-hidden="true"> · </span>}
                             {company.address}
+                        </p>
+                    )}
+                    {(company.email || company.phone) && (
+                        <p>
+                            {/* Ehandelsloven § 8 wants the email address with the name and address. */}
+                            {company.email && (
+                                <span>
+                                    {/* The label never breaks, not even at the hyphen in E-post, and stays with the value. A long address may break inside. */}
+                                    <span className="whitespace-nowrap">{dict.footer.email}</span>{'\u00a0'}
+                                    {contact(mailtoHref(company.email), company.email, '[overflow-wrap:anywhere]')}
+                                </span>
+                            )}
+                            {company.email && company.phone && <span aria-hidden="true"> · </span>}
+                            {company.phone && (
+                                <span className="whitespace-nowrap">
+                                    {dict.footer.phone}{' '}
+                                    {contact(telHref(company.phone), company.phone)}
+                                </span>
+                            )}
                         </p>
                     )}
                 </div>

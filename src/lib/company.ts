@@ -4,7 +4,7 @@ export const COMPANY = {
     orgNumber: "",
     vatRegistered: false,
     address: "Mårvegen 21a, 4347 Lye",
-    email: "altinnendata@gmail.com",
+    email: "havard@altinnendata.no",
     phone: "+47 473 88 759",
     url: "https://www.altinnendata.no",
 } as const;

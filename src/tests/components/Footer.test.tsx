@@ -20,7 +20,7 @@ const company: CompanyInfo = {
     postalCode: '4347',
     addressLocality: 'Lye',
     addressRegion: '',
-    email: 'altinnendata@gmail.com',
+    email: 'havard@altinnendata.no',
     phone: '',
 };
 
@@ -75,7 +75,7 @@ describe('Footer', () => {
     });
 
     it('leaves out the second line when neither org number nor address is set', () => {
-        renderFooter({ ...company, orgNumber: '', address: '' });
+        renderFooter({ ...company, orgNumber: '', address: '', email: '' });
 
         const first = screen.getByRole('link', { name: 'Sjølyst Innovation AS' }).closest('p')!;
         expect(first.parentElement!.children).toHaveLength(1);
@@ -88,6 +88,7 @@ describe('Footer', () => {
         expect(lines).toEqual([
             expect.stringMatching(/^© \d{4} ALTINNENDATA AS · Laget av Sjølyst Innovation AS$/),
             'Org.nr. 938 433 240 Foretaksregisteret · Mårvegen 21a, 4347 Lye',
+            'E-post\u00a0havard@altinnendata.no',
         ]);
         expect(screen.getByRole('link', { name: 'Sjølyst Innovation AS' })).toHaveAttribute('href', 'https://www.sjolystinnovation.no/');
     });
@@ -126,4 +127,76 @@ describe('Footer', () => {
         expect(getConsent().reopened).toBe(true);
         setConsent({ marketing: false, noticeVersion: 'test' });
     });
+
+    /** The text as a reader sees it, with the no-break space as a plain space. */
+    const text = (el: Element | null) => (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
+
+    const contactLine = () => screen.getByRole('link', { name: 'havard@altinnendata.no' }).closest('p');
+
+    it.each([
+        ['no', 'E-post'],
+        ['en', 'Email'],
+    ] as const)('shows the email as a mailto link on its own line (%s)', (locale, label) => {
+        renderFooter(company, locale);
+
+        expect(screen.getByRole('link', { name: 'havard@altinnendata.no' })).toHaveAttribute('href', 'mailto:havard@altinnendata.no');
+        expect(text(contactLine())).toBe(`${label} havard@altinnendata.no`);
+        expect(document.querySelector('a[href^="tel:"]')).toBeNull();
+    });
+
+    it.each([
+        ['no', 'E-post havard@altinnendata.no · Telefon +47 473 88 759'],
+        ['en', 'Email havard@altinnendata.no · Phone +47 473 88 759'],
+    ] as const)('adds the phone as a tel link when it is set (%s)', (locale, line) => {
+        renderFooter({ ...company, phone: '+47 473 88 759' }, locale);
+
+        expect(screen.getByRole('link', { name: '+47 473 88 759' })).toHaveAttribute('href', 'tel:+4747388759');
+        expect(contactLine()).toHaveTextContent(line);
+    });
+
+    it('shows the phone alone with no separator when no email is set', () => {
+        renderFooter({ ...company, email: '', phone: '+47 473 88 759' });
+
+        const line = screen.getByRole('link', { name: '+47 473 88 759' }).closest('p');
+        expect(line).toHaveTextContent(/^Telefon \+47 473 88 759$/);
+        expect(screen.queryByRole('link', { name: /@/ })).not.toBeInTheDocument();
+    });
+
+    it('adds no contact line and no stray separator when neither email nor phone is set', () => {
+        renderFooter({ ...company, email: '', phone: '' });
+
+        const lines = [...registerLine()!.parentElement!.children].map(line => line.textContent);
+        expect(lines).toHaveLength(2);
+        expect(document.querySelector('footer')).not.toHaveTextContent(/E-post|Telefon|mailto/);
+        expect(document.querySelectorAll('a[href^="mailto:"], a[href^="tel:"]')).toHaveLength(0);
+    });
+
+    it.each([
+        ['+47 473 88 759', 'tel:+4747388759'],
+        ['+47 (0) 473 88 759', 'tel:+4747388759'],
+        ['473-88.759', 'tel:47388759'],
+    ])('links the phone %s as %s', (phone, href) => {
+        renderFooter({ ...company, phone });
+
+        expect(screen.getByRole('link', { name: phone })).toHaveAttribute('href', href);
+    });
+
+    it.each(['ring oss', '(0)', '1234', '+47 473 88 759 ext 2'])('shows the phone %s as text, not a link', phone => {
+        renderFooter({ ...company, phone });
+
+        expect(document.querySelector('a[href^="tel:"]')).toBeNull();
+        expect(screen.getByText(phone)).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: phone })).toBeNull();
+    });
+
+    it.each(['post @altinnendata.no', 'post@altinnendata.no?subject=hei', 'a@b@c.no', 'post&x@altinnendata.no', 'no-at-sign', 'a,b@altinnendata.no', 'post@altinnendata.no#x', 'a;b@altinnendata.no'])(
+        'shows the email %s as text, not a link',
+        email => {
+            renderFooter({ ...company, email });
+
+            expect(document.querySelector('a[href^="mailto:"]')).toBeNull();
+            expect(screen.getByText(email)).toBeInTheDocument();
+            expect(screen.queryByRole('link', { name: email })).toBeNull();
+        },
+    );
 });

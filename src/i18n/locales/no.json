@@ -212,7 +212,9 @@
     "privacy": "Personvern",
     "cookies": "Informasjonskapsler",
     "rights": "Alle rettigheter reservert.",
-    "createdBy": "Laget av"
+    "createdBy": "Laget av",
+    "email": "E-post",
+    "phone": "Telefon"
   },
   "admin": {
     "title": "Admin",
