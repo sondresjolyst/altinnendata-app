@@ -212,7 +212,9 @@
     "privacy": "Privacy notice",
     "cookies": "Cookies",
     "rights": "All rights reserved.",
-    "createdBy": "Created by"
+    "createdBy": "Created by",
+    "email": "Email",
+    "phone": "Phone"
   },
   "admin": {
     "title": "Admin",

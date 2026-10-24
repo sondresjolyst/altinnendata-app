@@ -75,7 +75,7 @@ describe('Footer', () => {
     });
 
     it('leaves out the second line when neither org number nor address is set', () => {
-        renderFooter({ ...company, orgNumber: '', address: '' });
+        renderFooter({ ...company, orgNumber: '', address: '', email: '' });
 
         const first = screen.getByRole('link', { name: 'Sjølyst Innovation AS' }).closest('p')!;
         expect(first.parentElement!.children).toHaveLength(1);
@@ -88,6 +88,7 @@ describe('Footer', () => {
         expect(lines).toEqual([
             expect.stringMatching(/^© \d{4} ALTINNENDATA AS · Laget av Sjølyst Innovation AS$/),
             'Org.nr. 938 433 240 Foretaksregisteret · Mårvegen 21a, 4347 Lye',
+            'E-post altinnendata@gmail.com',
         ]);
         expect(screen.getByRole('link', { name: 'Sjølyst Innovation AS' })).toHaveAttribute('href', 'https://www.sjolystinnovation.no/');
     });
@@ -125,5 +126,45 @@ describe('Footer', () => {
 
         expect(getConsent().reopened).toBe(true);
         setConsent({ marketing: false, noticeVersion: 'test' });
+    });
+
+    const contactLine = () => screen.getByRole('link', { name: 'altinnendata@gmail.com' }).closest('p');
+
+    it.each([
+        ['no', 'E-post'],
+        ['en', 'Email'],
+    ] as const)('shows the email as a mailto link on its own line (%s)', (locale, label) => {
+        renderFooter(company, locale);
+
+        expect(screen.getByRole('link', { name: 'altinnendata@gmail.com' })).toHaveAttribute('href', 'mailto:altinnendata@gmail.com');
+        expect(contactLine()).toHaveTextContent(new RegExp(`^${label} altinnendata@gmail\.com$`));
+        expect(document.querySelector('a[href^="tel:"]')).toBeNull();
+    });
+
+    it.each([
+        ['no', 'E-post altinnendata@gmail.com · Telefon +47 473 88 759'],
+        ['en', 'Email altinnendata@gmail.com · Phone +47 473 88 759'],
+    ] as const)('adds the phone as a tel link when it is set (%s)', (locale, line) => {
+        renderFooter({ ...company, phone: '+47 473 88 759' }, locale);
+
+        expect(screen.getByRole('link', { name: '+47 473 88 759' })).toHaveAttribute('href', 'tel:+4747388759');
+        expect(contactLine()).toHaveTextContent(line);
+    });
+
+    it('shows the phone alone with no separator when no email is set', () => {
+        renderFooter({ ...company, email: '', phone: '+47 473 88 759' });
+
+        const line = screen.getByRole('link', { name: '+47 473 88 759' }).closest('p');
+        expect(line).toHaveTextContent(/^Telefon \+47 473 88 759$/);
+        expect(screen.queryByRole('link', { name: /@/ })).not.toBeInTheDocument();
+    });
+
+    it('adds no contact line and no stray separator when neither email nor phone is set', () => {
+        renderFooter({ ...company, email: '', phone: '' });
+
+        const lines = [...registerLine()!.parentElement!.children].map(line => line.textContent);
+        expect(lines).toHaveLength(2);
+        expect(document.querySelector('footer')).not.toHaveTextContent(/E-post|Telefon|mailto/);
+        expect(document.querySelectorAll('a[href^="mailto:"], a[href^="tel:"]')).toHaveLength(0);
     });
 });

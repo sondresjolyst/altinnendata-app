@@ -80,6 +80,28 @@ export default function Footer({ company, consentSettings = false }: { company: 
                             {company.address}
                         </p>
                     )}
+                    {(company.email || company.phone) && (
+                        <p>
+                            {/* Ehandelsloven § 8 wants the email address with the name and address. */}
+                            {company.email && (
+                                <>
+                                    {dict.footer.email}{' '}
+                                    <a href={`mailto:${company.email}`} className="underline underline-offset-4 hover:text-gray-900">
+                                        {company.email}
+                                    </a>
+                                </>
+                            )}
+                            {company.email && company.phone && <span aria-hidden="true"> · </span>}
+                            {company.phone && (
+                                <>
+                                    {dict.footer.phone}{' '}
+                                    <a href={`tel:${company.phone.replace(/[^\d+]/g, '')}`} className="underline underline-offset-4 hover:text-gray-900">
+                                        {company.phone}
+                                    </a>
+                                </>
+                            )}
+                        </p>
+                    )}
                 </div>
             </div>
         </footer>
