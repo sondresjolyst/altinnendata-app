@@ -13,7 +13,7 @@ const base: CompanyInfo = {
     postalCode: '4347',
     addressLocality: 'Lye',
     addressRegion: 'Rogaland',
-    email: 'altinnendata@gmail.com',
+    email: 'havard@altinnendata.no',
     phone: '+47 473 88 759',
 };
 
@@ -56,6 +56,14 @@ describe('getCompanyInfo', () => {
         expect(info.address).toBe('Mårvegen 21a, 4347 Lye');
         expect(info.streetAddress).toBe('');
         expect(info.postalCode).toBe('');
+    });
+
+    it('takes the email and phone from the API over the built-in ones, and the built-in ones for blanks', async () => {
+        respond({ email: 'post@example.no', phone: '' });
+
+        const info = await getCompanyInfo();
+        expect(info.email).toBe('post@example.no');
+        expect(info.phone).toBe(COMPANY.phone);
     });
 
     it('falls back to the built-in details when the API is unreachable', async () => {
