@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.3...v1.13.0) (2026-10-24)
+
+
+### Features
+
+* add the Meta Pixel behind a consent banner ([#215](https://github.com/sondresjolyst/altinnendata-app/issues/215)) ([615812e](https://github.com/sondresjolyst/altinnendata-app/commit/615812eafb5f618a4b62ec1b1f32ace2edf6448d))
+* show the company email and phone in the footer ([#217](https://github.com/sondresjolyst/altinnendata-app/issues/217)) ([0ed2b8d](https://github.com/sondresjolyst/altinnendata-app/commit/0ed2b8d5a30eb3f06c0cc4b8612eff499b0e9743)), closes [#214](https://github.com/sondresjolyst/altinnendata-app/issues/214)
+
 ## [1.12.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.2...v1.12.3) (2026-10-23)
 
 
