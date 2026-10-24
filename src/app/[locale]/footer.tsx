@@ -84,21 +84,22 @@ export default function Footer({ company, consentSettings = false }: { company: 
                         <p>
                             {/* Ehandelsloven § 8 wants the email address with the name and address. */}
                             {company.email && (
-                                <>
+                                // One unit, so a narrow footer breaks the line between the items, not inside one.
+                                <span className="whitespace-nowrap">
                                     {dict.footer.email}{' '}
                                     <a href={`mailto:${company.email}`} className="underline underline-offset-4 hover:text-gray-900">
                                         {company.email}
                                     </a>
-                                </>
+                                </span>
                             )}
                             {company.email && company.phone && <span aria-hidden="true"> · </span>}
                             {company.phone && (
-                                <>
+                                <span className="whitespace-nowrap">
                                     {dict.footer.phone}{' '}
                                     <a href={`tel:${company.phone.replace(/[^\d+]/g, '')}`} className="underline underline-offset-4 hover:text-gray-900">
                                         {company.phone}
                                     </a>
-                                </>
+                                </span>
                             )}
                         </p>
                     )}
