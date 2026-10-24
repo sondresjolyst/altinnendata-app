@@ -210,9 +210,7 @@ describe('the Purchase on the return page', () => {
 
         render(<ShopReturn locale="no" />);
         await waitFor(() => expect(screen.getByRole('heading', { name: 'Betalingen er reservert' })).toBeInTheDocument());
-        await tick();
-
-        expect(events(fbq)).toEqual([purchase()]);
+        await waitFor(() => expect(events(fbq)).toEqual([purchase()]));
         expect(stored()).toEqual([reference]);
     });
 
@@ -221,10 +219,8 @@ describe('the Purchase on the return page', () => {
         orderStatus.mockResolvedValue(order({ status: 'Paid' }));
 
         render(<ShopReturn locale="no" />);
-        await tick();
-        await tick();
 
-        expect(events(fbq)).toEqual([purchase()]);
+        await waitFor(() => expect(events(fbq)).toEqual([purchase()]));
     });
 
     it.each(['Pending', 'Failed', 'Cancelled', 'Refunded'] as const)('does not fire for a %s order', async status => {

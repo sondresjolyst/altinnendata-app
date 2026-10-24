@@ -5,6 +5,7 @@ import { nbConsentBannerStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import LocaleLayout from '@/app/[locale]/layout';
 import Footer from '@/app/[locale]/footer';
 import { publicGetOptional } from '@/lib/publicApi';
+import { getMetaPixelId } from '@/lib/marketing';
 
 vi.mock('@/lib/publicApi', () => ({ publicGetOptional: vi.fn() }));
 vi.mock('@/lib/companyInfo', () => ({ getCompanyInfo: () => Promise.resolve({ name: 'Altinnendata' }) }));
@@ -64,5 +65,19 @@ describe('the consent banner in the layout', () => {
         const tree = await layout('en');
 
         expect(find(tree, ConsentBanner).map(b => b.props)).toEqual([{ noticeVersion: '2026-10-meta', enabled: true, cookiesHref: '/en/cookies', strings: undefined }]);
+    });
+});
+
+describe('getMetaPixelId', () => {
+    it.each([
+        [{ metaPixelId: '123456789012345' }, '123456789012345'],
+        [{ metaPixelId: null }, null],
+        [{ metaPixelId: '12ab<script>' }, null],
+        [{ metaPixelId: 123456789 }, null],
+        [null, null],
+    ])('gives a digits-only ID or null for %j', async (config, expected) => {
+        answer(config);
+
+        await expect(getMetaPixelId()).resolves.toBe(expected);
     });
 });
