@@ -229,7 +229,7 @@
       "title": "Markedsføring",
       "pixelId": "Meta Pixel-ID",
       "pixelIdHint": "Du finner ID-en i Meta Events Manager under Datasett. Den består av 5 til 20 siffer. La feltet stå tomt for å slå av Meta Pixel.",
-      "legalNotice": "Før du setter ID-en, må sidene om informasjonskapsler og personvern beskrive Meta Pixel. Samtykkebanneret vises først når en ID er satt.",
+      "consentNote": "Meta Pixel lastes bare etter at den besøkende har godtatt markedsføring i samtykkebanneret.",
       "invalid": "Meta Pixel-ID-en må bestå av 5 til 20 siffer.",
       "save": "Lagre markedsføring",
       "saved": "Markedsføring lagret",
