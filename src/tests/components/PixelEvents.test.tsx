@@ -99,15 +99,32 @@ describe('the pixel event helpers', () => {
         expect(stored()).toBeNull();
     });
 
-    it('send nothing for a consent given under an older notice', () => {
-        const fbq = loadPixel();
+    it('send nothing for a consent given under an older notice', async () => {
         setConsent({ marketing: true, noticeVersion: '2025-01-01' });
 
+        render(<MetaPixel {...CONSENT_OPTIONS} pixelId="123456789012345" />);
+        await tick();
+
+        expect((window as Window & { fbq?: unknown }).fbq).toBeUndefined();
         expect(trackViewContent('gaming-pc', 12990)).toBe(false);
         expect(trackPurchaseOnce(order())).toBe(false);
-
-        expect(fbq).not.toHaveBeenCalled();
         expect(stored()).toBeNull();
+    });
+
+    it('record a purchase only once it was really sent, so a blocked send is tried again', () => {
+        const fbq = loadPixel();
+
+        expect(trackPurchaseOnce(order())).toBe(false);
+        expect(stored()).toBeNull();
+        expect(fbq).not.toHaveBeenCalled();
+
+        acceptPixel();
+        (window as Window & { fbq?: unknown }).fbq = fbq;
+        expect(trackPurchaseOnce(order())).toBe(true);
+        expect(trackPurchaseOnce(order())).toBe(false);
+
+        expect(events(fbq)).toEqual([purchase()]);
+        expect(stored()).toEqual([reference]);
     });
 
     it('drop stored entries that are not references', () => {
@@ -256,6 +273,46 @@ describe('the Purchase on the return page', () => {
 
         expect(orderStatus.mock.calls.length).toBeGreaterThanOrEqual(3);
         expect(events(fbq)).toEqual([purchase()]);
+    });
+
+    it('fires once across two tabs open on the same return page', async () => {
+        const fbq = acceptPixel();
+        orderStatus.mockResolvedValue(order());
+
+        render(<ShopReturn locale="no" />);
+        await waitFor(() => expect(events(fbq)).toHaveLength(1));
+
+        // The second tab has its own copy of the modules and shares only localStorage with the first.
+        vi.resetModules();
+        const { default: SecondTab } = await import('@/components/shop/ShopReturn');
+        render(<SecondTab locale="no" />);
+        await waitFor(() => expect(screen.getAllByRole('heading', { name: 'Betalingen er reservert' })).toHaveLength(2));
+        await tick();
+
+        expect(events(fbq)).toEqual([purchase()]);
+        expect(stored()).toEqual([reference]);
+    });
+
+    it('sends Purchase after the layout pixel loads when the visitor accepts on the return page', async () => {
+        orderStatus.mockResolvedValue(order());
+
+        // ShopReturn comes before MetaPixel in the tree, so on accept its effect runs before the pixel exists.
+        render(
+            <>
+                <ShopReturn locale="no" />
+                <MetaPixel {...CONSENT_OPTIONS} pixelId="123456789012345" />
+            </>,
+        );
+        await waitFor(() => expect(screen.getByRole('heading', { name: 'Betalingen er reservert' })).toBeInTheDocument());
+        await tick();
+        expect((window as Window & { fbq?: unknown }).fbq).toBeUndefined();
+
+        act(() => { setConsent({ marketing: true, ...CONSENT_OPTIONS }); });
+        await tick();
+
+        const queue = (window as Window & { fbq?: { queue: unknown[][] } }).fbq!.queue;
+        expect(queue.filter(call => call[0] === 'track')).toEqual([['track', 'PageView'], purchase()]);
+        expect(stored()).toEqual([reference]);
     });
 
     it('fires once when the status moves from Reserved to Paid', async () => {
