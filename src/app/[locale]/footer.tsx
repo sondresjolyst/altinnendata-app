@@ -4,11 +4,14 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useBranding } from '@sjolystinnovation/app-kit/branding';
 import { brregUrl } from '@sjolystinnovation/app-kit/company';
+import { ConsentSettingsLink } from '@sjolystinnovation/app-kit/consent';
+import { nbConsentSettingsLinkStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import { formatOrgNumber, type CompanyInfo } from '@/lib/companyInfo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { localeHref } from '@/i18n/config';
 
-export default function Footer({ company }: { company: CompanyInfo }) {
+/** `consentSettings` adds the cookie settings button, for when a marketing tool asks for consent. */
+export default function Footer({ company, consentSettings = false }: { company: CompanyInfo; consentSettings?: boolean }) {
     const year = new Date().getFullYear();
     const { logoUrl } = useBranding();
     const { locale, dict } = useDictionary();
@@ -30,6 +33,13 @@ export default function Footer({ company }: { company: CompanyInfo }) {
                     <Link href={href('/terms')} className="hover:text-gray-900">{dict.footer.terms}</Link>
                     <Link href={href('/privacy')} className="hover:text-gray-900">{dict.footer.privacy}</Link>
                     <Link href={href('/cookies')} className="hover:text-gray-900">{dict.footer.cookies}</Link>
+                    {consentSettings && (
+                        <ConsentSettingsLink
+                            enabled
+                            className="hover:text-gray-900"
+                            strings={locale === 'no' ? nbConsentSettingsLinkStrings : undefined}
+                        />
+                    )}
                     {status !== 'authenticated' && (
                         <Link href={href('/login')} className="hover:text-gray-900">{dict.nav.signIn}</Link>
                     )}

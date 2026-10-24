@@ -6,6 +6,7 @@ import BuildGallery from '@/components/BuildGallery';
 import { Markdown } from '@sjolystinnovation/app-kit/markdown';
 import { BuildDetail, coverImageSrc } from '@/services/buildService';
 import BuyButton from '@/components/shop/BuyButton';
+import ViewContentPixel from '@/components/shop/ViewContentPixel';
 import type { ShopConfig } from '@/services/shopService';
 import { publicGet, publicGetOptional } from '@/lib/publicApi';
 import { slugSegment } from '@/lib/slug';
@@ -69,6 +70,7 @@ export default async function BuildPage({ params }: { params: Promise<{ locale: 
                     { name: build.title },
                 ], pageUrl),
             ]} />
+            <ViewContentPixel slug={build.slug} priceNok={build.priceNok} />
             <Link href={localeHref(locale, '/builds')} className="text-sm font-semibold text-gray-500 hover:text-gray-900">
                 ← {dict.builds.title}
             </Link>

@@ -223,6 +223,17 @@
     "legal": "Legal pages",
     "users": "Users",
     "settings": "Settings",
+    "marketing": {
+      "title": "Marketing",
+      "pixelId": "Meta Pixel ID",
+      "pixelIdHint": "Find the ID in Meta Events Manager under Datasets. It is 5 to 20 digits. Leave the field empty to turn the Meta Pixel off.",
+      "legalNotice": "Before you set the ID, the cookie and privacy pages must describe the Meta Pixel. The consent banner shows only once an ID is set.",
+      "invalid": "The Meta Pixel ID must be 5 to 20 digits.",
+      "save": "Save marketing",
+      "saved": "Marketing saved",
+      "saveFailed": "Could not save the marketing settings",
+      "loadFailed": "Could not load the marketing settings"
+    },
     "stats": "Statistics",
     "language": "Language",
     "newBuild": "New computer",

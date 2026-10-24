@@ -13,6 +13,7 @@ import { getDictionary } from '@/i18n/dictionaries';
 import { formatPrice } from '@/lib/format';
 import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import { canBuy } from '@/lib/shop';
+import { trackInitiateCheckout } from '@/lib/pixelEvents';
 import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from './VippsButtonArt';
 import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, type CheckoutField } from '@/lib/validation';
 
@@ -153,6 +154,7 @@ export default function CheckoutForm({ build, delivery, mode, termsVersion: load
         setSubmitting(true);
         try {
             const { redirectUrl } = await ShopService.checkout(parsed.data);
+            trackInitiateCheckout(build.slug, total);
             window.location.assign(redirectUrl);
         } catch (err) {
             const shown = apiFieldMessages(err);
