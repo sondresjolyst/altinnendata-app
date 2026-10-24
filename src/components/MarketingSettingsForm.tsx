@@ -74,13 +74,11 @@ export default function MarketingSettingsForm() {
                 value={pixelId}
                 error={error}
                 disabled={!loaded}
-                aria-describedby="metaPixelId-hint metaPixelId-notice"
+                aria-describedby="metaPixelId-hint metaPixelId-consent"
                 onChange={e => setPixelId(e.target.value)}
             />
             <p id="metaPixelId-hint" className="text-xs text-gray-500">{text.pixelIdHint}</p>
-            <div id="metaPixelId-notice">
-                <Alert variant="warning" role="none">{text.legalNotice}</Alert>
-            </div>
+            <p id="metaPixelId-consent" className="text-xs text-gray-500">{text.consentNote}</p>
             <button
                 type="submit"
                 disabled={!loaded || saving}

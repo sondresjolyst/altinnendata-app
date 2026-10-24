@@ -229,7 +229,7 @@
       "title": "Marketing",
       "pixelId": "Meta Pixel ID",
       "pixelIdHint": "Find the ID in Meta Events Manager under Datasets. It is 5 to 20 digits. Leave the field empty to turn the Meta Pixel off.",
-      "legalNotice": "Before you set the ID, the cookie and privacy pages must describe the Meta Pixel. The consent banner shows only once an ID is set.",
+      "consentNote": "The Meta Pixel loads only after the visitor has accepted marketing in the consent banner.",
       "invalid": "The Meta Pixel ID must be 5 to 20 digits.",
       "save": "Save marketing",
       "saved": "Marketing saved",

@@ -165,16 +165,19 @@ describe('the marketing section', () => {
     });
 
     it.each([
-        ['no', 'Markedsføring', 'Meta Pixel-ID', /Meta Events Manager under Datasett/, /informasjonskapsler og personvern beskrive Meta Pixel/],
-        ['en', 'Marketing', 'Meta Pixel ID', /Meta Events Manager under Datasets/, /cookie and privacy pages must describe the Meta Pixel/],
-    ] as const)('shows the saved ID with where to find it and what the legal pages need (%s)', async (locale, title, label, hint, notice) => {
+        ['no', 'Markedsføring', 'Meta Pixel-ID', /Meta Events Manager under Datasett/, 'Meta Pixel lastes bare etter at den besøkende har godtatt markedsføring i samtykkebanneret.'],
+        ['en', 'Marketing', 'Meta Pixel ID', /Meta Events Manager under Datasets/, 'The Meta Pixel loads only after the visitor has accepted marketing in the consent banner.'],
+    ] as const)('shows the saved ID with where to find it and that the pixel waits for consent (%s)', async (locale, title, label, hint, note) => {
         renderPage(locale);
 
         expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument();
         const field = screen.getByLabelText(label);
         await waitFor(() => expect(field).toHaveValue('123456789012345'));
         expect(field).toHaveAccessibleDescription(expect.stringMatching(hint));
-        expect(field).toHaveAccessibleDescription(expect.stringMatching(notice));
+        expect(field).toHaveAccessibleDescription(expect.stringContaining(note));
+        // A plain info line, not a warning box.
+        expect(screen.getByText(note)).toHaveClass('text-xs', 'text-gray-500');
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
     it('keeps the field and the button in place but disabled until the ID has loaded', async () => {
