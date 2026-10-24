@@ -189,7 +189,7 @@ describe('Footer', () => {
         expect(screen.queryByRole('link', { name: phone })).toBeNull();
     });
 
-    it.each(['post @altinnendata.no', 'post@altinnendata.no?subject=hei', 'a@b@c.no', 'post&x@altinnendata.no', 'no-at-sign'])(
+    it.each(['post @altinnendata.no', 'post@altinnendata.no?subject=hei', 'a@b@c.no', 'post&x@altinnendata.no', 'no-at-sign', 'a,b@altinnendata.no', 'post@altinnendata.no#x', 'a;b@altinnendata.no'])(
         'shows the email %s as text, not a link',
         email => {
             renderFooter({ ...company, email });

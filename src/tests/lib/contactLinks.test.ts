@@ -17,11 +17,11 @@ describe('telHref', () => {
 });
 
 describe('mailtoHref', () => {
-    it('links a plain address', () => {
-        expect(mailtoHref('post@altinnendata.no')).toBe('mailto:post@altinnendata.no');
+    it.each(['post@altinnendata.no', 'havard@altinnendata.no', 'first.last+shop@sub.example-site.com', 'a_b%c@x.io'])('links %s', email => {
+        expect(mailtoHref(email)).toBe(`mailto:${email}`);
     });
 
-    it.each(['', 'no-at-sign', 'a@b@c.no', 'post @altinnendata.no', 'post@altinnendata.no?cc=x', 'post&x@altinnendata.no', '@altinnendata.no', 'post@'])(
+    it.each(['', 'no-at-sign', 'a@b@c.no', 'post @altinnendata.no', 'post@altinnendata.no?cc=x', 'post&x@altinnendata.no', '@altinnendata.no', 'post@', 'a,b@altinnendata.no', 'post@altinnendata.no#x', 'a;b@altinnendata.no', 'post@altinnendata', 'post@altinnendata.n', 'post@altinnendata.n0', 'pøst@altinnendata.no', 'post@alt_innendata.no'])(
         'gives no link for %j',
         email => {
             expect(mailtoHref(email)).toBeNull();

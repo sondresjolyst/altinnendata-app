@@ -1,6 +1,6 @@
-/** The mailto: href for an email address of a plain shape, or null so the address shows as text. */
+/** The mailto: href for an address made only of the usual characters, or null so the address shows as text. */
 export function mailtoHref(email: string): string | null {
-    return /^[^\s@?&]+@[^\s@?&]+$/.test(email) ? `mailto:${email}` : null;
+    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email) ? `mailto:${email}` : null;
 }
 
 /**
