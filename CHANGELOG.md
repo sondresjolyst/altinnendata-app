@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.1...v1.13.2) (2026-10-24)
+
+
+### Dependencies
+
+* **npm:** bump `undici` from 8.11.2 to 8.12.3 ([#220](https://github.com/sondresjolyst/altinnendata-app/issues/220)) ([e7cf6be](https://github.com/sondresjolyst/altinnendata-app/commit/e7cf6be4c22b50452163b6ec88025144505552a9))
+* **npm:** bump `zod` from 4.6.5 to 4.6.7 ([#221](https://github.com/sondresjolyst/altinnendata-app/issues/221)) ([4ac9dc4](https://github.com/sondresjolyst/altinnendata-app/commit/4ac9dc4f091d13614483ca5d16b4b1b5353b5db1))
+
 ## [1.13.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.0...v1.13.1) (2026-10-24)
 
 
