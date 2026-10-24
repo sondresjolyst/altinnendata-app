@@ -54,7 +54,7 @@ describe('the consent banner in the layout', () => {
         const tree = await layout('no');
 
         expect(find(tree, ConsentBanner).map(b => b.props)).toEqual([
-            { noticeVersion: '2026-10-meta', enabled: true, cookiesHref: '/no/cookies', strings: nbConsentBannerStrings },
+            { noticeVersion: '2026-10-meta', enabled: true, cookiesHref: '/no/cookies', logEndpoint: 'http://api.test/api/consent', strings: nbConsentBannerStrings },
         ]);
         expect(find(tree, MetaPixel).map(p => p.props)).toEqual([{ noticeVersion: '2026-10-meta', pixelId: '123456789012345' }]);
         expect(find(tree, Footer).map(f => f.props.consentSettings)).toEqual([true]);
@@ -64,7 +64,7 @@ describe('the consent banner in the layout', () => {
         answer({ metaPixelId: '123456789012345' });
         const tree = await layout('en');
 
-        expect(find(tree, ConsentBanner).map(b => b.props)).toEqual([{ noticeVersion: '2026-10-meta', enabled: true, cookiesHref: '/en/cookies', strings: undefined }]);
+        expect(find(tree, ConsentBanner).map(b => b.props)).toEqual([{ noticeVersion: '2026-10-meta', enabled: true, cookiesHref: '/en/cookies', logEndpoint: 'http://api.test/api/consent', strings: undefined }]);
     });
 });
 

@@ -152,9 +152,10 @@ export default function CheckoutForm({ build, delivery, mode, termsVersion: load
         setErrors({});
         setFailure(null);
         setSubmitting(true);
+        // Sent before the checkout call, so the pixel's request has that call's time to leave before the redirect.
+        trackInitiateCheckout(build.slug, total);
         try {
             const { redirectUrl } = await ShopService.checkout(parsed.data);
-            trackInitiateCheckout(build.slug, total);
             window.location.assign(redirectUrl);
         } catch (err) {
             const shown = apiFieldMessages(err);

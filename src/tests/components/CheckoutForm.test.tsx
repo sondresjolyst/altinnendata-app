@@ -155,7 +155,7 @@ describe('CheckoutForm', () => {
         await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
     };
 
-    it('sends a Meta Pixel InitiateCheckout with the total including delivery before going to Vipps', async () => {
+    it('sends a Meta Pixel InitiateCheckout with the total including delivery before the checkout call', async () => {
         resetPixel();
         const fbq = acceptPixel();
         const user = userEvent.setup();
@@ -170,7 +170,7 @@ describe('CheckoutForm', () => {
         expect(events(fbq)).toEqual([
             ['track', 'InitiateCheckout', { content_ids: ['gaming-pc'], content_type: 'product', num_items: 1, value: 10290, currency: 'NOK' }],
         ]);
-        expect(fbq.mock.invocationCallOrder[0]).toBeLessThan(assign.mock.invocationCallOrder[0]);
+        expect(fbq.mock.invocationCallOrder[0]).toBeLessThan(service.checkout.mock.invocationCallOrder[0]);
         vi.unstubAllGlobals();
         resetPixel();
     }, 15_000);
@@ -192,16 +192,17 @@ describe('CheckoutForm', () => {
         resetPixel();
     }, 15_000);
 
-    it('sends no InitiateCheckout when the checkout fails', async () => {
+    it('sends no InitiateCheckout when client validation stops the submit', async () => {
         resetPixel();
         const fbq = acceptPixel();
         const user = userEvent.setup();
-        service.checkout.mockRejectedValueOnce(await refused(409, { message: 'x', code: 'buildUnavailable' }));
         renderForm();
 
-        await submitShipping(user);
+        await fillContact(user);
+        await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
 
-        expect(await screen.findByText(/ikke lenger tilgjengelig/)).toBeInTheDocument();
+        expect(await screen.findByText('Du må godta salgsvilkårene.')).toBeInTheDocument();
+        expect(service.checkout).not.toHaveBeenCalled();
         expect(events(fbq)).toEqual([]);
         resetPixel();
     }, 15_000);

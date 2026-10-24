@@ -15,7 +15,7 @@ import { ConsentBanner, MetaPixel, isValidPixelId } from "@sjolystinnovation/app
 import { nbConsentBannerStrings } from "@sjolystinnovation/app-kit/locales/nb";
 import { getCompanyInfo } from "@/lib/companyInfo";
 import { getMetaPixelId } from "@/lib/marketing";
-import { CONSENT_OPTIONS } from "@/lib/consent";
+import { CONSENT_LOG_ENDPOINT, CONSENT_OPTIONS } from "@/lib/consent";
 import { DictionaryProvider } from "@/i18n/DictionaryProvider";
 import { getDictionary } from "@/i18n/dictionaries";
 
@@ -78,6 +78,7 @@ export default async function LocaleLayout({
                                     {...CONSENT_OPTIONS}
                                     enabled={marketing}
                                     cookiesHref={localeHref(locale, "/cookies")}
+                                    logEndpoint={CONSENT_LOG_ENDPOINT}
                                     strings={locale === "no" ? nbConsentBannerStrings : undefined}
                                 />
                                 <MetaPixel {...CONSENT_OPTIONS} pixelId={pixelId} />
