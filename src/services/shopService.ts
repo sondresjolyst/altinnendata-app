@@ -68,6 +68,8 @@ export interface OrderStatusInfo {
     buildTitle: string;
     totalInOre: number;
     deliveryMethod: DeliveryMethod;
+    /** The slug of the build bought. An API older than the field leaves it out. */
+    buildSlug?: string | null;
 }
 
 export interface AdminOrderSummary {

@@ -13,6 +13,7 @@ import { getDictionary } from '@/i18n/dictionaries';
 import { formatPrice } from '@/lib/format';
 import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import { canBuy } from '@/lib/shop';
+import { trackInitiateCheckout } from '@/lib/pixelEvents';
 import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from './VippsButtonArt';
 import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, type CheckoutField } from '@/lib/validation';
 
@@ -151,6 +152,8 @@ export default function CheckoutForm({ build, delivery, mode, termsVersion: load
         setErrors({});
         setFailure(null);
         setSubmitting(true);
+        // Sent before the checkout call, so the pixel's request has that call's time to leave before the redirect.
+        trackInitiateCheckout(build.slug, total);
         try {
             const { redirectUrl } = await ShopService.checkout(parsed.data);
             window.location.assign(redirectUrl);

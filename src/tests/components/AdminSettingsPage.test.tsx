@@ -10,6 +10,7 @@ import type { Locale } from '@/i18n/config';
 
 const updateBranding = vi.fn();
 const update = vi.fn();
+const marketing = vi.hoisted(() => ({ getSettings: vi.fn(), updateSettings: vi.fn() }));
 const saved = {
     contactRecipientEmail: 'post@altinnendata.no',
     companyName: 'Altinnendata',
@@ -27,6 +28,7 @@ const saved = {
 vi.mock('@/services/settingsService', () => ({
     default: { get: () => Promise.resolve(saved), update: (...args: unknown[]) => update(...args) },
 }));
+vi.mock('@/services/marketingService', () => ({ default: marketing }));
 vi.mock('@/services/brandingService', () => ({
     default: { update: (...args: unknown[]) => updateBranding(...args) },
 }));
@@ -82,6 +84,8 @@ describe('the admin settings page', () => {
     beforeEach(() => {
         update.mockReset();
         updateBranding.mockReset();
+        marketing.getSettings.mockReset().mockResolvedValue({ metaPixelId: null });
+        marketing.updateSettings.mockReset();
     });
 
     it('shows the branding form in Norwegian', async () => {
@@ -138,5 +142,124 @@ describe('the admin settings page', () => {
 
         await userEvent.click(screen.getByRole('button', { name: saveLabel }));
         await waitFor(() => expect(logo).toHaveAccessibleDescription(tooLarge));
+    });
+});
+
+// The Error that the marketing service throws when the API refuses the ID.
+const refusedPixelId = () =>
+    request(
+        () =>
+            Promise.reject(
+                Object.assign(new Error('Request failed with status code 400'), {
+                    isAxiosError: true,
+                    response: { status: 400, data: { errors: { metaPixelId: ['The Meta Pixel ID must be 5 to 20 digits.'] } } },
+                }),
+            ),
+        'Failed',
+    ).catch((e: unknown) => e);
+
+describe('the marketing section', () => {
+    beforeEach(() => {
+        marketing.getSettings.mockReset().mockResolvedValue({ metaPixelId: '123456789012345' });
+        marketing.updateSettings.mockReset();
+    });
+
+    it.each([
+        ['no', 'Markedsføring', 'Meta Pixel-ID', /Meta Events Manager under Datasett/, /informasjonskapsler og personvern beskrive Meta Pixel/],
+        ['en', 'Marketing', 'Meta Pixel ID', /Meta Events Manager under Datasets/, /cookie and privacy pages must describe the Meta Pixel/],
+    ] as const)('shows the saved ID with where to find it and what the legal pages need (%s)', async (locale, title, label, hint, notice) => {
+        renderPage(locale);
+
+        expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument();
+        const field = screen.getByLabelText(label);
+        await waitFor(() => expect(field).toHaveValue('123456789012345'));
+        expect(field).toHaveAccessibleDescription(expect.stringMatching(hint));
+        expect(field).toHaveAccessibleDescription(expect.stringMatching(notice));
+    });
+
+    it('keeps the field and the button in place but disabled until the ID has loaded', async () => {
+        marketing.getSettings.mockReset().mockReturnValue(new Promise(() => undefined));
+        renderPage('no');
+
+        expect(await screen.findByLabelText('Meta Pixel-ID')).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Lagre markedsføring' })).toBeDisabled();
+    });
+
+    it('says so when the ID cannot be loaded', async () => {
+        marketing.getSettings.mockReset().mockRejectedValue(new Error('down'));
+        renderPage('no');
+
+        expect(await screen.findByText('Kunne ikke laste innstillingene for markedsføring')).toBeInTheDocument();
+        expect(screen.getByLabelText('Meta Pixel-ID')).toBeDisabled();
+    });
+
+    it('saves the trimmed ID', async () => {
+        marketing.updateSettings.mockResolvedValue({ metaPixelId: '987654321' });
+        renderPage('no');
+        const field = await screen.findByLabelText('Meta Pixel-ID');
+        await waitFor(() => expect(field).toBeEnabled());
+
+        await userEvent.clear(field);
+        await userEvent.type(field, ' 987654321 ');
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledWith({ metaPixelId: '987654321' }));
+        expect(field).toHaveValue('987654321');
+        expect(field).not.toHaveAttribute('aria-invalid');
+    });
+
+    it('clears the ID with an empty field', async () => {
+        marketing.updateSettings.mockResolvedValue({ metaPixelId: null });
+        renderPage('no');
+        const field = await screen.findByLabelText('Meta Pixel-ID');
+        await waitFor(() => expect(field).toBeEnabled());
+
+        await userEvent.clear(field);
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledWith({ metaPixelId: '' }));
+        expect(field).toHaveValue('');
+    });
+
+    it.each(['12ab5', '1234', '123456789012345678901', '１２３４５'])('refuses %s before sending it', async value => {
+        renderPage('no');
+        const field = await screen.findByLabelText('Meta Pixel-ID');
+        await waitFor(() => expect(field).toBeEnabled());
+
+        await userEvent.clear(field);
+        await userEvent.type(field, value);
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        expect(field).toHaveAccessibleDescription(expect.stringMatching(/Meta Pixel-ID-en må bestå av 5 til 20 siffer\.$/));
+        expect(field).toHaveAttribute('aria-invalid', 'true');
+        expect(marketing.updateSettings).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['no', 'Meta Pixel-ID', 'Lagre markedsføring', /Meta Pixel-ID-en må bestå av 5 til 20 siffer\.$/],
+        ['en', 'Meta Pixel ID', 'Save marketing', /The Meta Pixel ID must be 5 to 20 digits\.$/],
+    ] as const)('shows the API field error on the field in the page language (%s)', async (locale, label, save, message) => {
+        marketing.updateSettings.mockRejectedValueOnce(await refusedPixelId());
+        renderPage(locale);
+        const field = await screen.findByLabelText(label);
+        await waitFor(() => expect(field).toBeEnabled());
+
+        await userEvent.click(screen.getByRole('button', { name: save }));
+
+        await waitFor(() => expect(field).toHaveAccessibleDescription(expect.stringMatching(message)));
+        expect(field).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('marks no field when the save fails for another reason', async () => {
+        marketing.updateSettings.mockRejectedValueOnce(new Error('Network Error'));
+        renderPage('no');
+        const field = await screen.findByLabelText('Meta Pixel-ID');
+        await waitFor(() => expect(field).toBeEnabled());
+
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Lagre markedsføring' })).toBeEnabled());
+        expect(marketing.updateSettings).toHaveBeenCalledTimes(1);
+        expect(field).not.toHaveAttribute('aria-invalid');
     });
 });

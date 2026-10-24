@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PaymentReturn, usePollUntilFinal, type PaymentReturnState } from '@sjolystinnovation/app-kit/payments';
 import { localeHref, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { formatOre } from '@/lib/format';
 import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
+import { useConsent } from '@sjolystinnovation/app-kit/consent';
+import { trackPurchaseOnce } from '@/lib/pixelEvents';
+import { CONSENT_OPTIONS } from '@/lib/consent';
 import ShopService, { type OrderStatusInfo } from '@/services/shopService';
 
 const isFinal = (order: OrderStatusInfo | null) => order === null || order.status !== 'Pending';
@@ -29,6 +32,15 @@ export default function ShopReturn({ locale }: { locale: Locale }) {
         }
     }, [token]);
     const { data: order, loading, refresh } = usePollUntilFinal(fetcher, isFinal);
+    const { marketing } = useConsent(CONSENT_OPTIONS);
+
+    // A Meta Pixel Purchase once the payment is reserved or taken, once per order in this browser.
+    useEffect(() => {
+        if (!marketing || !order || (order.status !== 'Reserved' && order.status !== 'Paid')) return;
+        // The layout's MetaPixel loads the pixel in an effect of the same commit, which runs after this one.
+        const timer = setTimeout(() => trackPurchaseOnce(order), 0);
+        return () => clearTimeout(timer);
+    }, [marketing, order]);
 
     let state: PaymentReturnState;
     if (!token) state = 'failed';

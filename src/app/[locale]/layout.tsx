@@ -8,10 +8,14 @@ import Footer from "./footer";
 import { publicGetOptional } from "@/lib/publicApi";
 import { REVALIDATE_TARGETS } from "@/lib/cacheTags";
 import { Branding } from "@/services/brandingService";
-import { LOCALES, LOCALE_TAGS, isLocale, type Locale } from "@/i18n/config";
+import { LOCALES, LOCALE_TAGS, isLocale, localeHref, type Locale } from "@/i18n/config";
 import { siteMetadata, organizationNode, webSiteNode } from "@/lib/seo/site";
 import { JsonLd } from "@sjolystinnovation/app-kit/seo";
+import { ConsentBanner, MetaPixel, isValidPixelId } from "@sjolystinnovation/app-kit/consent";
+import { nbConsentBannerStrings } from "@sjolystinnovation/app-kit/locales/nb";
 import { getCompanyInfo } from "@/lib/companyInfo";
+import { getMetaPixelId } from "@/lib/marketing";
+import { CONSENT_LOG_ENDPOINT, CONSENT_OPTIONS } from "@/lib/consent";
 import { DictionaryProvider } from "@/i18n/DictionaryProvider";
 import { getDictionary } from "@/i18n/dictionaries";
 
@@ -40,10 +44,13 @@ export default async function LocaleLayout({
     if (!isLocale(locale)) notFound();
 
     const dict = getDictionary(locale);
-    const [branding, company] = await Promise.all([
+    const [branding, company, pixelId] = await Promise.all([
         publicGetOptional<Branding>("/branding", { tags: [REVALIDATE_TARGETS.branding] }),
         getCompanyInfo(),
+        getMetaPixelId(),
     ]);
+    // Without a pixel there is nothing to consent to, so no banner and no cookie settings link.
+    const marketing = isValidPixelId(pixelId);
 
     return (
         <html lang={LOCALE_TAGS[locale as Locale]}>
@@ -64,7 +71,19 @@ export default async function LocaleLayout({
                         </a>
                         <Navbar />
                         <main id="main" tabIndex={-1} className="flex-1 outline-none">{children}</main>
-                        <Footer company={company} />
+                        <Footer company={company} consentSettings={marketing} />
+                        {marketing && (
+                            <>
+                                <ConsentBanner
+                                    {...CONSENT_OPTIONS}
+                                    enabled={marketing}
+                                    cookiesHref={localeHref(locale, "/cookies")}
+                                    logEndpoint={CONSENT_LOG_ENDPOINT}
+                                    strings={locale === "no" ? nbConsentBannerStrings : undefined}
+                                />
+                                <MetaPixel {...CONSENT_OPTIONS} pixelId={pixelId} />
+                            </>
+                        )}
                     </Providers>
                 </DictionaryProvider>
             </body>

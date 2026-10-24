@@ -7,6 +7,7 @@ import CheckoutForm from '@/components/shop/CheckoutForm';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { BuildDetail } from '@/services/buildService';
 import type { PublicDeliveryOption } from '@/services/shopService';
+import { acceptPixel, events, loadPixel, resetPixel } from '../pixel';
 
 const service = vi.hoisted(() => ({ checkout: vi.fn(), config: vi.fn() }));
 const session = vi.hoisted(() => ({ roles: ['Admin'] as string[] }));
@@ -144,6 +145,67 @@ describe('CheckoutForm', () => {
         });
         vi.unstubAllGlobals();
     });
+
+    const submitShipping = async (user: ReturnType<typeof userEvent.setup>) => {
+        await fillContact(user);
+        await user.type(screen.getByLabelText(/Gateadresse/), 'Storgata 1');
+        await user.type(screen.getByLabelText(/Postnummer/), '4347');
+        await user.type(screen.getByLabelText(/Sted/), 'Lye');
+        await user.click(screen.getByRole('checkbox', { name: /Jeg godtar salgsvilkårene/ }));
+        await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
+    };
+
+    it('sends a Meta Pixel InitiateCheckout with the total including delivery before the checkout call', async () => {
+        resetPixel();
+        const fbq = acceptPixel();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValue({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        renderForm();
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        expect(events(fbq)).toEqual([
+            ['track', 'InitiateCheckout', { content_ids: ['gaming-pc'], content_type: 'product', num_items: 1, value: 10290, currency: 'NOK' }],
+        ]);
+        expect(fbq.mock.invocationCallOrder[0]).toBeLessThan(service.checkout.mock.invocationCallOrder[0]);
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    it('sends no InitiateCheckout without consent', async () => {
+        resetPixel();
+        const fbq = loadPixel();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValueOnce({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        renderForm();
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        expect(fbq).not.toHaveBeenCalled();
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    it('sends no InitiateCheckout when client validation stops the submit', async () => {
+        resetPixel();
+        const fbq = acceptPixel();
+        const user = userEvent.setup();
+        renderForm();
+
+        await fillContact(user);
+        await user.click(screen.getByRole('button', { name: 'Betal med Vipps' }));
+
+        expect(await screen.findByText('Du må godta salgsvilkårene.')).toBeInTheDocument();
+        expect(service.checkout).not.toHaveBeenCalled();
+        expect(events(fbq)).toEqual([]);
+        resetPixel();
+    }, 15_000);
 
     it('shows the unavailable text on 409 buildUnavailable', async () => {
         const user = userEvent.setup();

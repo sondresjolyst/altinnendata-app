@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { getConsent, setConsent } from '@sjolystinnovation/app-kit/consent';
 import Footer from '@/app/[locale]/footer';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { Locale } from '@/i18n/config';
@@ -22,10 +24,10 @@ const company: CompanyInfo = {
     phone: '',
 };
 
-const renderFooter = (info: CompanyInfo, locale: Locale = 'no') =>
+const renderFooter = (info: CompanyInfo, locale: Locale = 'no', consentSettings?: boolean) =>
     render(
         <DictionaryProvider locale={locale}>
-            <Footer company={info} />
+            <Footer company={info} consentSettings={consentSettings} />
         </DictionaryProvider>,
     );
 
@@ -94,5 +96,34 @@ describe('Footer', () => {
         renderFooter({ ...company, legalName: '' });
 
         expect(screen.getByRole('link', { name: 'Sjølyst Innovation AS' }).closest('p')).toHaveTextContent(/^© \d{4} Altinnendata · /);
+    });
+
+    it('has no cookie settings button without a marketing tool', () => {
+        renderFooter(company);
+
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
+        expect(screen.queryByText(/Innstillinger for informasjonskapsler/)).not.toBeInTheDocument();
+    });
+
+    it.each([
+        ['no', 'Informasjonskapsler', 'Innstillinger for informasjonskapsler'],
+        ['en', 'Cookies', 'Cookie settings'],
+    ] as const)('puts the cookie settings button right after the cookies link (%s)', (locale, cookies, label) => {
+        renderFooter(company, locale, true);
+
+        const nav = within(screen.getByRole('navigation'));
+        const button = nav.getByRole('button', { name: label });
+        expect(nav.getByRole('link', { name: cookies }).nextElementSibling).toBe(button);
+        expect(button).toHaveClass('hover:text-gray-900');
+    });
+
+    it('reopens the consent choice from the cookie settings button', async () => {
+        setConsent({ marketing: true, noticeVersion: 'test' });
+        renderFooter(company, 'no', true);
+
+        await userEvent.click(screen.getByRole('button', { name: 'Innstillinger for informasjonskapsler' }));
+
+        expect(getConsent().reopened).toBe(true);
+        setConsent({ marketing: false, noticeVersion: 'test' });
     });
 });

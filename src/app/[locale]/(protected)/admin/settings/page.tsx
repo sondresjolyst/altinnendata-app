@@ -5,6 +5,7 @@ import { BrandingManager, type BrandingManagerStrings } from '@sjolystinnovation
 import { nbBrandingManagerStrings, nbCompanySettingsFormStrings } from '@sjolystinnovation/app-kit/locales/nb';
 import SettingsService from '@/services/settingsService';
 import BrandingService from '@/services/brandingService';
+import MarketingSettingsForm from '@/components/MarketingSettingsForm';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 // app-kit's English hint only says the county is optional.
@@ -27,6 +28,7 @@ export default function AdminSettingsPage() {
     return (
         <CompanySettingsForm service={SettingsService} strings={no ? nbCompanySettingsFormStrings : enCompanySettingsStrings}>
             <BrandingManager save={BrandingService.update} strings={no ? nbBrandingManagerStrings : enBrandingStrings} />
+            <MarketingSettingsForm />
         </CompanySettingsForm>
     );
 }
