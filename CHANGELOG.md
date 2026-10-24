@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.0...v1.13.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* show a neutral consent note in the marketing settings ([#218](https://github.com/sondresjolyst/altinnendata-app/issues/218)) ([e21c8a1](https://github.com/sondresjolyst/altinnendata-app/commit/e21c8a164af65508592369862892f26c7600e305))
+
 ## [1.13.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.12.3...v1.13.0) (2026-10-24)
 
 
