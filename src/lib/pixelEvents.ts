@@ -45,7 +45,6 @@ function readSent(): string[] {
  * only once the event was really sent, so a send that consent or a missing pixel blocked is tried again later.
  */
 export function trackPurchaseOnce(order: OrderStatusInfo): boolean {
-    if (typeof window === 'undefined') return false;
     const sent = readSent();
     if (sentHere.has(order.reference) || sent.includes(order.reference)) return false;
     const params = {
