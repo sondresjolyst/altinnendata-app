@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.13.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.1...v1.13.2) (2026-10-25)
+
+
+### Dependencies
+
+* **npm:** bump `undici` from 8.11.2 to 8.12.3 ([#220](https://github.com/sondresjolyst/altinnendata-app/issues/220)) ([e7cf6be](https://github.com/sondresjolyst/altinnendata-app/commit/e7cf6be4c22b50452163b6ec88025144505552a9))
+* **npm:** bump `zod` from 4.6.5 to 4.6.7 ([#221](https://github.com/sondresjolyst/altinnendata-app/issues/221)) ([4ac9dc4](https://github.com/sondresjolyst/altinnendata-app/commit/4ac9dc4f091d13614483ca5d16b4b1b5353b5db1))
+* **npm:** bump postcss from 8.5.29 to 8.5.30 in the tailwind group ([#227](https://github.com/sondresjolyst/altinnendata-app/issues/227)) ([7efce17](https://github.com/sondresjolyst/altinnendata-app/commit/7efce17027bda6a2c384a8b10c874019e5d3a61d))
+* **npm:** bump the react group with 2 updates ([#224](https://github.com/sondresjolyst/altinnendata-app/issues/224)) ([5bae516](https://github.com/sondresjolyst/altinnendata-app/commit/5bae516a078aeaabad316dfa33e5d6fae248e4f4))
+* **npm:** bump the testing group across 1 directory with 3 updates ([#226](https://github.com/sondresjolyst/altinnendata-app/issues/226)) ([71471df](https://github.com/sondresjolyst/altinnendata-app/commit/71471dfe1262455743f66424f3ac6c6657f32602))
+
 ## [1.13.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.0...v1.13.1) (2026-10-24)
 
 
