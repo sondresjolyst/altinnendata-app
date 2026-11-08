@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.13.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.2...v1.13.3) (2026-11-08)
+
+
+### Dependencies
+
+* **docker:** update node from 26.12.1-slim to 26.13.0-slim ([07ea9fd](https://github.com/sondresjolyst/altinnendata-app/commit/07ea9fdf877962e456e88a122d3e61db2ff8226a))
+* **npm:** update @heroicons/react from ^2.2.0 to 2.2.0 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update @sjolystinnovation/app-kit from ^1.6.1 to 1.6.1 ([837b695](https://github.com/sondresjolyst/altinnendata-app/commit/837b695e10dcda39ddc2e86c8cca2247c4daee92))
+* **npm:** update axios from ^1.20.0 to 1.20.0 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update next from ^16.4.2 to 16.4.2 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update next-auth from ^4.24.15 to 4.24.15 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update react from ^19.3.1 to 19.3.1 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update react-dom from ^19.3.1 to 19.3.1 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update react-markdown from ^10.1.0 to 10.1.0 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update rehype-sanitize from ^6.0.0 to 6.0.0 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update remark-gfm from ^4.0.1 to 4.0.1 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update sonner from ^2.0.8 to 2.0.8 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+* **npm:** update zod from ^4.6.7 to 4.6.7 ([f30f7b6](https://github.com/sondresjolyst/altinnendata-app/commit/f30f7b68051cfe10d976325f812a79d1eab36922))
+
 ## [1.13.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.1...v1.13.2) (2026-10-25)
 
 
