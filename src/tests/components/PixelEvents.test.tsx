@@ -201,6 +201,36 @@ describe('the TikTok Pixel events', () => {
         ]);
     });
 
+    it('give the Purchase item the build price and keep the total as the value', () => {
+        const fbq = acceptPixel();
+        const ttq = loadTikTok();
+
+        expect(trackPurchaseOnce(order({ buildPriceInOre: 1269050 }))).toBe(true);
+
+        expect(tikTokEvents(ttq)).toEqual([
+            [
+                'track',
+                'Purchase',
+                { contents: [{ content_id: 'gaming-pc', quantity: 1, price: 12690.5 }], content_type: 'product', value: 12990.5, currency: 'NOK' },
+                { event_id: reference },
+            ],
+        ]);
+        // Meta's reference documents no item price in contents, so its Purchase keeps the same shape.
+        expect(events(fbq)).toEqual([purchase()]);
+    });
+
+    it('leave out the Purchase item price when the build price is null or missing', () => {
+        acceptPixel();
+        const ttq = loadTikTok();
+        const missing = reference;
+        const empty = `${reference}-NULL`;
+
+        trackPurchaseOnce(order());
+        trackPurchaseOnce(order({ reference: empty, buildPriceInOre: null }));
+
+        expect(tikTokEvents(ttq)).toEqual([tikTokPurchase(missing), tikTokPurchase(empty)]);
+    });
+
     it('send nothing without consent, even with the pixel loaded', () => {
         const ttq = loadTikTok();
 

@@ -87,6 +87,7 @@ function purchaseOnce(pixel: Pixel, order: OrderStatusInfo, send: () => boolean)
  */
 export function trackPurchaseOnce(order: OrderStatusInfo): boolean {
     const value = order.totalInOre / 100;
+    const itemPrice = typeof order.buildPriceInOre === 'number' && Number.isFinite(order.buildPriceInOre) ? order.buildPriceInOre / 100 : null;
     const meta = purchaseOnce('meta', order, () =>
         trackPixel(
             'Purchase',
@@ -104,8 +105,8 @@ export function trackPurchaseOnce(order: OrderStatusInfo): boolean {
         trackTikTok(
             'Purchase',
             {
-                // The order status has only the total, which includes delivery, so the item has no price.
-                ...(order.buildSlug ? { contents: tikTokContents(order.buildSlug, null) } : {}),
+                // The item price is the build alone. The value is the total, which includes delivery.
+                ...(order.buildSlug ? { contents: tikTokContents(order.buildSlug, itemPrice) } : {}),
                 content_type: 'product',
                 value,
                 currency: CURRENCY,
