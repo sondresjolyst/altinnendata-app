@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from 'react';
+import { identifyTikTok } from '@sjolystinnovation/app-kit/consent';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { TextInput } from '@sjolystinnovation/app-kit/ui';
 import ContactService from '@/services/contactService';
 import { zodFieldErrors } from '@sjolystinnovation/app-kit/validation';
 import { contactSchema, issueMessage, budgetRanges, ContactInput } from '@/lib/validation';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { trackContact } from '@/lib/pixelEvents';
+import { toE164 } from '@/lib/phone';
 
 export default function ContactForm({ build }: { build?: { slug: string; title: string } | null }) {
     const { dict, locale } = useDictionary();
@@ -42,6 +45,10 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
         setSubmitting(true);
         try {
             await ContactService.send({ ...parsed.data, locale });
+            // Only once the API took the message. TikTok's Advanced Matching goes right above the event, as TikTok asks.
+            // A phone number that is not Norwegian gives no E.164 number, so it is left out.
+            identifyTikTok({ email: parsed.data.email, phoneNumber: toE164(parsed.data.phone) });
+            trackContact();
             toast.success(dict.contact.sent);
             setForm(empty);
         } catch {
