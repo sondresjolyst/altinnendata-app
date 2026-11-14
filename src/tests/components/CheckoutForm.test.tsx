@@ -7,7 +7,7 @@ import CheckoutForm from '@/components/shop/CheckoutForm';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { BuildDetail } from '@/services/buildService';
 import type { PublicDeliveryOption } from '@/services/shopService';
-import { acceptPixel, events, loadPixel, resetPixel } from '../pixel';
+import { acceptPixel, events, loadPixel, loadTikTok, resetPixel, tikTokEvents } from '../pixel';
 
 const service = vi.hoisted(() => ({ checkout: vi.fn(), config: vi.fn() }));
 const session = vi.hoisted(() => ({ roles: ['Admin'] as string[] }));
@@ -171,6 +171,54 @@ describe('CheckoutForm', () => {
             ['track', 'InitiateCheckout', { content_ids: ['gaming-pc'], content_type: 'product', num_items: 1, value: 10290, currency: 'NOK' }],
         ]);
         expect(fbq.mock.invocationCallOrder[0]).toBeLessThan(service.checkout.mock.invocationCallOrder[0]);
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    it('identifies the buyer to TikTok right before a TikTok InitiateCheckout, and both before the checkout call', async () => {
+        resetPixel();
+        const fbq = acceptPixel();
+        const ttq = loadTikTok();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValue({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        renderForm();
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        // Only the email and the phone in E.164. The name and the address are not sent.
+        expect(tikTokEvents(ttq)).toEqual([
+            ['identify', { email: 'kari@example.no', phone_number: '+4791234567', external_id: '' }],
+            ['track', 'InitiateCheckout', {
+                contents: [{ content_id: 'gaming-pc', quantity: 1, price: 9990 }],
+                content_type: 'product',
+                value: 10290,
+                currency: 'NOK',
+            }],
+        ]);
+        const identifyOrder = ttq.mock.invocationCallOrder[ttq.mock.calls.findIndex(call => call[0] === 'identify')]!;
+        expect(identifyOrder).toBeLessThan(ttq.mock.invocationCallOrder[ttq.mock.calls.findIndex(call => call[0] === 'track')]!);
+        expect(identifyOrder).toBeLessThan(fbq.mock.invocationCallOrder[0]!);
+        expect(Math.max(...ttq.mock.invocationCallOrder)).toBeLessThan(service.checkout.mock.invocationCallOrder[0]!);
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    it('sends nothing to TikTok without consent', async () => {
+        resetPixel();
+        const ttq = loadTikTok();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValueOnce({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        renderForm();
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        expect(ttq).not.toHaveBeenCalled();
         vi.unstubAllGlobals();
         resetPixel();
     }, 15_000);

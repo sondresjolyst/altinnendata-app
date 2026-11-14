@@ -11,10 +11,9 @@ import { Branding } from "@/services/brandingService";
 import { LOCALES, LOCALE_TAGS, isLocale, localeHref, type Locale } from "@/i18n/config";
 import { siteMetadata, organizationNode, webSiteNode } from "@/lib/seo/site";
 import { JsonLd } from "@sjolystinnovation/app-kit/seo";
-import { ConsentBanner, MetaPixel, isValidPixelId } from "@sjolystinnovation/app-kit/consent";
-import { nbConsentBannerStrings } from "@sjolystinnovation/app-kit/locales/nb";
+import { ConsentBanner, MetaPixel, TikTokPixel } from "@sjolystinnovation/app-kit/consent";
 import { getCompanyInfo } from "@/lib/companyInfo";
-import { getMetaPixelId } from "@/lib/marketing";
+import { getMarketingConfig } from "@/lib/marketing";
 import { CONSENT_LOG_ENDPOINT, CONSENT_OPTIONS } from "@/lib/consent";
 import { DictionaryProvider } from "@/i18n/DictionaryProvider";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -44,13 +43,14 @@ export default async function LocaleLayout({
     if (!isLocale(locale)) notFound();
 
     const dict = getDictionary(locale);
-    const [branding, company, pixelId] = await Promise.all([
+    const [branding, company, { metaPixelId, tikTokPixelId }] = await Promise.all([
         publicGetOptional<Branding>("/branding", { tags: [REVALIDATE_TARGETS.branding] }),
         getCompanyInfo(),
-        getMetaPixelId(),
+        getMarketingConfig(),
     ]);
-    // Without a pixel there is nothing to consent to, so no banner and no cookie settings link.
-    const marketing = isValidPixelId(pixelId);
+    // getMarketingConfig gives only valid IDs. Without a pixel there is nothing to consent to, so no banner and no
+    // cookie settings link.
+    const marketing = metaPixelId !== null || tikTokPixelId !== null;
 
     return (
         <html lang={LOCALE_TAGS[locale as Locale]}>
@@ -79,9 +79,11 @@ export default async function LocaleLayout({
                                     enabled={marketing}
                                     cookiesHref={localeHref(locale, "/cookies")}
                                     logEndpoint={CONSENT_LOG_ENDPOINT}
-                                    strings={locale === "no" ? nbConsentBannerStrings : undefined}
+                                    strings={dict.consentBanner}
                                 />
-                                <MetaPixel {...CONSENT_OPTIONS} pixelId={pixelId} />
+                                {/* autoConfig leaves Meta's automatic events on, such as button clicks. */}
+                                {metaPixelId && <MetaPixel {...CONSENT_OPTIONS} pixelId={metaPixelId} autoConfig />}
+                                {tikTokPixelId && <TikTokPixel {...CONSENT_OPTIONS} pixelId={tikTokPixelId} />}
                             </>
                         )}
                     </Providers>

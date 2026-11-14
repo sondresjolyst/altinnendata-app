@@ -13,7 +13,7 @@ const revalidateTargets = defineRevalidateTargets({
         legal: { pages: ['/terms', '/privacy', '/cookies'], root: ['/sitemap.xml'] },
         // Every page renders branding through the layout, and so does /icon: the tag reaches them all.
         branding: {},
-        // The layout reads the Meta Pixel ID for the consent banner on every page, so the tag alone reaches them.
+        // The layout reads the Meta and TikTok Pixel IDs for the consent banner on every page, so the tag alone reaches them.
         marketing: {},
     },
 });

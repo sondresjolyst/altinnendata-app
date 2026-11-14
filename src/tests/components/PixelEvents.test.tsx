@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { MetaPixel, setConsent } from '@sjolystinnovation/app-kit/consent';
+import { MetaPixel, TikTokPixel, setConsent } from '@sjolystinnovation/app-kit/consent';
 import ViewContentPixel from '@/components/shop/ViewContentPixel';
 import ShopReturn from '@/components/shop/ShopReturn';
 import ShopService, { type OrderStatusInfo } from '@/services/shopService';
-import { PURCHASE_STORAGE_KEY, trackInitiateCheckout, trackPurchaseOnce, trackViewContent } from '@/lib/pixelEvents';
+import { PURCHASE_STORAGE_KEY, TIKTOK_PURCHASE_STORAGE_KEY, trackInitiateCheckout, trackPurchaseOnce, trackViewContent } from '@/lib/pixelEvents';
 import { CONSENT_OPTIONS } from '@/lib/consent';
-import { acceptPixel, events, loadPixel, resetPixel } from '../pixel';
+import { acceptPixel, acceptTikTok, events, loadPixel, loadTikTok, resetPixel, tikTokEvents } from '../pixel';
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/no/builds/gaming-pc',
@@ -40,7 +40,17 @@ const purchase = (ref = reference, slug: string | null = 'gaming-pc') => [
 /** Lets the timers and the promises of one render run. */
 const tick = () => act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
 
-const stored = () => JSON.parse(window.localStorage.getItem(PURCHASE_STORAGE_KEY) ?? 'null') as string[] | null;
+const stored = (key = PURCHASE_STORAGE_KEY) => JSON.parse(window.localStorage.getItem(key) ?? 'null') as string[] | null;
+const storedTikTok = () => stored(TIKTOK_PURCHASE_STORAGE_KEY);
+
+const tikTokPurchase = (ref = reference, slug: string | null = 'gaming-pc') => [
+    'track',
+    'Purchase',
+    { ...(slug ? { contents: [{ content_id: slug, quantity: 1 }] } : {}), content_type: 'product', value: 12990.5, currency: 'NOK' },
+    { event_id: ref },
+];
+
+type TtqWindow = Window & { ttq?: unknown };
 
 beforeEach(() => {
     reference = `AID-00100${++count}-9C0D1E2F`;
@@ -52,7 +62,7 @@ describe('the pixel event helpers', () => {
     it('send ViewContent, InitiateCheckout and Purchase in NOK with the build as the product', () => {
         const fbq = acceptPixel();
 
-        expect(trackViewContent('gaming-pc', 12990)).toBe(true);
+        expect(trackViewContent('gaming-pc', 12990)).toEqual(['meta']);
         trackInitiateCheckout('gaming-pc', 13290);
         expect(trackPurchaseOnce(order())).toBe(true);
 
@@ -82,7 +92,7 @@ describe('the pixel event helpers', () => {
     it('send nothing without consent, even with the pixel loaded', () => {
         const fbq = loadPixel();
 
-        expect(trackViewContent('gaming-pc', 12990)).toBe(false);
+        expect(trackViewContent('gaming-pc', 12990)).toEqual([]);
         trackInitiateCheckout('gaming-pc', 13290);
         expect(trackPurchaseOnce(order())).toBe(false);
 
@@ -94,7 +104,7 @@ describe('the pixel event helpers', () => {
         acceptPixel();
         delete (window as Window & { fbq?: unknown }).fbq;
 
-        expect(trackViewContent('gaming-pc', 12990)).toBe(false);
+        expect(trackViewContent('gaming-pc', 12990)).toEqual([]);
         expect(trackPurchaseOnce(order())).toBe(false);
         expect(stored()).toBeNull();
     });
@@ -106,7 +116,7 @@ describe('the pixel event helpers', () => {
         await tick();
 
         expect((window as Window & { fbq?: unknown }).fbq).toBeUndefined();
-        expect(trackViewContent('gaming-pc', 12990)).toBe(false);
+        expect(trackViewContent('gaming-pc', 12990)).toEqual([]);
         expect(trackPurchaseOnce(order())).toBe(false);
         expect(stored()).toBeNull();
     });
@@ -157,6 +167,130 @@ describe('the pixel event helpers', () => {
 
         setItem.mockRestore();
         expect(events(fbq)).toHaveLength(1);
+    });
+});
+
+describe('the TikTok Pixel events', () => {
+    it('send ViewContent, InitiateCheckout and Purchase in the shape TikTok asks for', () => {
+        acceptPixel();
+        const ttq = loadTikTok();
+
+        expect(trackViewContent('gaming-pc', 12990)).toEqual(['meta', 'tiktok']);
+        trackInitiateCheckout('gaming-pc', 13290, 12990);
+        expect(trackPurchaseOnce(order())).toBe(true);
+
+        expect(tikTokEvents(ttq)).toEqual([
+            ['track', 'ViewContent', { contents: [{ content_id: 'gaming-pc', quantity: 1, price: 12990 }], content_type: 'product', value: 12990, currency: 'NOK' }],
+            ['track', 'InitiateCheckout', { contents: [{ content_id: 'gaming-pc', quantity: 1, price: 12990 }], content_type: 'product', value: 13290, currency: 'NOK' }],
+            tikTokPurchase(),
+        ]);
+        expect(storedTikTok()).toEqual([reference]);
+    });
+
+    it('leave out the value and the price when they are not known', () => {
+        const ttq = acceptTikTok();
+
+        trackViewContent('gaming-pc', null);
+        trackInitiateCheckout('gaming-pc', 300);
+        trackPurchaseOnce(order({ buildSlug: undefined }));
+
+        expect(tikTokEvents(ttq)).toEqual([
+            ['track', 'ViewContent', { contents: [{ content_id: 'gaming-pc', quantity: 1 }], content_type: 'product' }],
+            ['track', 'InitiateCheckout', { contents: [{ content_id: 'gaming-pc', quantity: 1 }], content_type: 'product', value: 300, currency: 'NOK' }],
+            tikTokPurchase(reference, null),
+        ]);
+    });
+
+    it('send nothing without consent, even with the pixel loaded', () => {
+        const ttq = loadTikTok();
+
+        expect(trackViewContent('gaming-pc', 12990)).toEqual([]);
+        trackInitiateCheckout('gaming-pc', 13290, 12990);
+        expect(trackPurchaseOnce(order())).toBe(false);
+
+        expect(ttq).not.toHaveBeenCalled();
+        expect(storedTikTok()).toBeNull();
+    });
+
+    it('send to TikTok alone when only the TikTok Pixel is loaded', () => {
+        const ttq = acceptTikTok();
+
+        expect(trackViewContent('gaming-pc', 12990)).toEqual(['tiktok']);
+        expect(trackPurchaseOnce(order())).toBe(true);
+
+        expect(tikTokEvents(ttq)).toHaveLength(2);
+        expect(storedTikTok()).toEqual([reference]);
+        expect(stored()).toBeNull();
+    });
+
+    it('send only to the pixels asked for', () => {
+        const fbq = acceptPixel();
+        const ttq = loadTikTok();
+
+        expect(trackViewContent('gaming-pc', 12990, ['tiktok'])).toEqual(['tiktok']);
+
+        expect(events(fbq)).toEqual([]);
+        expect(tikTokEvents(ttq)).toHaveLength(1);
+    });
+});
+
+describe('Purchase once for each pixel', () => {
+    it('records the purchase for the pixel that sent, and sends it to the other once that one loads', () => {
+        const fbq = acceptPixel();
+
+        expect(trackPurchaseOnce(order())).toBe(true);
+        expect(stored()).toEqual([reference]);
+        expect(storedTikTok()).toBeNull();
+
+        const ttq = loadTikTok();
+        expect(trackPurchaseOnce(order())).toBe(true);
+        expect(trackPurchaseOnce(order())).toBe(false);
+
+        expect(events(fbq)).toEqual([purchase()]);
+        expect(tikTokEvents(ttq)).toEqual([tikTokPurchase()]);
+        expect(storedTikTok()).toEqual([reference]);
+    });
+
+    it('sends to Meta later when only TikTok was loaded at first', () => {
+        const ttq = acceptTikTok();
+
+        expect(trackPurchaseOnce(order())).toBe(true);
+        expect(stored()).toBeNull();
+
+        const fbq = loadPixel();
+        expect(trackPurchaseOnce(order())).toBe(true);
+        expect(trackPurchaseOnce(order())).toBe(false);
+
+        expect(events(fbq)).toEqual([purchase()]);
+        expect(tikTokEvents(ttq)).toEqual([tikTokPurchase()]);
+    });
+
+    it('does not let one pixel stored purchase count for the other across a reload', async () => {
+        acceptPixel();
+        trackPurchaseOnce(order());
+
+        // A reload: only localStorage remembers, and the Meta key must not count for TikTok.
+        vi.resetModules();
+        const reloaded = await import('@/lib/pixelEvents');
+        const fbq = loadPixel();
+        const ttq = loadTikTok();
+
+        expect(reloaded.trackPurchaseOnce(order())).toBe(true);
+        expect(reloaded.trackPurchaseOnce(order())).toBe(false);
+        expect(events(fbq)).toEqual([]);
+        expect(tikTokEvents(ttq)).toEqual([tikTokPurchase()]);
+    });
+
+    it('keeps a TikTok purchase from this page load when storage is broken', () => {
+        acceptPixel();
+        const ttq = loadTikTok();
+        const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('full'); });
+
+        expect(trackPurchaseOnce(order())).toBe(true);
+        expect(trackPurchaseOnce(order())).toBe(false);
+
+        setItem.mockRestore();
+        expect(tikTokEvents(ttq)).toHaveLength(1);
     });
 });
 
@@ -217,6 +351,91 @@ describe('ViewContentPixel', () => {
         await tick();
 
         expect(events(fbq)).toEqual([['track', 'ViewContent', expect.objectContaining({ content_ids: ['gaming-pc'] })]]);
+    });
+});
+
+describe('ViewContentPixel with both pixels', () => {
+    it('sends ViewContent to both pixels after the layout pixels load in the same commit', async () => {
+        setConsent({ marketing: true, ...CONSENT_OPTIONS });
+
+        render(
+            <>
+                <ViewContentPixel slug="gaming-pc" priceNok={12990} />
+                <MetaPixel {...CONSENT_OPTIONS} pixelId="123456789012345" />
+                <TikTokPixel {...CONSENT_OPTIONS} pixelId="C4A1B2C3D4E5F6G7H8I9" />
+            </>,
+        );
+        await tick();
+
+        const meta = (window as Window & { fbq?: { queue: unknown[][] } }).fbq!.queue;
+        expect(meta.filter(call => call[0] === 'track')).toEqual([
+            ['track', 'PageView'],
+            ['track', 'ViewContent', { content_ids: ['gaming-pc'], content_type: 'product', value: 12990, currency: 'NOK' }],
+        ]);
+        const tiktok = (window as TtqWindow).ttq as unknown[][];
+        expect(tiktok.filter(call => call[0] === 'track')).toEqual([
+            ['track', 'ViewContent', { contents: [{ content_id: 'gaming-pc', quantity: 1, price: 12990 }], content_type: 'product', value: 12990, currency: 'NOK' }],
+        ]);
+    });
+
+    it('sends to the pixel that missed it on a new consent, and not again to the one that sent', async () => {
+        const fbq = acceptPixel();
+
+        render(<ViewContentPixel slug="gaming-pc" priceNok={12990} />);
+        await tick();
+        expect(events(fbq)).toHaveLength(1);
+
+        act(() => { setConsent({ marketing: false, ...CONSENT_OPTIONS }); });
+        await tick();
+        const ttq = loadTikTok();
+        act(() => { setConsent({ marketing: true, ...CONSENT_OPTIONS }); });
+        await tick();
+
+        expect(events(fbq)).toHaveLength(1);
+        expect(tikTokEvents(ttq)).toEqual([['track', 'ViewContent', expect.objectContaining({ content_type: 'product' })]]);
+    });
+
+    it('sends again for a new build on the same mount', async () => {
+        const fbq = acceptPixel();
+        const ttq = loadTikTok();
+
+        const { rerender } = render(<ViewContentPixel slug="gaming-pc" priceNok={12990} />);
+        await tick();
+        rerender(<ViewContentPixel slug="office-pc" priceNok={6990} />);
+        await tick();
+
+        expect(events(fbq)).toHaveLength(2);
+        expect(tikTokEvents(ttq)).toHaveLength(2);
+    });
+});
+
+describe('the Purchase on the return page with both pixels', () => {
+    it('fires once to each pixel with the order reference as the event ID', async () => {
+        const fbq = acceptPixel();
+        const ttq = loadTikTok();
+        orderStatus.mockResolvedValue(order());
+
+        render(<ShopReturn locale="no" />);
+
+        await waitFor(() => expect(tikTokEvents(ttq)).toEqual([tikTokPurchase()]));
+        expect(events(fbq)).toEqual([purchase()]);
+        expect(stored()).toEqual([reference]);
+        expect(storedTikTok()).toEqual([reference]);
+    });
+
+    it('fires to TikTok on a later visit when only Meta was loaded the first time', async () => {
+        const fbq = acceptPixel();
+        orderStatus.mockResolvedValue(order());
+        const first = render(<ShopReturn locale="no" />);
+        await waitFor(() => expect(events(fbq)).toEqual([purchase()]));
+        first.unmount();
+
+        const ttq = loadTikTok();
+        render(<ShopReturn locale="no" />);
+        await waitFor(() => expect(tikTokEvents(ttq)).toEqual([tikTokPurchase()]));
+        await tick();
+
+        expect(events(fbq)).toEqual([purchase()]);
     });
 });
 

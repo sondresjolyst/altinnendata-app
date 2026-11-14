@@ -13,7 +13,9 @@ import { getDictionary } from '@/i18n/dictionaries';
 import { formatPrice } from '@/lib/format';
 import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import { canBuy } from '@/lib/shop';
+import { identifyTikTok } from '@sjolystinnovation/app-kit/consent';
 import { trackInitiateCheckout } from '@/lib/pixelEvents';
+import { toE164 } from '@/lib/phone';
 import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from './VippsButtonArt';
 import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, type CheckoutField } from '@/lib/validation';
 
@@ -152,8 +154,10 @@ export default function CheckoutForm({ build, delivery, mode, termsVersion: load
         setErrors({});
         setFailure(null);
         setSubmitting(true);
-        // Sent before the checkout call, so the pixel's request has that call's time to leave before the redirect.
-        trackInitiateCheckout(build.slug, total);
+        // Sent before the checkout call, so the pixels' requests have that call's time to leave before the redirect.
+        // TikTok's Advanced Matching goes right above the event, as TikTok asks. The pixel hashes the values.
+        identifyTikTok({ email: form.email, phoneNumber: toE164(form.phone) });
+        trackInitiateCheckout(build.slug, total, build.priceNok);
         try {
             const { redirectUrl } = await ShopService.checkout(parsed.data);
             window.location.assign(redirectUrl);
