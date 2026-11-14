@@ -70,6 +70,8 @@ export interface OrderStatusInfo {
     deliveryMethod: DeliveryMethod;
     /** The slug of the build bought. An API older than the field leaves it out. */
     buildSlug?: string | null;
+    /** The price of the build when the order was placed, in øre, without delivery. An API older than the field leaves it out. */
+    buildPriceInOre?: number | null;
 }
 
 export interface AdminOrderSummary {
