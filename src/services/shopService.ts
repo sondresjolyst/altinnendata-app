@@ -2,6 +2,7 @@ import { request } from '@sjolystinnovation/app-kit/api';
 import axiosInstance from './axiosInstance';
 import publicClient from './publicClient';
 import { REVALIDATE_TARGETS, revalidateTarget } from '@/lib/cacheTags';
+import type { CheckoutMarketing } from '@/lib/checkoutMarketing';
 
 export type BuyButtonMode = 'Off' | 'AdminsOnly' | 'Everyone';
 export type DeliveryMethod = 'Shipping' | 'HomeDelivery' | 'Pickup';
@@ -55,6 +56,8 @@ export interface CheckoutRequest {
     acceptTerms: boolean;
     termsVersion: string;
     locale: string;
+    /** Sent only when the buyer has accepted marketing. */
+    marketing?: CheckoutMarketing;
 }
 
 export interface CheckoutResponse {

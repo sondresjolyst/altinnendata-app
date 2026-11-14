@@ -15,6 +15,7 @@ import { fillTemplate } from '@sjolystinnovation/app-kit/ui';
 import { canBuy } from '@/lib/shop';
 import { identifyTikTok } from '@sjolystinnovation/app-kit/consent';
 import { trackInitiateCheckout } from '@/lib/pixelEvents';
+import { checkoutMarketing } from '@/lib/checkoutMarketing';
 import { toE164 } from '@/lib/phone';
 import VippsButtonArt, { VIPPS_BUTTON, VIPPS_DISABLED } from './VippsButtonArt';
 import { checkoutApiFieldMessage, checkoutFieldOfApiKey, checkoutIssueMessage, checkoutSchema, type CheckoutField } from '@/lib/validation';
@@ -159,7 +160,9 @@ export default function CheckoutForm({ build, delivery, mode, termsVersion: load
         identifyTikTok({ email: form.email, phoneNumber: toE164(form.phone) });
         trackInitiateCheckout(build.slug, total, build.priceNok);
         try {
-            const { redirectUrl } = await ShopService.checkout(parsed.data);
+            // Left out entirely without marketing consent.
+            const marketing = checkoutMarketing();
+            const { redirectUrl } = await ShopService.checkout({ ...parsed.data, ...(marketing && { marketing }) });
             window.location.assign(redirectUrl);
         } catch (err) {
             const shown = apiFieldMessages(err);

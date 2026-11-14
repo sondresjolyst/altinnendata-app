@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
 import AdminSettingsPage from '@/app/[locale]/(protected)/admin/settings/page';
@@ -355,5 +355,152 @@ describe('the marketing section', () => {
         await waitFor(() => expect(screen.getByRole('button', { name: 'Lagre markedsføring' })).toBeEnabled());
         expect(marketing.updateSettings).toHaveBeenCalledTimes(1);
         expect(field).not.toHaveAttribute('aria-invalid');
+    });
+});
+
+describe('the server tokens in the marketing section', () => {
+    const META_TOKEN = 'EAAB' + 'x'.repeat(40);
+    const TIKTOK_TOKEN = 'tt' + '9'.repeat(30);
+    const IDS = { metaPixelId: '123456789012345', tikTokPixelId: 'C4A1B2C3D4E5F6G7H8I9' };
+
+    beforeEach(() => {
+        marketing.getSettings.mockReset().mockResolvedValue({ ...IDS, metaCapiTokenSet: true, tikTokEventsTokenSet: false });
+        marketing.updateSettings.mockReset();
+    });
+
+    /** The page once the settings have loaded, with the Meta and TikTok token fields. */
+    const loadedPage = async (locale: Locale = 'no') => {
+        renderPage(locale);
+        const metaLabel = locale === 'no' ? 'Meta Conversions API-tilgangsnøkkel' : 'Meta Conversions API access token';
+        const tikTokLabel = locale === 'no' ? 'TikTok Events API-tilgangsnøkkel' : 'TikTok Events API access token';
+        const meta = await screen.findByLabelText(metaLabel);
+        await waitFor(() => expect(meta).toBeEnabled());
+        return { meta, tikTok: screen.getByLabelText(tikTokLabel) };
+    };
+
+    it.each([
+        ['no', /^Lagret /, /^Ikke lagret /, /Meta Events Manager under Settings, Conversions API\. Nøkkelen vises aldri igjen/, /TikTok Events Manager under Settings, Generate Access Token\./, 'Kjøp sendes fra serveren bare når kjøperen har godtatt markedsføring.'],
+        ['en', /^Saved /, /^Not saved /, /Meta Events Manager under Settings, Conversions API\. The token is never shown again/, /TikTok Events Manager under Settings, Generate Access Token\./, 'Purchases are sent from the server only when the buyer has accepted marketing.'],
+    ] as const)('shows whether each token is stored, with an empty password field (%s)', async (locale, stored, notStored, metaHint, tikTokHint, note) => {
+        const { meta, tikTok } = await loadedPage(locale);
+
+        for (const field of [meta, tikTok]) {
+            expect(field).toHaveAttribute('type', 'password');
+            expect(field).toHaveAttribute('autocomplete', 'off');
+            expect(field).toHaveValue('');
+            expect(field).toHaveAccessibleDescription(expect.stringContaining(note));
+        }
+        expect(meta).toHaveAccessibleDescription(expect.stringMatching(stored));
+        expect(meta).toHaveAccessibleDescription(expect.stringMatching(metaHint));
+        expect(tikTok).toHaveAccessibleDescription(expect.stringMatching(notStored));
+        expect(tikTok).toHaveAccessibleDescription(expect.stringMatching(tikTokHint));
+    });
+
+    it('treats missing flags as not stored and offers no remove button then', async () => {
+        marketing.getSettings.mockReset().mockResolvedValue(IDS);
+        const { meta, tikTok } = await loadedPage();
+
+        expect(meta).toHaveAccessibleDescription(expect.stringMatching(/^Ikke lagret /));
+        expect(tikTok).toHaveAccessibleDescription(expect.stringMatching(/^Ikke lagret /));
+        expect(screen.queryByRole('button', { name: /^Fjern/ })).not.toBeInTheDocument();
+    });
+
+    it('sends no token key for an empty field, so the stored token is kept', async () => {
+        marketing.updateSettings.mockResolvedValue({ ...IDS, metaCapiTokenSet: true, tikTokEventsTokenSet: false });
+        await loadedPage();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledTimes(1));
+        const sent = marketing.updateSettings.mock.calls[0]![0] as Record<string, unknown>;
+        expect(sent).toEqual(IDS);
+        expect(sent).not.toHaveProperty('metaCapiToken');
+        expect(sent).not.toHaveProperty('tikTokEventsToken');
+    });
+
+    it('sends a typed token trimmed, then empties the field and shows it as stored', async () => {
+        marketing.updateSettings.mockResolvedValue({ ...IDS, metaCapiTokenSet: true, tikTokEventsTokenSet: true });
+        const { meta, tikTok } = await loadedPage();
+
+        await userEvent.type(tikTok, `  ${TIKTOK_TOKEN} `);
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledWith({ ...IDS, tikTokEventsToken: TIKTOK_TOKEN }));
+        await waitFor(() => expect(tikTok).toHaveValue(''));
+        expect(meta).toHaveValue('');
+        expect(tikTok).toHaveAccessibleDescription(expect.stringMatching(/^Lagret /));
+    });
+
+    it('never puts a token back in a field, even when an answer carries one', async () => {
+        marketing.getSettings.mockReset().mockResolvedValue({ ...IDS, metaCapiTokenSet: true, tikTokEventsTokenSet: true, metaCapiToken: META_TOKEN, tikTokEventsToken: TIKTOK_TOKEN });
+        marketing.updateSettings.mockResolvedValue({ ...IDS, metaCapiTokenSet: true, tikTokEventsTokenSet: true, metaCapiToken: META_TOKEN, tikTokEventsToken: TIKTOK_TOKEN });
+        const { meta, tikTok } = await loadedPage();
+        expect(meta).toHaveValue('');
+        expect(tikTok).toHaveValue('');
+
+        await userEvent.type(meta, META_TOKEN);
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(meta).toHaveValue(''));
+        expect(tikTok).toHaveValue('');
+        expect(document.body.innerHTML).not.toContain(META_TOKEN);
+        expect(document.body.innerHTML).not.toContain(TIKTOK_TOKEN);
+    });
+
+    it('removes a stored token with an empty value only after the confirm step', async () => {
+        marketing.updateSettings.mockResolvedValue({ ...IDS, metaCapiTokenSet: false, tikTokEventsTokenSet: false });
+        const { meta } = await loadedPage();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Fjern Meta Conversions API-tilgangsnøkkel' }));
+        expect(marketing.updateSettings).not.toHaveBeenCalled();
+        const confirm = screen.getByRole('group', { name: 'Vil du fjerne Meta Conversions API-tilgangsnøkkel?' });
+
+        await userEvent.click(within(confirm).getByRole('button', { name: 'Ja, fjern' }));
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledWith({ ...IDS, metaCapiToken: '' }));
+        await waitFor(() => expect(meta).toHaveAccessibleDescription(expect.stringMatching(/^Ikke lagret /)));
+        expect(screen.queryByRole('group', { name: /Vil du fjerne/ })).not.toBeInTheDocument();
+    });
+
+    it('sends nothing when the remove is cancelled', async () => {
+        await loadedPage();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Fjern Meta Conversions API-tilgangsnøkkel' }));
+        await userEvent.click(screen.getByRole('button', { name: 'Avbryt' }));
+
+        expect(screen.queryByRole('group', { name: /Vil du fjerne/ })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Fjern Meta Conversions API-tilgangsnøkkel' })).toBeInTheDocument();
+        expect(marketing.updateSettings).not.toHaveBeenCalled();
+    });
+
+    it.each(['short', 'x'.repeat(19), 'x'.repeat(513), 'has a space in it here', 'ææææææææææææææææææææ'])('refuses the token %s before sending it', async value => {
+        const { meta, tikTok } = await loadedPage();
+
+        await userEvent.type(meta, value);
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+
+        expect(meta).toHaveAttribute('aria-invalid', 'true');
+        expect(meta).toHaveAccessibleDescription(expect.stringMatching(/Nøkkelen må være 20 til 512 tegn uten mellomrom\.$/));
+        expect(tikTok).not.toHaveAttribute('aria-invalid');
+        expect(marketing.updateSettings).not.toHaveBeenCalled();
+    }, 15_000);
+
+    it.each([
+        ['metaCapiToken', 'no', /Nøkkelen må være 20 til 512 tegn uten mellomrom\.$/],
+        ['tikTokEventsToken', 'no', /Nøkkelen må være 20 til 512 tegn uten mellomrom\.$/],
+        ['tikTokEventsToken', 'en', /The token must be 20 to 512 characters with no spaces\.$/],
+    ] as const)('shows the API error for %s on its own field (%s)', async (key, locale, message) => {
+        marketing.updateSettings.mockRejectedValueOnce(await refusedPixelId({ [key]: ['The token is not valid.'] }));
+        const { meta, tikTok } = await loadedPage(locale);
+        const [field, other] = key === 'metaCapiToken' ? [meta, tikTok] : [tikTok, meta];
+
+        await userEvent.type(field, key === 'metaCapiToken' ? META_TOKEN : TIKTOK_TOKEN);
+        await userEvent.click(screen.getByRole('button', { name: locale === 'no' ? 'Lagre markedsføring' : 'Save marketing' }));
+
+        await waitFor(() => expect(field).toHaveAttribute('aria-invalid', 'true'));
+        expect(field).toHaveAccessibleDescription(expect.stringMatching(message));
+        expect(other).not.toHaveAttribute('aria-invalid');
+        expect(screen.getByLabelText(locale === 'no' ? 'Meta Pixel-ID' : 'Meta Pixel ID')).not.toHaveAttribute('aria-invalid');
     });
 });

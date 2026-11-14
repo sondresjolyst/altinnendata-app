@@ -31,6 +31,14 @@ describe('MarketingService', () => {
         expect(put.mock.invocationCallOrder[0]).toBeLessThan(revalidate.mock.invocationCallOrder[0]);
     });
 
+    it('sends a token only when one is given, and an empty one to remove it', async () => {
+        put.mockResolvedValue({ data: { metaPixelId: null, tikTokPixelId: null, metaCapiTokenSet: false, tikTokEventsTokenSet: true } });
+
+        await MarketingService.updateSettings({ metaPixelId: '', tikTokPixelId: '', metaCapiToken: '', tikTokEventsToken: 'x'.repeat(20) });
+
+        expect(put).toHaveBeenCalledWith('/admin/marketing/settings', { metaPixelId: '', tikTokPixelId: '', metaCapiToken: '', tikTokEventsToken: 'x'.repeat(20) });
+    });
+
     it('purges nothing when the API refuses the save', async () => {
         put.mockRejectedValueOnce(Object.assign(new Error('Request failed with status code 400'), { isAxiosError: true, response: { status: 400, data: { errors: { metaPixelId: ['x'] } } } }));
 
