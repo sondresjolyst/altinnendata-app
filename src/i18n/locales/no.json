@@ -218,7 +218,7 @@
   },
   "consentBanner": {
     "title": "Informasjonskapsler for markedsføring",
-    "body": "Vi vil gjerne bruke Meta Pixel og TikTok Pixel til å måle annonsene våre og vise deg markedsføring hos Meta og TikTok. De setter informasjonskapsler og sender Meta og TikTok opplysninger om besøket ditt. Når du handler, sender de også kontaktopplysningene dine. Du kan endre valget når som helst.",
+    "body": "Vi vil gjerne bruke Meta Pixel og TikTok Pixel til å måle annonsene våre og vise deg markedsføring hos Meta og TikTok. De setter informasjonskapsler og sender Meta og TikTok opplysninger om besøket ditt. Når du handler eller kontakter oss, sender de også kontaktopplysningene dine. Du kan endre valget når som helst.",
     "cookiePolicy": "Les om informasjonskapsler",
     "accept": "Godta",
     "reject": "Avvis",

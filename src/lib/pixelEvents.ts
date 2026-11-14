@@ -54,6 +54,15 @@ export function trackInitiateCheckout(slug: string, totalNok: number, priceNok?:
     trackTikTok('InitiateCheckout', { contents: tikTokContents(slug, priceNok), content_type: 'product', value: totalNok, currency: CURRENCY });
 }
 
+/**
+ * A sent contact form: Contact to the Meta Pixel and Lead to the TikTok Pixel, as each defines a question sent through a
+ * form. It carries no parameters, so nothing from the message reaches either pixel.
+ */
+export function trackContact(): void {
+    trackPixel('Contact');
+    trackTikTok('Lead');
+}
+
 function readSent(pixel: Pixel): string[] {
     try {
         const parsed: unknown = JSON.parse(window.localStorage.getItem(STORAGE_KEYS[pixel]) ?? '[]');

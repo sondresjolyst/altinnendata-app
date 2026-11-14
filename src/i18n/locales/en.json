@@ -218,7 +218,7 @@
   },
   "consentBanner": {
     "title": "Cookies for marketing",
-    "body": "We would like to use Meta Pixel and TikTok Pixel to measure our ads and show you marketing on Meta and TikTok. They set cookies and send Meta and TikTok information about your visit. When you buy something, they also send your contact details. You can change your choice at any time.",
+    "body": "We would like to use Meta Pixel and TikTok Pixel to measure our ads and show you marketing on Meta and TikTok. They set cookies and send Meta and TikTok information about your visit. When you buy something or contact us, they also send your contact details. You can change your choice at any time.",
     "cookiePolicy": "Read about cookies",
     "accept": "Accept",
     "reject": "Reject",
