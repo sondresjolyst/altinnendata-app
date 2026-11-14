@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.14.0...v1.14.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **consent:** shorten the consent banner text ([#245](https://github.com/sondresjolyst/altinnendata-app/issues/245)) ([11e0176](https://github.com/sondresjolyst/altinnendata-app/commit/11e0176b5cb1afdaab853fb6f22091f06a06ae9b))
+
 ## [1.14.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.3...v1.14.0) (2026-11-14)
 
 
