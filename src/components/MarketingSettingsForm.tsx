@@ -118,7 +118,10 @@ export default function MarketingSettingsForm() {
                     label={label}
                     name={field}
                     type="password"
-                    autoComplete="off"
+                    // Browsers ignore off on a password field. new-password and the ignore flags keep a saved login out of it.
+                    autoComplete="new-password"
+                    data-1p-ignore
+                    data-lpignore="true"
                     spellCheck={false}
                     value={tokens[field]}
                     error={errors[field]}

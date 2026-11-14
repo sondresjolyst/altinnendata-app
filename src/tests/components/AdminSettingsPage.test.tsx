@@ -386,7 +386,9 @@ describe('the server tokens in the marketing section', () => {
 
         for (const field of [meta, tikTok]) {
             expect(field).toHaveAttribute('type', 'password');
-            expect(field).toHaveAttribute('autocomplete', 'off');
+            expect(field).toHaveAttribute('autocomplete', 'new-password');
+            expect(field).toHaveAttribute('data-1p-ignore');
+            expect(field).toHaveAttribute('data-lpignore', 'true');
             expect(field).toHaveValue('');
             expect(field).toHaveAccessibleDescription(expect.stringContaining(note));
         }
