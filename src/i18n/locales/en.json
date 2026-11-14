@@ -218,7 +218,7 @@
   },
   "consentBanner": {
     "title": "Cookies for marketing",
-    "body": "We would like to use Meta Pixel and TikTok Pixel to measure our ads and market to you on Meta's and TikTok's services. They set cookies and send Meta and TikTok information about your visit. When you fill in the checkout, they also send your email address, mobile number and other contact details as a code, known as a hash. Meta and TikTok use the code to match your visit to an account. The data may be processed outside the EEA. Meta may transfer it to the United States. TikTok stores it in the United States, among other countries, and gives access from countries including China. Nothing is loaded unless you accept, and you can change your choice at any time.",
+    "body": "We would like to use Meta Pixel and TikTok Pixel to measure our ads and show you marketing on Meta and TikTok. They set cookies and send Meta and TikTok information about your visit. When you buy something, they also send your contact details. You can change your choice at any time.",
     "cookiePolicy": "Read about cookies",
     "accept": "Accept",
     "reject": "Reject",
