@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.3...v1.14.0) (2026-11-14)
+
+
+### Features
+
+* **marketing:** add the TikTok Pixel and turn on ad matching ([#243](https://github.com/sondresjolyst/altinnendata-app/issues/243)) ([d10b22c](https://github.com/sondresjolyst/altinnendata-app/commit/d10b22c8e85fb0fde0ec5f04daf7f5781afa1a7c))
+
 ## [1.13.3](https://github.com/sondresjolyst/altinnendata-app/compare/v1.13.2...v1.13.3) (2026-11-08)
 
 
