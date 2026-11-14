@@ -16,6 +16,10 @@ describe('readCookie', () => {
         expect(readCookie('ttclid', 'my_ttclid=wrong; ttclid=right')).toBe('right');
     });
 
+    it('gives the first of two cookies with the same name', () => {
+        expect(readCookie('_fbp', '_fbp=fb.1.1.first; _ga=1; _fbp=fb.1.1.second')).toBe('fb.1.1.first');
+    });
+
     it('keeps an equals sign inside the value', () => {
         expect(readCookie('ttclid', 'ttclid=a=b==')).toBe('a=b==');
     });

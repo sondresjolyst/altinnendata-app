@@ -4,6 +4,7 @@
  */
 export function readCookie(name: string, cookies?: string): string | undefined {
     const source = cookies ?? (typeof document === 'undefined' ? '' : document.cookie);
+    // The first match wins on purpose. The browser lists the cookie with the most specific path first.
     for (const part of source.split(';')) {
         const at = part.indexOf('=');
         if (at < 0 || part.slice(0, at).trim() !== name) continue;
