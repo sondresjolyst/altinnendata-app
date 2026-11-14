@@ -43,18 +43,26 @@ export default function ContactForm({ build }: { build?: { slug: string; title: 
         }
         setErrors({});
         setSubmitting(true);
+        let sent = false;
         try {
             await ContactService.send({ ...parsed.data, locale });
-            // Only once the API took the message. TikTok's Advanced Matching goes right above the event, as TikTok asks.
-            // A phone number that is not Norwegian gives no E.164 number, so it is left out.
-            identifyTikTok({ email: parsed.data.email, phoneNumber: toE164(parsed.data.phone) });
-            trackContact();
+            sent = true;
             toast.success(dict.contact.sent);
             setForm(empty);
         } catch {
             toast.error(dict.contact.failed);
         } finally {
             setSubmitting(false);
+        }
+        if (!sent) return;
+        // Only once the API took the message, and outside the send, so a pixel can never show the failure text.
+        // TikTok's Advanced Matching goes right above the event, as TikTok asks. A phone number that is not Norwegian
+        // gives no E.164 number, so it is left out.
+        try {
+            identifyTikTok({ email: parsed.data.email, phoneNumber: toE164(parsed.data.phone) });
+            trackContact();
+        } catch {
+            // The message is sent. A failing pixel changes nothing for the visitor.
         }
     };
 

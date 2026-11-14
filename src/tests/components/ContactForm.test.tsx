@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TikTokPixel, setConsent } from '@sjolystinnovation/app-kit/consent';
-import { resetTestMocks } from '@sjolystinnovation/app-kit/testing';
+import { resetTestMocks, toastSpies } from '@sjolystinnovation/app-kit/testing';
 import ContactForm from '@/components/ContactForm';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import type { Locale } from '@/i18n/config';
@@ -12,7 +12,19 @@ import { acceptPixel, acceptTikTok, events, loadPixel, loadTikTok, resetPixel, t
 const service = vi.hoisted(() => ({ send: vi.fn() }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
+const pixels = vi.hoisted(() => ({ failContact: false }));
+
 vi.mock('@/services/contactService', () => ({ default: service }));
+vi.mock('@/lib/pixelEvents', async importOriginal => {
+    const actual = await importOriginal<typeof import('@/lib/pixelEvents')>();
+    return {
+        ...actual,
+        trackContact: () => {
+            if (pixels.failContact) throw new Error('pixel failed');
+            actual.trackContact();
+        },
+    };
+});
 
 const renderForm = (locale: Locale) =>
     render(
@@ -24,6 +36,7 @@ const renderForm = (locale: Locale) =>
 beforeEach(() => {
     resetTestMocks();
     resetPixel();
+    pixels.failContact = false;
     service.send.mockReset().mockResolvedValue(undefined);
 });
 
@@ -119,6 +132,21 @@ describe('ContactForm pixel events', () => {
         await waitFor(() => expect(screen.getByRole('button', { name: 'Send' })).toBeEnabled());
         expect(events(fbq)).toEqual([]);
         expect(ttq).not.toHaveBeenCalled();
+    });
+
+    it('still shows the message as sent when the pixel event throws', async () => {
+        acceptPixel();
+        pixels.failContact = true;
+        const user = userEvent.setup();
+        renderForm('no');
+
+        await fill(user);
+        await send(user);
+
+        await waitFor(() => expect(toastSpies.success).toHaveBeenCalled());
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Send' })).toBeEnabled());
+        expect(screen.getByLabelText(/^Melding/)).toHaveValue('');
+        expect(toastSpies.error).not.toHaveBeenCalled();
     });
 
     it('sends nothing when validation stops the submit', async () => {
