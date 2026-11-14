@@ -34,10 +34,11 @@ export default function ShopReturn({ locale }: { locale: Locale }) {
     const { data: order, loading, refresh } = usePollUntilFinal(fetcher, isFinal);
     const { marketing } = useConsent(CONSENT_OPTIONS);
 
-    // A Meta Pixel Purchase once the payment is reserved or taken, once per order in this browser.
+    // A Purchase to each marketing pixel once the payment is reserved or taken, once per order and pixel in this browser.
+    // A pixel that could not send yet is tried again the next time this effect runs.
     useEffect(() => {
         if (!marketing || !order || (order.status !== 'Reserved' && order.status !== 'Paid')) return;
-        // The layout's MetaPixel loads the pixel in an effect of the same commit, which runs after this one.
+        // The layout's pixels load in effects of the same commit, which run after this one.
         const timer = setTimeout(() => trackPurchaseOnce(order), 0);
         return () => clearTimeout(timer);
     }, [marketing, order]);

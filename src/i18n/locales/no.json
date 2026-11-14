@@ -216,6 +216,14 @@
     "email": "E-post",
     "phone": "Telefon"
   },
+  "consentBanner": {
+    "title": "Informasjonskapsler for markedsføring",
+    "body": "Vi vil gjerne bruke Meta Pixel og TikTok Pixel til å måle annonsene våre og vise deg markedsføring hos Meta og TikTok. De setter informasjonskapsler og sender opplysninger om besøket ditt. Når du fyller inn kassen, sender de også e-postadressen, mobilnummeret og andre kontaktopplysninger som en kode, en såkalt hash. Med koden kan Meta og TikTok koble besøket til en konto hos seg. Opplysningene kan bli behandlet utenfor EØS. Meta kan overføre dem til USA. TikTok lagrer dem blant annet i USA og gir tilgang fra blant annet Kina. Ingenting lastes inn før du godtar, og du kan endre valget når som helst.",
+    "cookiePolicy": "Les om informasjonskapsler",
+    "accept": "Godta",
+    "reject": "Avvis",
+    "close": "Lukk"
+  },
   "admin": {
     "title": "Admin",
     "dashboard": "Oversikt",
@@ -229,8 +237,11 @@
       "title": "Markedsføring",
       "pixelId": "Meta Pixel-ID",
       "pixelIdHint": "Du finner ID-en i Meta Events Manager under Datasett. Den består av 5 til 20 siffer. La feltet stå tomt for å slå av Meta Pixel.",
-      "consentNote": "Meta Pixel lastes bare etter at den besøkende har godtatt markedsføring i samtykkebanneret.",
+      "consentNote": "Meta Pixel og TikTok Pixel lastes bare etter at den besøkende har godtatt markedsføring i samtykkebanneret.",
       "invalid": "Meta Pixel-ID-en må bestå av 5 til 20 siffer.",
+      "tikTokPixelId": "TikTok Pixel-ID",
+      "tikTokPixelIdHint": "Du finner ID-en i TikTok Events Manager under Data Sources. Den består av store bokstaver og tall. La feltet stå tomt for å slå av TikTok Pixel.",
+      "tikTokInvalid": "TikTok Pixel-ID-en må bestå av 10 til 32 store bokstaver og tall.",
       "save": "Lagre markedsføring",
       "saved": "Markedsføring lagret",
       "saveFailed": "Kunne ikke lagre markedsføringen",

@@ -2,18 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
+import { TikTokPixel, setConsent } from '@sjolystinnovation/app-kit/consent';
 import { resetTestMocks } from '@sjolystinnovation/app-kit/testing';
 import CheckoutForm from '@/components/shop/CheckoutForm';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
+import { CONSENT_OPTIONS } from '@/lib/consent';
 import type { BuildDetail } from '@/services/buildService';
 import type { PublicDeliveryOption } from '@/services/shopService';
-import { acceptPixel, events, loadPixel, resetPixel } from '../pixel';
+import { acceptPixel, events, loadPixel, loadTikTok, resetPixel, tikTokEvents } from '../pixel';
 
 const service = vi.hoisted(() => ({ checkout: vi.fn(), config: vi.fn() }));
 const session = vi.hoisted(() => ({ roles: ['Admin'] as string[] }));
 
 vi.mock('sonner', async () => (await import('@sjolystinnovation/app-kit/testing')).toastMock());
 vi.mock('@/services/shopService', () => ({ default: service }));
+vi.mock('next/navigation', async importActual => ({
+    ...(await importActual<typeof import('next/navigation')>()),
+    usePathname: () => '/no/builds/gaming-pc/buy',
+}));
 vi.mock('next-auth/react', () => ({
     useSession: () => ({ data: { user: { roles: session.roles } }, status: 'authenticated' }),
 }));
@@ -171,6 +177,102 @@ describe('CheckoutForm', () => {
             ['track', 'InitiateCheckout', { content_ids: ['gaming-pc'], content_type: 'product', num_items: 1, value: 10290, currency: 'NOK' }],
         ]);
         expect(fbq.mock.invocationCallOrder[0]).toBeLessThan(service.checkout.mock.invocationCallOrder[0]);
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    it('identifies the buyer to TikTok right before a TikTok InitiateCheckout, and both before the checkout call', async () => {
+        resetPixel();
+        const fbq = acceptPixel();
+        const ttq = loadTikTok();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValue({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        renderForm();
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        // Only the email and the phone in E.164. The name and the address are not sent.
+        expect(tikTokEvents(ttq)).toEqual([
+            ['identify', { email: 'kari@example.no', phone_number: '+4791234567', external_id: '' }],
+            ['track', 'InitiateCheckout', {
+                contents: [{ content_id: 'gaming-pc', quantity: 1, price: 9990 }],
+                content_type: 'product',
+                value: 10290,
+                currency: 'NOK',
+            }],
+        ]);
+        const identifyOrder = ttq.mock.invocationCallOrder[ttq.mock.calls.findIndex(call => call[0] === 'identify')]!;
+        expect(identifyOrder).toBeLessThan(ttq.mock.invocationCallOrder[ttq.mock.calls.findIndex(call => call[0] === 'track')]!);
+        expect(identifyOrder).toBeLessThan(fbq.mock.invocationCallOrder[0]!);
+        expect(Math.max(...ttq.mock.invocationCallOrder)).toBeLessThan(service.checkout.mock.invocationCallOrder[0]!);
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    it('sends nothing to TikTok without consent', async () => {
+        resetPixel();
+        const ttq = loadTikTok();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValueOnce({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        renderForm();
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        expect(ttq).not.toHaveBeenCalled();
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    /** The calls the real TikTok Pixel queued on its ttq array, without consent and page calls. */
+    const queued = () =>
+        ((window as Window & { ttq?: unknown[][] }).ttq ?? []).filter(call => call[0] === 'identify' || call[0] === 'track');
+
+    it('queues identify before InitiateCheckout on the real TikTok Pixel mounted after accept', async () => {
+        resetPixel();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValueOnce({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        setConsent({ marketing: true, ...CONSENT_OPTIONS });
+        renderForm();
+        const pixel = render(<TikTokPixel {...CONSENT_OPTIONS} pixelId="C4A1B2C3D4E5F6G7H8I9" />);
+        await waitFor(() => expect(Array.isArray((window as Window & { ttq?: unknown }).ttq)).toBe(true));
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        expect(queued()).toEqual([
+            ['identify', { email: 'kari@example.no', phone_number: '+4791234567', external_id: '' }],
+            ['track', 'InitiateCheckout', expect.objectContaining({ value: 10290, currency: 'NOK' })],
+        ]);
+        pixel.unmount();
+        vi.unstubAllGlobals();
+        resetPixel();
+    }, 15_000);
+
+    it('sends no identify and no track once the TikTok Pixel has unmounted', async () => {
+        resetPixel();
+        const user = userEvent.setup();
+        const assign = vi.fn();
+        vi.stubGlobal('location', { ...window.location, assign });
+        service.checkout.mockResolvedValueOnce({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+        setConsent({ marketing: true, ...CONSENT_OPTIONS });
+        renderForm();
+        const pixel = render(<TikTokPixel {...CONSENT_OPTIONS} pixelId="C4A1B2C3D4E5F6G7H8I9" />);
+        await waitFor(() => expect(Array.isArray((window as Window & { ttq?: unknown }).ttq)).toBe(true));
+        pixel.unmount();
+        await act(async () => { await Promise.resolve(); });
+
+        await submitShipping(user);
+
+        await waitFor(() => expect(assign).toHaveBeenCalled());
+        expect(queued()).toEqual([]);
         vi.unstubAllGlobals();
         resetPixel();
     }, 15_000);
