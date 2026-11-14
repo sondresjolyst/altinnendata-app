@@ -521,6 +521,26 @@ describe('the server tokens in the marketing section', () => {
         expect(marketing.updateSettings).toHaveBeenLastCalledWith({ metaPixelId: '987654321', tikTokPixelId: IDS.tikTokPixelId, metaCapiToken: '' });
     });
 
+    it('moves focus to Ja, fjern when the confirm step opens and back to Fjern on Avbryt', async () => {
+        await loadedPage();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Fjern Meta Conversions API-tilgangsnøkkel' }));
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Ja, fjern' })).toHaveFocus());
+
+        await userEvent.click(screen.getByRole('button', { name: 'Avbryt' }));
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Fjern Meta Conversions API-tilgangsnøkkel' })).toHaveFocus());
+    });
+
+    it('moves focus to the token field after the token is removed', async () => {
+        marketing.updateSettings.mockResolvedValue({ ...IDS, metaCapiTokenSet: false, tikTokEventsTokenSet: false });
+        const { meta } = await loadedPage();
+
+        await removeMetaToken();
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(meta).toHaveFocus());
+    });
+
     it('sends nothing when the remove is cancelled', async () => {
         await loadedPage();
 

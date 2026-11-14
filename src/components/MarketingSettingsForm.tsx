@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { apiFieldErrors } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
 import { Alert, TextInput, fillTemplate } from '@sjolystinnovation/app-kit/ui';
@@ -46,6 +46,17 @@ export default function MarketingSettingsForm() {
     const [loadFailed, setLoadFailed] = useState(false);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState<FieldErrors>({});
+    // Where focus goes once the next render has put that element on the page. Every setFocusNext comes with a
+    // state change, so a render follows.
+    const focusNext = useRef<string | null>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const setFocusNext = (selector: string) => { focusNext.current = selector; };
+
+    useEffect(() => {
+        if (focusNext.current === null) return;
+        formRef.current?.querySelector<HTMLElement>(focusNext.current)?.focus();
+        focusNext.current = null;
+    });
 
     const showStored = (settings: MarketingSettings) => {
         setSavedIds({ metaPixelId: settings.metaPixelId ?? '', tikTokPixelId: settings.tikTokPixelId ?? '' });
@@ -126,6 +137,7 @@ export default function MarketingSettingsForm() {
             showStored(saved);
             setErrors(e => ({ ...e, [field]: undefined }));
             setConfirmRemove(null);
+            setFocusNext(`input[name="${field}"]`);
             toast.success(text.saved);
         } catch (err) {
             showFieldErrors(err);
@@ -164,7 +176,11 @@ export default function MarketingSettingsForm() {
                             className={SECONDARY_BUTTON}
                             disabled={!loaded || saving}
                             aria-label={fillTemplate(text.removeTokenLabel, { name: label })}
-                            onClick={() => setConfirmRemove(field)}
+                            id={`${field}-remove`}
+                            onClick={() => {
+                                setConfirmRemove(field);
+                                setFocusNext(`#${field}-remove-yes`);
+                            }}
                         >
                             {text.removeToken}
                         </button>
@@ -173,10 +189,13 @@ export default function MarketingSettingsForm() {
                 {confirmRemove === field && (
                     <div role="group" aria-labelledby={`${field}-confirm`} className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 p-3">
                         <p id={`${field}-confirm`} className="text-sm text-gray-900">{fillTemplate(text.removeTokenConfirm, { name: label })}</p>
-                        <button type="button" className={SECONDARY_BUTTON} disabled={saving} onClick={() => void removeToken(field)}>
+                        <button type="button" id={`${field}-remove-yes`} className={SECONDARY_BUTTON} disabled={saving} onClick={() => void removeToken(field)}>
                             {text.removeTokenYes}
                         </button>
-                        <button type="button" className={SECONDARY_BUTTON} disabled={saving} onClick={() => setConfirmRemove(null)}>
+                        <button type="button" className={SECONDARY_BUTTON} disabled={saving} onClick={() => {
+                                setConfirmRemove(null);
+                                setFocusNext(`#${field}-remove`);
+                            }}>
                             {text.removeTokenCancel}
                         </button>
                     </div>
@@ -188,6 +207,7 @@ export default function MarketingSettingsForm() {
 
     return (
         <form
+            ref={formRef}
             className="max-w-md space-y-5 border-t border-gray-200 pt-6"
             aria-labelledby="marketing-settings"
             onSubmit={e => {
