@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { request } from '@sjolystinnovation/app-kit/api';
@@ -485,5 +485,151 @@ describe('CheckoutForm', () => {
 
         expect(screen.getByText('Kjøp er ikke åpnet ennå.')).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Betal med Vipps' })).not.toBeInTheDocument();
+    });
+
+    describe('the marketing data for the server Purchase event', () => {
+        const PAGE = 'https://www.altinnendata.no/no/builds/gaming-pc/buy?ttclid=E.C.P.click&email=kari%40example.no#betal';
+        const COOKIES = ['_fbp', '_fbc', '_ttp', 'ttclid'];
+
+        const setCookies = (cookies: Record<string, string>) => {
+            for (const [name, value] of Object.entries(cookies)) document.cookie = `${name}=${value}; path=/`;
+        };
+
+        afterEach(() => {
+            for (const name of COOKIES) document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+            vi.unstubAllGlobals();
+            resetPixel();
+        });
+
+        /** Submits a filled shipping order from `href` and gives what went to ShopService.checkout. */
+        const checkoutFrom = async (href = PAGE) => {
+            const user = userEvent.setup();
+            const assign = vi.fn();
+            vi.stubGlobal('location', { ...window.location, href, assign });
+            service.checkout.mockResolvedValueOnce({ redirectUrl: 'https://vipps.test/pay', token: 'abc' });
+            renderForm();
+            await submitShipping(user);
+            await waitFor(() => expect(assign).toHaveBeenCalled());
+            return service.checkout.mock.calls[0]![0] as Record<string, unknown>;
+        };
+
+        const noNulls = (value: unknown): boolean =>
+            value !== null && (typeof value !== 'object' || Object.values(value as object).every(noNulls));
+
+        it('sends the consent ID, the ad cookies and the page without its query with consent', async () => {
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789', _fbc: 'fb.1.1700000000000.IwAR0abc', _ttp: 'ttp-abc_123', ttclid: 'E.C.P.click' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent.marketing).toEqual({
+                consentId,
+                fbp: 'fb.1.1700000000000.123456789',
+                fbc: 'fb.1.1700000000000.IwAR0abc',
+                ttp: 'ttp-abc_123',
+                ttclid: 'E.C.P.click',
+                pageUrl: 'https://www.altinnendata.no/no/builds/gaming-pc/buy',
+            });
+            expect(sent).toMatchObject({ buildSlug: 'gaming-pc', email: 'kari@example.no' });
+        }, 15_000);
+
+        it('keeps the query, the click ID and the email out of the page URL', async () => {
+            setConsent({ marketing: true, ...CONSENT_OPTIONS });
+
+            const sent = await checkoutFrom();
+
+            const { pageUrl } = sent.marketing as { pageUrl: string };
+            expect(pageUrl).toBe('https://www.altinnendata.no/no/builds/gaming-pc/buy');
+            expect(pageUrl).not.toContain('?');
+            expect(pageUrl).not.toContain('ttclid');
+            expect(pageUrl).not.toContain('kari');
+        }, 15_000);
+
+        it.each([
+            ['the visitor declined marketing', () => setConsent({ marketing: false, ...CONSENT_OPTIONS })],
+            ['the visitor has made no choice', () => window.localStorage.clear()],
+            ['the choice was made for an older notice', () => setConsent({ marketing: true, noticeVersion: 'older-notice' })],
+        ])('sends no marketing key when %s', async (_, choose) => {
+            choose();
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789', _ttp: 'ttp-abc_123' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent).not.toHaveProperty('marketing');
+        }, 15_000);
+
+        it('sends no marketing key when the yes is older than the consent max age', async () => {
+            vi.useFakeTimers({ toFake: ['Date'] });
+            vi.setSystemTime(new Date(Date.now() - 366 * 24 * 60 * 60 * 1000));
+            setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            vi.useRealTimers();
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent).not.toHaveProperty('marketing');
+        }, 15_000);
+
+        it('sends no marketing key when the visitor said yes and then no', async () => {
+            setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setConsent({ marketing: false, ...CONSENT_OPTIONS });
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent).not.toHaveProperty('marketing');
+        }, 15_000);
+
+        // The yes holds in memory for this page when storage is blocked. The banner posted it to the consent log,
+        // and the API checks that log, so the checkout still sends it.
+        it('sends the marketing data for a yes that only holds in memory because storage is blocked', async () => {
+            const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+                throw new Error('blocked');
+            });
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setItem.mockRestore();
+            setCookies({ _ttp: 'ttp-abc_123' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent.marketing).toEqual({ consentId, ttp: 'ttp-abc_123', pageUrl: 'https://www.altinnendata.no/no/builds/gaming-pc/buy' });
+        }, 15_000);
+
+        it('leaves out an https page on another host and keeps the rest', async () => {
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789' });
+
+            const sent = await checkoutFrom('https://evil.example/no/builds/gaming-pc/buy');
+
+            expect(sent.marketing).toEqual({ consentId, fbp: 'fb.1.1700000000000.123456789' });
+        }, 15_000);
+
+        it('leaves out a cookie over the limit and keeps the rest', async () => {
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setCookies({ _fbp: 'a'.repeat(257), _ttp: 'ttp-abc_123', ttclid: 'b'.repeat(1001) });
+
+            const sent = await checkoutFrom();
+
+            expect(sent.marketing).toEqual({ consentId, ttp: 'ttp-abc_123', pageUrl: 'https://www.altinnendata.no/no/builds/gaming-pc/buy' });
+        }, 15_000);
+
+        it('leaves out a missing cookie and a page off the site, and never sends null', async () => {
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+
+            const sent = await checkoutFrom('http://localhost:3000/no/builds/gaming-pc/buy');
+
+            expect(sent.marketing).toEqual({ consentId });
+            expect(noNulls(sent.marketing)).toBe(true);
+            expect(Object.values(sent.marketing as object).every(value => typeof value === 'string')).toBe(true);
+        }, 15_000);
+
+        it('does not build fbc from an fbclid on the page', async () => {
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789' });
+
+            const sent = await checkoutFrom('https://www.altinnendata.no/no/builds/gaming-pc/buy?fbclid=IwAR0abc');
+
+            expect(sent.marketing).toEqual({ consentId, fbp: 'fb.1.1700000000000.123456789', pageUrl: 'https://www.altinnendata.no/no/builds/gaming-pc/buy' });
+        }, 15_000);
     });
 });

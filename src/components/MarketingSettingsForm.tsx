@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { apiFieldErrors } from '@sjolystinnovation/app-kit/api';
 import { toast } from '@sjolystinnovation/app-kit/toast';
-import { Alert, TextInput } from '@sjolystinnovation/app-kit/ui';
-import MarketingService from '@/services/marketingService';
+import { Alert, TextInput, fillTemplate } from '@sjolystinnovation/app-kit/ui';
+import MarketingService, { type MarketingSettings, type MarketingSettingsUpdate } from '@/services/marketingService';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 /** The API's rule for the Meta Pixel ID: 5 to 20 digits, or empty to turn the pixel off. */
@@ -13,24 +13,55 @@ const PIXEL_ID = /^[0-9]{5,20}$/;
 /** The API's rule for the TikTok Pixel ID: 10 to 32 capital letters and digits, or empty to turn the pixel off. */
 const TIKTOK_PIXEL_ID = /^[A-Z0-9]{10,32}$/;
 
+/** The API's rule for a server token after trimming: 20 to 512 printable ASCII characters with no spaces. */
+const SERVER_TOKEN = /^[\x21-\x7e]{20,512}$/;
+
+type TokenField = 'metaCapiToken' | 'tikTokEventsToken';
+
 interface FieldErrors {
     metaPixelId?: string;
     tikTokPixelId?: string;
+    metaCapiToken?: string;
+    tikTokEventsToken?: string;
 }
 
+const SECONDARY_BUTTON = 'shrink-0 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60';
+
 /**
- * The Meta and TikTok Pixel IDs in the admin settings. The API replaces the whole setting, so a save sends both.
- * Saving purges every page, since the layout reads them.
+ * The Meta and TikTok Pixel IDs and the server tokens in the admin settings. A save sends both IDs, since the API
+ * replaces them. A token is sent only when the admin typed one or removes it, and the API never sends one back.
+ * Saving purges every page, since the layout reads the IDs.
  */
 export default function MarketingSettingsForm() {
     const { dict } = useDictionary();
     const text = dict.admin.marketing;
     const [pixelId, setPixelId] = useState('');
     const [tikTokPixelId, setTikTokPixelId] = useState('');
+    // The IDs as the API last gave them. A token removal sends these, not edits that are not saved yet.
+    const [savedIds, setSavedIds] = useState({ metaPixelId: '', tikTokPixelId: '' });
+    const [tokens, setTokens] = useState<Record<TokenField, string>>({ metaCapiToken: '', tikTokEventsToken: '' });
+    const [tokenSet, setTokenSet] = useState<Record<TokenField, boolean>>({ metaCapiToken: false, tikTokEventsToken: false });
+    const [confirmRemove, setConfirmRemove] = useState<TokenField | null>(null);
     const [loaded, setLoaded] = useState(false);
     const [loadFailed, setLoadFailed] = useState(false);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState<FieldErrors>({});
+    // Where focus goes once the next render has put that element on the page. Every setFocusNext comes with a
+    // state change, so a render follows.
+    const focusNext = useRef<string | null>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const setFocusNext = (selector: string) => { focusNext.current = selector; };
+
+    useEffect(() => {
+        if (focusNext.current === null) return;
+        formRef.current?.querySelector<HTMLElement>(focusNext.current)?.focus();
+        focusNext.current = null;
+    });
+
+    const showStored = (settings: MarketingSettings) => {
+        setSavedIds({ metaPixelId: settings.metaPixelId ?? '', tikTokPixelId: settings.tikTokPixelId ?? '' });
+        setTokenSet({ metaCapiToken: settings.metaCapiTokenSet === true, tikTokEventsToken: settings.tikTokEventsTokenSet === true });
+    };
 
     useEffect(() => {
         let current = true;
@@ -39,6 +70,7 @@ export default function MarketingSettingsForm() {
                 if (!current) return;
                 setPixelId(settings.metaPixelId ?? '');
                 setTikTokPixelId(settings.tikTokPixelId ?? '');
+                showStored(settings);
                 setLoaded(true);
             })
             .catch(() => {
@@ -47,35 +79,135 @@ export default function MarketingSettingsForm() {
         return () => { current = false; };
     }, []);
 
+    /** Saves the whole form. An empty token field sends nothing, so the API keeps the stored token. */
     const save = async () => {
         const meta = pixelId.trim();
         // Trimmed but not uppercased, so a lowercase ID shows the error instead of being changed without a word.
         const tikTok = tikTokPixelId.trim();
+        const typed: Record<TokenField, string> = { metaCapiToken: tokens.metaCapiToken.trim(), tikTokEventsToken: tokens.tikTokEventsToken.trim() };
         const invalid: FieldErrors = {};
         if (meta !== '' && !PIXEL_ID.test(meta)) invalid.metaPixelId = text.invalid;
         if (tikTok !== '' && !TIKTOK_PIXEL_ID.test(tikTok)) invalid.tikTokPixelId = text.tikTokInvalid;
+        for (const field of ['metaCapiToken', 'tikTokEventsToken'] as const) {
+            if (typed[field] !== '' && !SERVER_TOKEN.test(typed[field])) invalid[field] = text.tokenInvalid;
+        }
         setErrors(invalid);
-        if (invalid.metaPixelId || invalid.tikTokPixelId) return;
+        if (Object.keys(invalid).length > 0) return;
+
+        const update: MarketingSettingsUpdate = { metaPixelId: meta, tikTokPixelId: tikTok };
+        for (const field of ['metaCapiToken', 'tikTokEventsToken'] as const) {
+            if (typed[field] !== '') update[field] = typed[field];
+        }
+
         setSaving(true);
         try {
-            const saved = await MarketingService.updateSettings({ metaPixelId: meta, tikTokPixelId: tikTok });
+            const saved = await MarketingService.updateSettings(update);
             setPixelId(saved.metaPixelId ?? '');
             setTikTokPixelId(saved.tikTokPixelId ?? '');
+            showStored(saved);
+            setTokens({ metaCapiToken: '', tikTokEventsToken: '' });
+            setConfirmRemove(null);
             toast.success(text.saved);
         } catch (err) {
-            const refused = Object.keys(apiFieldErrors(err) ?? {}).map(key => key.toLowerCase());
-            const shown: FieldErrors = {};
-            if (refused.includes('metapixelid')) shown.metaPixelId = text.invalid;
-            if (refused.includes('tiktokpixelid')) shown.tikTokPixelId = text.tikTokInvalid;
-            if (shown.metaPixelId || shown.tikTokPixelId) setErrors(shown);
-            else toast.error(text.saveFailed);
+            showFieldErrors(err);
         } finally {
             setSaving(false);
         }
     };
 
+    const showFieldErrors = (err: unknown) => {
+        const refused = Object.keys(apiFieldErrors(err) ?? {}).map(key => key.toLowerCase());
+        const shown: FieldErrors = {};
+        if (refused.includes('metapixelid')) shown.metaPixelId = text.invalid;
+        if (refused.includes('tiktokpixelid')) shown.tikTokPixelId = text.tikTokInvalid;
+        if (refused.includes('metacapitoken')) shown.metaCapiToken = text.tokenInvalid;
+        if (refused.includes('tiktokeventstoken')) shown.tikTokEventsToken = text.tokenInvalid;
+        if (Object.keys(shown).length > 0) setErrors(shown);
+        else toast.error(text.saveFailed);
+    };
+
+    /**
+     * Removes one stored token. It sends the IDs as last saved and only that token, so nothing typed in the other
+     * fields is sent or checked, and those fields keep what was typed.
+     */
+    const removeToken = async (field: TokenField) => {
+        setSaving(true);
+        try {
+            const saved = await MarketingService.updateSettings({ ...savedIds, [field]: '' });
+            showStored(saved);
+            setErrors(e => ({ ...e, [field]: undefined }));
+            setConfirmRemove(null);
+            setFocusNext(`input[name="${field}"]`);
+            toast.success(text.saved);
+        } catch (err) {
+            showFieldErrors(err);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const tokenInput = (field: TokenField, label: string, hint: string) => {
+        const status = tokenSet[field] ? text.tokenSet : text.tokenNotSet;
+        return (
+            <div className="space-y-2">
+                <TextInput
+                    label={label}
+                    name={field}
+                    type="password"
+                    // Browsers ignore off on a password field. new-password and the ignore flags keep a saved login out of it.
+                    autoComplete="new-password"
+                    data-1p-ignore
+                    data-lpignore="true"
+                    spellCheck={false}
+                    value={tokens[field]}
+                    error={errors[field]}
+                    disabled={!loaded}
+                    aria-describedby={`${field}-status ${field}-hint marketing-server-note`}
+                    onChange={e => {
+                        const value = e.target.value;
+                        setTokens(t => ({ ...t, [field]: value }));
+                    }}
+                />
+                <div className="flex flex-wrap items-center gap-3">
+                    <p id={`${field}-status`} className="text-xs font-semibold text-gray-700">{status}</p>
+                    {tokenSet[field] && confirmRemove !== field && (
+                        <button
+                            type="button"
+                            className={SECONDARY_BUTTON}
+                            disabled={!loaded || saving}
+                            aria-label={fillTemplate(text.removeTokenLabel, { name: label })}
+                            id={`${field}-remove`}
+                            onClick={() => {
+                                setConfirmRemove(field);
+                                setFocusNext(`#${field}-remove-yes`);
+                            }}
+                        >
+                            {text.removeToken}
+                        </button>
+                    )}
+                </div>
+                {confirmRemove === field && (
+                    <div role="group" aria-labelledby={`${field}-confirm`} className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 p-3">
+                        <p id={`${field}-confirm`} className="text-sm text-gray-900">{fillTemplate(text.removeTokenConfirm, { name: label })}</p>
+                        <button type="button" id={`${field}-remove-yes`} className={SECONDARY_BUTTON} disabled={saving} onClick={() => void removeToken(field)}>
+                            {text.removeTokenYes}
+                        </button>
+                        <button type="button" className={SECONDARY_BUTTON} disabled={saving} onClick={() => {
+                                setConfirmRemove(null);
+                                setFocusNext(`#${field}-remove`);
+                            }}>
+                            {text.removeTokenCancel}
+                        </button>
+                    </div>
+                )}
+                <p id={`${field}-hint`} className="text-xs text-gray-500">{hint}</p>
+            </div>
+        );
+    };
+
     return (
         <form
+            ref={formRef}
             className="max-w-md space-y-5 border-t border-gray-200 pt-6"
             aria-labelledby="marketing-settings"
             onSubmit={e => {
@@ -115,6 +247,9 @@ export default function MarketingSettingsForm() {
                 <p id="tikTokPixelId-hint" className="text-xs text-gray-500">{text.tikTokPixelIdHint}</p>
             </div>
             <p id="marketing-consent" className="text-xs text-gray-500">{text.consentNote}</p>
+            {tokenInput('metaCapiToken', text.metaCapiToken, text.metaCapiTokenHint)}
+            {tokenInput('tikTokEventsToken', text.tikTokEventsToken, text.tikTokEventsTokenHint)}
+            <p id="marketing-server-note" className="text-xs text-gray-500">{text.serverNote}</p>
             <button
                 type="submit"
                 disabled={!loaded || saving}
