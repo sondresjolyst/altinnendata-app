@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.15.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.14.1...v1.15.0) (2026-11-14)
+
+
+### Features
+
+* **marketing:** send a pixel event when the contact form is sent ([#249](https://github.com/sondresjolyst/altinnendata-app/issues/249)) ([a5bde8f](https://github.com/sondresjolyst/altinnendata-app/commit/a5bde8fa7eb031bea9c97ce7bfa1f5ce7a86e174))
+* **marketing:** send consent and ad identifiers with the checkout ([#250](https://github.com/sondresjolyst/altinnendata-app/issues/250)) ([f6b8853](https://github.com/sondresjolyst/altinnendata-app/commit/f6b88531ef84de5e1985a750583e94524f9d3ab4))
+* **marketing:** send the item price in the Purchase pixel events ([#247](https://github.com/sondresjolyst/altinnendata-app/issues/247)) ([3ab09a8](https://github.com/sondresjolyst/altinnendata-app/commit/3ab09a87222155362ceef44e5cb6704ddbc0220b))
+
 ## [1.14.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.14.0...v1.14.1) (2026-11-14)
 
 
