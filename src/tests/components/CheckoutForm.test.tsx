@@ -558,6 +558,52 @@ describe('CheckoutForm', () => {
             expect(sent).not.toHaveProperty('marketing');
         }, 15_000);
 
+        it('sends no marketing key when the yes is older than the consent max age', async () => {
+            vi.useFakeTimers({ toFake: ['Date'] });
+            vi.setSystemTime(new Date(Date.now() - 366 * 24 * 60 * 60 * 1000));
+            setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            vi.useRealTimers();
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent).not.toHaveProperty('marketing');
+        }, 15_000);
+
+        it('sends no marketing key when the visitor said yes and then no', async () => {
+            setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setConsent({ marketing: false, ...CONSENT_OPTIONS });
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent).not.toHaveProperty('marketing');
+        }, 15_000);
+
+        // The yes holds in memory for this page when storage is blocked. The banner posted it to the consent log,
+        // and the API checks that log, so the checkout still sends it.
+        it('sends the marketing data for a yes that only holds in memory because storage is blocked', async () => {
+            const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+                throw new Error('blocked');
+            });
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setItem.mockRestore();
+            setCookies({ _ttp: 'ttp-abc_123' });
+
+            const sent = await checkoutFrom();
+
+            expect(sent.marketing).toEqual({ consentId, ttp: 'ttp-abc_123', pageUrl: 'https://www.altinnendata.no/no/builds/gaming-pc/buy' });
+        }, 15_000);
+
+        it('leaves out an https page on another host and keeps the rest', async () => {
+            const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
+            setCookies({ _fbp: 'fb.1.1700000000000.123456789' });
+
+            const sent = await checkoutFrom('https://evil.example/no/builds/gaming-pc/buy');
+
+            expect(sent.marketing).toEqual({ consentId, fbp: 'fb.1.1700000000000.123456789' });
+        }, 15_000);
+
         it('leaves out a cookie over the limit and keeps the rest', async () => {
             const { consentId } = setConsent({ marketing: true, ...CONSENT_OPTIONS });
             setCookies({ _fbp: 'a'.repeat(257), _ttp: 'ttp-abc_123', ttclid: 'b'.repeat(1001) });
