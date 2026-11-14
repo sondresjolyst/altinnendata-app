@@ -37,6 +37,8 @@ export default function MarketingSettingsForm() {
     const text = dict.admin.marketing;
     const [pixelId, setPixelId] = useState('');
     const [tikTokPixelId, setTikTokPixelId] = useState('');
+    // The IDs as the API last gave them. A token removal sends these, not edits that are not saved yet.
+    const [savedIds, setSavedIds] = useState({ metaPixelId: '', tikTokPixelId: '' });
     const [tokens, setTokens] = useState<Record<TokenField, string>>({ metaCapiToken: '', tikTokEventsToken: '' });
     const [tokenSet, setTokenSet] = useState<Record<TokenField, boolean>>({ metaCapiToken: false, tikTokEventsToken: false });
     const [confirmRemove, setConfirmRemove] = useState<TokenField | null>(null);
@@ -46,6 +48,7 @@ export default function MarketingSettingsForm() {
     const [errors, setErrors] = useState<FieldErrors>({});
 
     const showStored = (settings: MarketingSettings) => {
+        setSavedIds({ metaPixelId: settings.metaPixelId ?? '', tikTokPixelId: settings.tikTokPixelId ?? '' });
         setTokenSet({ metaCapiToken: settings.metaCapiTokenSet === true, tikTokEventsToken: settings.tikTokEventsTokenSet === true });
     };
 
@@ -65,8 +68,8 @@ export default function MarketingSettingsForm() {
         return () => { current = false; };
     }, []);
 
-    /** Saves the form. `remove` names a token to clear with an empty value. */
-    const save = async (remove?: TokenField) => {
+    /** Saves the whole form. An empty token field sends nothing, so the API keeps the stored token. */
+    const save = async () => {
         const meta = pixelId.trim();
         // Trimmed but not uppercased, so a lowercase ID shows the error instead of being changed without a word.
         const tikTok = tikTokPixelId.trim();
@@ -75,16 +78,14 @@ export default function MarketingSettingsForm() {
         if (meta !== '' && !PIXEL_ID.test(meta)) invalid.metaPixelId = text.invalid;
         if (tikTok !== '' && !TIKTOK_PIXEL_ID.test(tikTok)) invalid.tikTokPixelId = text.tikTokInvalid;
         for (const field of ['metaCapiToken', 'tikTokEventsToken'] as const) {
-            if (field !== remove && typed[field] !== '' && !SERVER_TOKEN.test(typed[field])) invalid[field] = text.tokenInvalid;
+            if (typed[field] !== '' && !SERVER_TOKEN.test(typed[field])) invalid[field] = text.tokenInvalid;
         }
         setErrors(invalid);
         if (Object.keys(invalid).length > 0) return;
 
         const update: MarketingSettingsUpdate = { metaPixelId: meta, tikTokPixelId: tikTok };
         for (const field of ['metaCapiToken', 'tikTokEventsToken'] as const) {
-            // An empty field sends nothing, so the API keeps the stored token.
-            if (field === remove) update[field] = '';
-            else if (typed[field] !== '') update[field] = typed[field];
+            if (typed[field] !== '') update[field] = typed[field];
         }
 
         setSaving(true);
@@ -97,14 +98,37 @@ export default function MarketingSettingsForm() {
             setConfirmRemove(null);
             toast.success(text.saved);
         } catch (err) {
-            const refused = Object.keys(apiFieldErrors(err) ?? {}).map(key => key.toLowerCase());
-            const shown: FieldErrors = {};
-            if (refused.includes('metapixelid')) shown.metaPixelId = text.invalid;
-            if (refused.includes('tiktokpixelid')) shown.tikTokPixelId = text.tikTokInvalid;
-            if (refused.includes('metacapitoken')) shown.metaCapiToken = text.tokenInvalid;
-            if (refused.includes('tiktokeventstoken')) shown.tikTokEventsToken = text.tokenInvalid;
-            if (Object.keys(shown).length > 0) setErrors(shown);
-            else toast.error(text.saveFailed);
+            showFieldErrors(err);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const showFieldErrors = (err: unknown) => {
+        const refused = Object.keys(apiFieldErrors(err) ?? {}).map(key => key.toLowerCase());
+        const shown: FieldErrors = {};
+        if (refused.includes('metapixelid')) shown.metaPixelId = text.invalid;
+        if (refused.includes('tiktokpixelid')) shown.tikTokPixelId = text.tikTokInvalid;
+        if (refused.includes('metacapitoken')) shown.metaCapiToken = text.tokenInvalid;
+        if (refused.includes('tiktokeventstoken')) shown.tikTokEventsToken = text.tokenInvalid;
+        if (Object.keys(shown).length > 0) setErrors(shown);
+        else toast.error(text.saveFailed);
+    };
+
+    /**
+     * Removes one stored token. It sends the IDs as last saved and only that token, so nothing typed in the other
+     * fields is sent or checked, and those fields keep what was typed.
+     */
+    const removeToken = async (field: TokenField) => {
+        setSaving(true);
+        try {
+            const saved = await MarketingService.updateSettings({ ...savedIds, [field]: '' });
+            showStored(saved);
+            setErrors(e => ({ ...e, [field]: undefined }));
+            setConfirmRemove(null);
+            toast.success(text.saved);
+        } catch (err) {
+            showFieldErrors(err);
         } finally {
             setSaving(false);
         }
@@ -149,7 +173,7 @@ export default function MarketingSettingsForm() {
                 {confirmRemove === field && (
                     <div role="group" aria-labelledby={`${field}-confirm`} className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 p-3">
                         <p id={`${field}-confirm`} className="text-sm text-gray-900">{fillTemplate(text.removeTokenConfirm, { name: label })}</p>
-                        <button type="button" className={SECONDARY_BUTTON} disabled={saving} onClick={() => void save(field)}>
+                        <button type="button" className={SECONDARY_BUTTON} disabled={saving} onClick={() => void removeToken(field)}>
                             {text.removeTokenYes}
                         </button>
                         <button type="button" className={SECONDARY_BUTTON} disabled={saving} onClick={() => setConfirmRemove(null)}>

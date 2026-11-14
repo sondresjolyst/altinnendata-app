@@ -465,6 +465,62 @@ describe('the server tokens in the marketing section', () => {
         expect(screen.queryByRole('group', { name: /Vil du fjerne/ })).not.toBeInTheDocument();
     });
 
+    /** Opens the confirm step for the Meta token and confirms it. */
+    const removeMetaToken = async () => {
+        await userEvent.click(screen.getByRole('button', { name: 'Fjern Meta Conversions API-tilgangsnøkkel' }));
+        await userEvent.click(screen.getByRole('button', { name: 'Ja, fjern' }));
+    };
+
+    it('sends only the removal with the saved IDs, and keeps what was typed in the other fields', async () => {
+        marketing.updateSettings.mockResolvedValue({ ...IDS, metaCapiTokenSet: false, tikTokEventsTokenSet: true });
+        const { tikTok } = await loadedPage();
+        const pixel = screen.getByLabelText('Meta Pixel-ID');
+
+        await userEvent.type(tikTok, TIKTOK_TOKEN);
+        await userEvent.clear(pixel);
+        await userEvent.type(pixel, '987654321');
+        await removeMetaToken();
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledTimes(1));
+        expect(marketing.updateSettings).toHaveBeenCalledWith({ ...IDS, metaCapiToken: '' });
+        expect(tikTok).toHaveValue(TIKTOK_TOKEN);
+        expect(pixel).toHaveValue('987654321');
+    });
+
+    it('removes a token even when an unsaved ID is not valid', async () => {
+        marketing.updateSettings.mockResolvedValue({ ...IDS, metaCapiTokenSet: false, tikTokEventsTokenSet: false });
+        const { tikTok } = await loadedPage();
+        const pixel = screen.getByLabelText('Meta Pixel-ID');
+
+        await userEvent.clear(pixel);
+        await userEvent.type(pixel, '12ab5');
+        await userEvent.type(tikTok, 'short');
+        await removeMetaToken();
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledWith({ ...IDS, metaCapiToken: '' }));
+        expect(pixel).not.toHaveAttribute('aria-invalid');
+        expect(tikTok).not.toHaveAttribute('aria-invalid');
+        expect(pixel).toHaveValue('12ab5');
+    });
+
+    it('sends the IDs from the last save, not the ones first loaded', async () => {
+        marketing.updateSettings
+            .mockResolvedValueOnce({ metaPixelId: '987654321', tikTokPixelId: IDS.tikTokPixelId, metaCapiTokenSet: true, tikTokEventsTokenSet: false })
+            .mockResolvedValueOnce({ metaPixelId: '987654321', tikTokPixelId: IDS.tikTokPixelId, metaCapiTokenSet: false, tikTokEventsTokenSet: false });
+        await loadedPage();
+        const pixel = screen.getByLabelText('Meta Pixel-ID');
+        await userEvent.clear(pixel);
+        await userEvent.type(pixel, '987654321');
+        await userEvent.click(screen.getByRole('button', { name: 'Lagre markedsføring' }));
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Lagre markedsføring' })).toBeEnabled());
+
+        await removeMetaToken();
+
+        await waitFor(() => expect(marketing.updateSettings).toHaveBeenCalledTimes(2));
+        expect(marketing.updateSettings).toHaveBeenLastCalledWith({ metaPixelId: '987654321', tikTokPixelId: IDS.tikTokPixelId, metaCapiToken: '' });
+    });
+
     it('sends nothing when the remove is cancelled', async () => {
         await loadedPage();
 
