@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.15.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.15.0...v1.15.1) (2026-11-15)
+
+
+### Dependencies
+
+* **docker:** update node from 26.13.0-slim to 26.13.1-slim ([8f41a0f](https://github.com/sondresjolyst/altinnendata-app/commit/8f41a0f36d6e7db70ac609f5fb364770e699b4bf))
+* **npm:** update @sjolystinnovation/app-kit from ^1.7.0 to 1.7.0 ([8ad2af7](https://github.com/sondresjolyst/altinnendata-app/commit/8ad2af7b3b1fc719b3a276afb779d91384674504))
+* **npm:** update axios from 1.20.0 to 1.21.0 ([8ef493e](https://github.com/sondresjolyst/altinnendata-app/commit/8ef493ec3f6c69fe70ca11b300f8756537618ce0))
+* **npm:** update next from 16.4.2 to 16.4.5 ([8ef493e](https://github.com/sondresjolyst/altinnendata-app/commit/8ef493ec3f6c69fe70ca11b300f8756537618ce0))
+
 ## [1.15.0](https://github.com/sondresjolyst/altinnendata-app/compare/v1.14.1...v1.15.0) (2026-11-14)
 
 
