@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.2](https://github.com/sondresjolyst/altinnendata-app/compare/v1.15.1...v1.15.2) (2026-11-22)
+
+
+### Dependencies
+
+* **npm:** update axios from 1.21.0 to 1.21.1 ([2bb0c7e](https://github.com/sondresjolyst/altinnendata-app/commit/2bb0c7e6d4c299b373b0162f89ecfc4da6615432))
+* **npm:** update next from 16.4.5 to 16.4.6 ([2bb0c7e](https://github.com/sondresjolyst/altinnendata-app/commit/2bb0c7e6d4c299b373b0162f89ecfc4da6615432))
+
 ## [1.15.1](https://github.com/sondresjolyst/altinnendata-app/compare/v1.15.0...v1.15.1) (2026-11-15)
 
 
